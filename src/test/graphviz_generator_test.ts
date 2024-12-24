@@ -1,12 +1,12 @@
-import { it, expect, describe, beforeEach } from "jasmine";
-import { ParsedFlow } from "./flow_parser.ts";
-import * as flowTypes from "./flow_types.ts";
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import { ParsedFlow } from "../main/flow_parser.ts";
+import * as flowTypes from "../main/flow_types.ts";
 import {
   FontColor,
   GraphVizGenerator,
   Icon,
   SkinColor,
-} from "./graphviz_generator.ts";
+} from "../main/graphviz_generator.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const NODE_NAMES = {
@@ -203,33 +203,33 @@ function generateInnerNodeCells(cells: string[]) {
   return cells.join(EOL);
 }
 
-describe("GraphViz", () => {
+Deno.test("GraphViz", async (t) => {
   let systemUnderTest: GraphVizGenerator;
   let mockedFlow: ParsedFlow;
   let result: string;
 
-  beforeEach(() => {
+  await t.step("should generate header", () => {
     mockedFlow = generateMockFlow();
     systemUnderTest = new GraphVizGenerator(mockedFlow);
-  });
-
-  it("should generate header", () => {
     const label = "foo";
     result = systemUnderTest.getHeader(label);
 
-    expect(result).toContain("digraph {");
-    expect(result).toContain("label=<<B>foo</B>>");
-    expect(result).toContain('title = "foo"');
-    expect(result).toContain('labelloc = "t"');
-    expect(result).toContain("node [shape=box, style=filled]");
+    assertStringIncludes(result, "digraph {");
+    assertStringIncludes(result, "label=<<B>foo</B>>");
+    assertStringIncludes(result, 'title = "foo"');
+    assertStringIncludes(result, 'labelloc = "t"');
+    assertStringIncludes(result, "node [shape=box, style=filled]");
   });
 
-  it("should generate flow apex plugin call", () => {
+  await t.step("should generate flow apex plugin call", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowApexPluginCall(
       mockedFlow.apexPluginCalls![0]
     );
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myApexPluginCall",
         "Apex Plugin Call",
@@ -240,10 +240,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow assignment", () => {
+  await t.step("should generate flow assignment", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowAssignment(mockedFlow.assignments![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myAssignment",
         "Assignment",
@@ -254,12 +257,15 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow collection processor", () => {
+  await t.step("should generate flow collection processor", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowCollectionProcessor(
       mockedFlow.collectionProcessors![0]
     );
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myCollectionProcessor",
         "Collection Processor",
@@ -270,10 +276,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow decision", () => {
+  await t.step("should generate flow decision", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowDecision(mockedFlow.decisions![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myDecision",
         "Decision",
@@ -287,10 +296,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow loop", () => {
+  await t.step("should generate flow loop", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowLoop(mockedFlow.loops![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myLoop",
         "Loop",
@@ -301,12 +313,15 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow orchestrated stage", () => {
+  await t.step("should generate flow orchestrated stage", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowOrchestratedStage(
       mockedFlow.orchestratedStages![0]
     );
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myOrchestratedStage",
         "Orchestrated Stage",
@@ -322,10 +337,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow record create", () => {
+  await t.step("should generate flow record create", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowRecordCreate(mockedFlow.recordCreates![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myRecordCreate",
         "Record Create",
@@ -336,10 +354,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow record delete", () => {
+  await t.step("should generate flow record delete", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowRecordDelete(mockedFlow.recordDeletes![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myRecordDelete",
         "Record Delete",
@@ -350,10 +371,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow record lookup", () => {
+  await t.step("should generate flow record lookup", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowRecordLookup(mockedFlow.recordLookups![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myRecordLookup",
         "Record Lookup",
@@ -364,12 +388,15 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow record rollback", () => {
+  await t.step("should generate flow record rollback", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowRecordRollback(
       mockedFlow.recordRollbacks![0]
     );
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myRecordRollback",
         "Record Rollback",
@@ -380,10 +407,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow record update", () => {
+  await t.step("should generate flow record update", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowRecordUpdate(mockedFlow.recordUpdates![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myRecordUpdate",
         "Record Update",
@@ -394,10 +424,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow screen", () => {
+  await t.step("should generate flow screen", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowScreen(mockedFlow.screens![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myScreen",
         "Screen",
@@ -408,10 +441,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow step", () => {
+  await t.step("should generate flow step", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowStep(mockedFlow.steps![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myStep",
         "Step",
@@ -422,10 +458,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow subflow", () => {
+  await t.step("should generate flow subflow", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowSubflow(mockedFlow.subflows![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "mySubflow",
         "Subflow",
@@ -436,10 +475,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow transform", () => {
+  await t.step("should generate flow transform", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowTransform(mockedFlow.transforms![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myTransform",
         "Transform",
@@ -450,10 +492,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow wait", () => {
+  await t.step("should generate flow wait", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowWait(mockedFlow.waits![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myWait",
         "Wait",
@@ -464,10 +509,13 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate flow action call", () => {
+  await t.step("should generate flow action call", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getFlowActionCall(mockedFlow.actionCalls![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       generateTable(
         "myActionCall",
         "Action Call",
@@ -478,35 +526,38 @@ describe("GraphViz", () => {
     );
   });
 
-  it("should generate transition", () => {
+  await t.step("should generate transition", () => {
+    mockedFlow = generateMockFlow();
+    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getTransition(mockedFlow.transitions![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'FLOW_START -> myApexPluginCall [label="" color="black" style=""]'
     );
   });
 
-  it("should include added diff indicator", () => {
+  await t.step("should include added diff indicator", () => {
     const flow = generateMockFlow();
     flow.apexPluginCalls![0].diffStatus = flowTypes.DiffStatus.ADDED;
     systemUnderTest = new GraphVizGenerator(flow);
     result = systemUnderTest.getFlowApexPluginCall(flow.apexPluginCalls![0]);
-    expect(result).toContain(DIFF_INDICATOR.ADDED);
+    assertStringIncludes(result, DIFF_INDICATOR.ADDED);
   });
 
-  it("should include deleted diff indicator", () => {
+  await t.step("should include deleted diff indicator", () => {
     const flow = generateMockFlow();
     flow.apexPluginCalls![0].diffStatus = flowTypes.DiffStatus.DELETED;
     systemUnderTest = new GraphVizGenerator(flow);
     result = systemUnderTest.getFlowApexPluginCall(flow.apexPluginCalls![0]);
-    expect(result).toContain(DIFF_INDICATOR.DELETED);
+    assertStringIncludes(result, DIFF_INDICATOR.DELETED);
   });
 
-  it("should include modified diff indicator", () => {
+  await t.step("should include modified diff indicator", () => {
     const flow = generateMockFlow();
     flow.apexPluginCalls![0].diffStatus = flowTypes.DiffStatus.MODIFIED;
     systemUnderTest = new GraphVizGenerator(flow);
     result = systemUnderTest.getFlowApexPluginCall(flow.apexPluginCalls![0]);
-    expect(result).toContain(DIFF_INDICATOR.MODIFIED);
+    assertStringIncludes(result, DIFF_INDICATOR.MODIFIED);
   });
 });
