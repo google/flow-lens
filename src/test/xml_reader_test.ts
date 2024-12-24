@@ -1,6 +1,6 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import * as path from "@std/path";
-import { ERROR_MESSAGES, XmlReader } from "./xml_reader.ts";
+import { ERROR_MESSAGES, XmlReader } from "../main/xml_reader.ts";
 
 const TEST_UNDECLARED_OUTPUTS_DIR = "./";
 

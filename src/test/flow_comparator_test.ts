@@ -1,8 +1,8 @@
 import { assertEquals } from "@std/assert";
 
-import { compareFlows } from "./flow_comparator.ts";
-import { ParsedFlow } from "./flow_parser.ts";
-import * as flowTypes from "./flow_types.ts";
+import { compareFlows } from "../main/flow_comparator.ts";
+import { ParsedFlow } from "../main/flow_parser.ts";
+import * as flowTypes from "../main/flow_types.ts";
 
 const NODE = {
   name: "node",

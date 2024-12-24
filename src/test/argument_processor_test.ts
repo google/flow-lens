@@ -4,7 +4,7 @@ import {
   ERROR_MESSAGES,
   GenerationType,
   RuntimeConfig,
-} from "./argument_processor.ts";
+} from "../main/argument_processor.ts";
 import { assertEquals, assertThrows } from "@std/assert";
 
 /**
