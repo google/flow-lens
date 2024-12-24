@@ -1,8 +1,7 @@
-import { it, expect, describe, beforeEach } from "jasmine";
-
-import { ParsedFlow, Transition } from "./flow_parser.ts";
-import * as flowTypes from "./flow_types.ts";
-import { UmlGenerator } from "./uml_generator.ts";
+import { assertEquals } from "@std/assert";
+import { ParsedFlow, Transition } from "../main/flow_parser.ts";
+import * as flowTypes from "../main/flow_types.ts";
+import { UmlGenerator } from "../main/uml_generator.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const TRANSITION_ARROW = "-->";
@@ -114,14 +113,14 @@ function generateMockFlow() {
 }
 
 function getFlowNodes(name: string): flowTypes.FlowNode[] {
-  return [{ name: `${name}` }] as flowTypes.FlowNode[];
+  return [{ name: name }] as flowTypes.FlowNode[];
 }
 
-describe("UmlGenerator", () => {
+Deno.test("UmlGenerator", async (t) => {
   let systemUnderTest: UmlGenerator;
   let mockParsedFlow: ParsedFlow;
 
-  beforeEach(() => {
+  await t.step("setup", () => {
     mockParsedFlow = generateMockFlow();
 
     class ConcreteUmlGenerator extends UmlGenerator {
@@ -192,7 +191,7 @@ describe("UmlGenerator", () => {
     systemUnderTest = new ConcreteUmlGenerator(mockParsedFlow);
   });
 
-  it("should generate UML with all flow elements", () => {
+  await t.step("should generate UML with all flow elements", () => {
     const uml = systemUnderTest.generateUml();
 
     const expectedUml = [
@@ -228,36 +227,42 @@ describe("UmlGenerator", () => {
       ),
     ].join(EOL);
 
-    expect(uml).toEqual(expectedUml);
+    assertEquals(uml, expectedUml);
   });
 
-  it("should handle empty flow elements", () => {
+  await t.step("should handle empty flow elements", () => {
     mockParsedFlow.screens = [];
 
     const uml = systemUnderTest.generateUml();
 
-    expect(uml).not.toContain(UML_REPRESENTATIONS.screen(NODE_NAMES.screen));
+    assertEquals(
+      uml.includes(UML_REPRESENTATIONS.screen(NODE_NAMES.screen)),
+      false
+    );
   });
 
-  it("should handle undefined flow elements", () => {
+  await t.step("should handle undefined flow elements", () => {
     mockParsedFlow.screens = undefined;
 
     const uml = systemUnderTest.generateUml();
 
-    expect(uml).not.toContain(UML_REPRESENTATIONS.screen(NODE_NAMES.screen));
+    assertEquals(
+      uml.includes(UML_REPRESENTATIONS.screen(NODE_NAMES.screen)),
+      false
+    );
   });
 
-  it("should handle empty transitions", () => {
+  await t.step("should handle empty transitions", () => {
     mockParsedFlow.transitions = [];
     const uml = systemUnderTest.generateUml();
 
-    expect(uml).not.toContain(TRANSITION_ARROW);
+    assertEquals(uml.includes(TRANSITION_ARROW), false);
   });
 
-  it("should handle undefined transitions", () => {
+  await t.step("should handle undefined transitions", () => {
     mockParsedFlow.transitions = undefined;
     const uml = systemUnderTest.generateUml();
 
-    expect(uml).not.toContain(TRANSITION_ARROW);
+    assertEquals(uml.includes(TRANSITION_ARROW), false);
   });
 });
