@@ -2,7 +2,6 @@ import {
   ArgumentProcessor,
   DiagramTool,
   ERROR_MESSAGES,
-  GenerationType,
   RuntimeConfig,
 } from "../main/argument_processor.ts";
 import { assertEquals, assertThrows } from "@std/assert";
@@ -14,7 +13,6 @@ export function getTestConfig(): RuntimeConfig {
   return {
     diagramTool: DiagramTool.PLANTUML,
     filePath: [],
-    generationType: GenerationType.UML_DIAGRAM,
     gitDiffFromHash: "HEAD~",
     gitDiffToHash: "HEAD",
     outputDirectory: "/",
@@ -80,23 +78,6 @@ Deno.test(
       },
       Error,
       ERROR_MESSAGES.filePathDoesNotExist(INVALID_FILE_PATH)
-    );
-  }
-);
-
-Deno.test(
-  "ArgumentProcessor should throw an exception when the generation type is not supported",
-  () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) =>
-            (config.generationType = INVALID_GENERATION_TYPE as GenerationType)
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.unsupportedGenerationType(INVALID_GENERATION_TYPE)
     );
   }
 );
