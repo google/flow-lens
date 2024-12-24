@@ -1,4 +1,4 @@
-import { it, expect, describe, beforeEach } from "jasmine";
+import { assertEquals } from "@std/assert";
 
 import { compareFlows } from "./flow_comparator.ts";
 import { ParsedFlow } from "./flow_parser.ts";
@@ -31,41 +31,39 @@ function createParsedFlow(nodes: flowTypes.FlowNode[]): ParsedFlow {
   };
 }
 
-describe("compareFlows", () => {
-  it("should set the diff status of a deleted node", () => {
-    const oldFlow: ParsedFlow = createParsedFlow([NODE]);
-    const newFlow: ParsedFlow = createParsedFlow([]);
+Deno.test("compareFlows should set the diff status of a deleted node", () => {
+  const oldFlow: ParsedFlow = createParsedFlow([NODE]);
+  const newFlow: ParsedFlow = createParsedFlow([]);
 
-    compareFlows(oldFlow, newFlow);
+  compareFlows(oldFlow, newFlow);
 
-    const oldNode = oldFlow.nameToNode?.get(NODE.name);
-    expect(oldNode).toBeDefined();
-    expect(oldNode!.diffStatus).toBe(flowTypes.DiffStatus.DELETED);
-  });
+  const oldNode = oldFlow.nameToNode?.get(NODE.name);
+  assertEquals(oldNode != null, true);
+  assertEquals(oldNode!.diffStatus, flowTypes.DiffStatus.DELETED);
+});
 
-  it("should set the diff status of a modified node", () => {
-    const oldFlow: ParsedFlow = createParsedFlow([NODE]);
-    const newFlow: ParsedFlow = createParsedFlow([NODE_MODIFIED]);
+Deno.test("compareFlows should set the diff status of a modified node", () => {
+  const oldFlow: ParsedFlow = createParsedFlow([NODE]);
+  const newFlow: ParsedFlow = createParsedFlow([NODE_MODIFIED]);
 
-    compareFlows(oldFlow, newFlow);
+  compareFlows(oldFlow, newFlow);
 
-    const oldNode = oldFlow.nameToNode?.get(NODE.name);
-    const newNode = newFlow.nameToNode?.get(NODE_MODIFIED.name);
+  const oldNode = oldFlow.nameToNode?.get(NODE.name);
+  const newNode = newFlow.nameToNode?.get(NODE_MODIFIED.name);
 
-    expect(oldNode).toBeDefined();
-    expect(newNode).toBeDefined();
-    expect(oldNode?.diffStatus).toBe(flowTypes.DiffStatus.MODIFIED);
-    expect(newNode?.diffStatus).toBe(flowTypes.DiffStatus.MODIFIED);
-  });
+  assertEquals(oldNode != null, true);
+  assertEquals(newNode != null, true);
+  assertEquals(oldNode?.diffStatus, flowTypes.DiffStatus.MODIFIED);
+  assertEquals(newNode?.diffStatus, flowTypes.DiffStatus.MODIFIED);
+});
 
-  it("should set the diff status of an added node", () => {
-    const oldFlow: ParsedFlow = createParsedFlow([]);
-    const newFlow: ParsedFlow = createParsedFlow([NODE]);
+Deno.test("compareFlows should set the diff status of an added node", () => {
+  const oldFlow: ParsedFlow = createParsedFlow([]);
+  const newFlow: ParsedFlow = createParsedFlow([NODE]);
 
-    compareFlows(oldFlow, newFlow);
+  compareFlows(oldFlow, newFlow);
 
-    const newNode = newFlow.nameToNode?.get(NODE.name);
-    expect(newNode).toBeDefined();
-    expect(newNode?.diffStatus).toBe(flowTypes.DiffStatus.ADDED);
-  });
+  const newNode = newFlow.nameToNode?.get(NODE.name);
+  assertEquals(newNode != null, true);
+  assertEquals(newNode?.diffStatus, flowTypes.DiffStatus.ADDED);
 });
