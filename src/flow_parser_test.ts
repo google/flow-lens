@@ -1,81 +1,81 @@
-import 'jasmine';
+import { it, expect, describe, beforeEach, spyOn } from "jasmine";
 
-import * as fs from 'fs';
-import * as path from 'path';
-import {ERROR_MESSAGES, FlowParser, ParsedFlow} from './flow_parser';
-import * as flowTypes from './flow_types';
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { ERROR_MESSAGES, FlowParser, ParsedFlow } from "./flow_parser.ts";
+import * as flowTypes from "./flow_types.ts";
 
-const ENCODING = 'utf8';
-const GOLDENS_PATH = `${process.env['RUNFILES']}/google3/corp/peopleops/connect/salesforce/flow_to_uml/goldens`;
-const LOOP_NODE_NAME = 'myLoop';
-const NON_EXISTING_ELEMENT = 'Non_Existing_Element';
-const START_NODE_NAME = 'FLOW_START';
+const ENCODING = "utf8";
+const GOLDENS_PATH = `${process.env["RUNFILES"]}/google3/corp/peopleops/connect/salesforce/flow_to_uml/goldens`;
+const LOOP_NODE_NAME = "myLoop";
+const NON_EXISTING_ELEMENT = "Non_Existing_Element";
+const START_NODE_NAME = "FLOW_START";
 
 const TEST_FILES = {
-  multipleElements: path.join(GOLDENS_PATH, 'multiple_elements.flow-meta.xml'),
-  singleElements: path.join(GOLDENS_PATH, 'single_elements.flow-meta.xml'),
-  sample: path.join(GOLDENS_PATH, 'sample.flow-meta.xml'),
-  noStartNode: path.join(GOLDENS_PATH, 'no_start_node.flow-meta.xml'),
+  multipleElements: path.join(GOLDENS_PATH, "multiple_elements.flow-meta.xml"),
+  singleElements: path.join(GOLDENS_PATH, "single_elements.flow-meta.xml"),
+  sample: path.join(GOLDENS_PATH, "sample.flow-meta.xml"),
+  noStartNode: path.join(GOLDENS_PATH, "no_start_node.flow-meta.xml"),
   missingTransitionNode: path.join(
     GOLDENS_PATH,
-    'missing_transition_node.flow-meta.xml',
+    "missing_transition_node.flow-meta.xml"
   ),
   circularTransition: path.join(
     GOLDENS_PATH,
-    'circular_transition.flow-meta.xml',
+    "circular_transition.flow-meta.xml"
   ),
-  rollback: path.join(GOLDENS_PATH, 'rollback.flow-meta.xml'),
+  rollback: path.join(GOLDENS_PATH, "rollback.flow-meta.xml"),
 };
 
 const NODE_NAMES = {
-  apexPluginCall: 'myApexPluginCall',
-  assignment: 'myAssignment',
-  collectionProcessor: 'myCollectionProcessor',
-  decision: 'myDecision',
-  loop: 'myLoop',
-  orchestratedStage: 'myOrchestratedStage',
-  recordCreate: 'myRecordCreate',
-  recordDelete: 'myRecordDelete',
-  recordLookup: 'myRecordLookup',
-  recordRollback: 'myRecordRollback',
-  recordUpdate: 'myRecordUpdate',
-  screen: 'myScreen',
-  step: 'myStep',
-  subflow: 'mySubflow',
-  transform: 'myTransform',
-  wait: 'myWait',
-  actionCall: 'myActionCall',
+  apexPluginCall: "myApexPluginCall",
+  assignment: "myAssignment",
+  collectionProcessor: "myCollectionProcessor",
+  decision: "myDecision",
+  loop: "myLoop",
+  orchestratedStage: "myOrchestratedStage",
+  recordCreate: "myRecordCreate",
+  recordDelete: "myRecordDelete",
+  recordLookup: "myRecordLookup",
+  recordRollback: "myRecordRollback",
+  recordUpdate: "myRecordUpdate",
+  screen: "myScreen",
+  step: "myStep",
+  subflow: "mySubflow",
+  transform: "myTransform",
+  wait: "myWait",
+  actionCall: "myActionCall",
 };
 
 const FLOW_NODES = {
   apexPluginCalls: getFlowNodes(
-    NODE_NAMES.apexPluginCall,
+    NODE_NAMES.apexPluginCall
   ) as flowTypes.FlowApexPluginCall[],
   assignments: getFlowNodes(
-    NODE_NAMES.assignment,
+    NODE_NAMES.assignment
   ) as flowTypes.FlowAssignment[],
   collectionProcessors: getFlowNodes(
-    NODE_NAMES.collectionProcessor,
+    NODE_NAMES.collectionProcessor
   ) as flowTypes.FlowCollectionProcessor[],
   decisions: getFlowNodes(NODE_NAMES.decision) as flowTypes.FlowDecision[],
   loops: getFlowNodes(NODE_NAMES.loop) as flowTypes.FlowLoop[],
   orchestratedStages: getFlowNodes(
-    NODE_NAMES.orchestratedStage,
+    NODE_NAMES.orchestratedStage
   ) as flowTypes.FlowOrchestratedStage[],
   recordCreates: getFlowNodes(
-    NODE_NAMES.recordCreate,
+    NODE_NAMES.recordCreate
   ) as flowTypes.FlowRecordCreate[],
   recordDeletes: getFlowNodes(
-    NODE_NAMES.recordDelete,
+    NODE_NAMES.recordDelete
   ) as flowTypes.FlowRecordDelete[],
   recordLookups: getFlowNodes(
-    NODE_NAMES.recordLookup,
+    NODE_NAMES.recordLookup
   ) as flowTypes.FlowRecordLookup[],
   recordRollbacks: getFlowNodes(
-    NODE_NAMES.recordRollback,
+    NODE_NAMES.recordRollback
   ) as flowTypes.FlowRecordRollback[],
   recordUpdates: getFlowNodes(
-    NODE_NAMES.recordUpdate,
+    NODE_NAMES.recordUpdate
   ) as flowTypes.FlowRecordUpdate[],
   screens: getFlowNodes(NODE_NAMES.screen) as flowTypes.FlowScreen[],
   steps: getFlowNodes(NODE_NAMES.step) as flowTypes.FlowStep[],
@@ -83,22 +83,22 @@ const FLOW_NODES = {
   transforms: getFlowNodes(NODE_NAMES.transform) as flowTypes.FlowTransform[],
   waits: getFlowNodes(NODE_NAMES.wait) as flowTypes.FlowWait[],
   actionCalls: getFlowNodes(
-    NODE_NAMES.actionCall,
+    NODE_NAMES.actionCall
   ) as flowTypes.FlowActionCall[],
 };
 
 function getFlowNodes(name: string): flowTypes.FlowNode[] {
-  return [{name: `${name}`}, {name: `${name}2`}] as flowTypes.FlowNode[];
+  return [{ name: `${name}` }, { name: `${name}2` }] as flowTypes.FlowNode[];
 }
 
-describe('FlowParser', () => {
+describe("FlowParser", () => {
   let systemUnderTest: FlowParser;
   let caught: Error;
   let parsedFlow: ParsedFlow;
 
-  it('should parse valid XML into a flow object', async () => {
+  it("should parse valid XML into a flow object", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.sample, ENCODING),
+      fs.readFileSync(TEST_FILES.sample, ENCODING)
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -108,46 +108,46 @@ describe('FlowParser', () => {
     expect(parsedFlow.transitions).toEqual([
       {
         from: START_NODE_NAME,
-        to: 'Get_Aurora_Tag_Definition',
+        to: "Get_Aurora_Tag_Definition",
         fault: false,
         label: undefined,
       },
       {
-        from: 'Get_Aurora_Tag_Definition',
-        to: 'Was_Tag_Definition_c_found',
+        from: "Get_Aurora_Tag_Definition",
+        to: "Was_Tag_Definition_c_found",
         fault: false,
         label: undefined,
       },
       {
-        from: 'Was_Tag_Definition_c_found',
-        to: 'Populate_Tag',
+        from: "Was_Tag_Definition_c_found",
+        to: "Populate_Tag",
         fault: false,
-        label: 'Yes',
+        label: "Yes",
       },
       {
-        from: 'Was_Tag_Definition_c_found',
-        to: 'Add_No_Tag_Definition_Found_Error',
+        from: "Was_Tag_Definition_c_found",
+        to: "Add_No_Tag_Definition_Found_Error",
         fault: false,
-        label: 'No',
+        label: "No",
       },
       {
-        from: 'Populate_Tag',
-        to: 'Insert_Tag',
+        from: "Populate_Tag",
+        to: "Insert_Tag",
         fault: false,
         label: undefined,
       },
       {
-        from: 'Insert_Tag',
-        to: 'Add_Issue_Inserting_Tag_Record_Error',
+        from: "Insert_Tag",
+        to: "Add_Issue_Inserting_Tag_Record_Error",
         fault: true,
-        label: 'Fault',
+        label: "Fault",
       },
     ]);
   });
 
-  it('should handle circular transitions', async () => {
+  it("should handle circular transitions", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.circularTransition, ENCODING),
+      fs.readFileSync(TEST_FILES.circularTransition, ENCODING)
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -165,14 +165,14 @@ describe('FlowParser', () => {
         from: LOOP_NODE_NAME,
         to: LOOP_NODE_NAME,
         fault: false,
-        label: 'for each',
+        label: "for each",
       },
     ]);
   });
 
-  it('should ensure multiple node definitions are represented as arrays', async () => {
+  it("should ensure multiple node definitions are represented as arrays", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.multipleElements, ENCODING),
+      fs.readFileSync(TEST_FILES.multipleElements, ENCODING)
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -181,12 +181,12 @@ describe('FlowParser', () => {
     expect(parsedFlow.apexPluginCalls).toEqual(FLOW_NODES.apexPluginCalls);
     expect(parsedFlow.assignments).toEqual(FLOW_NODES.assignments);
     expect(parsedFlow.collectionProcessors).toEqual(
-      FLOW_NODES.collectionProcessors,
+      FLOW_NODES.collectionProcessors
     );
     expect(parsedFlow.decisions).toEqual(FLOW_NODES.decisions);
     expect(parsedFlow.loops).toEqual(FLOW_NODES.loops);
     expect(parsedFlow.orchestratedStages).toEqual(
-      FLOW_NODES.orchestratedStages,
+      FLOW_NODES.orchestratedStages
     );
     expect(parsedFlow.recordCreates).toEqual(FLOW_NODES.recordCreates);
     expect(parsedFlow.recordDeletes).toEqual(FLOW_NODES.recordDeletes);
@@ -201,9 +201,9 @@ describe('FlowParser', () => {
     expect(parsedFlow.actionCalls).toEqual(FLOW_NODES.actionCalls);
   });
 
-  it('should ensure single node definitions are represented as arrays', async () => {
+  it("should ensure single node definitions are represented as arrays", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.singleElements, ENCODING),
+      fs.readFileSync(TEST_FILES.singleElements, ENCODING)
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -232,9 +232,9 @@ describe('FlowParser', () => {
     expect(parsedFlow.actionCalls).toEqual([FLOW_NODES.actionCalls[0]]);
   });
 
-  it('should properly identify rollbacks', async () => {
+  it("should properly identify rollbacks", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.rollback, ENCODING),
+      fs.readFileSync(TEST_FILES.rollback, ENCODING)
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -243,13 +243,13 @@ describe('FlowParser', () => {
     expect(parsedFlow.recordLookups).toEqual([
       {
         ...FLOW_NODES.recordLookups[0],
-        connector: {targetReference: NODE_NAMES.recordRollback},
+        connector: { targetReference: NODE_NAMES.recordRollback },
       } as flowTypes.FlowRecordLookup,
     ]);
     expect(parsedFlow.recordRollbacks).toEqual([
       {
         ...FLOW_NODES.recordRollbacks[0],
-        connector: {targetReference: NODE_NAMES.screen},
+        connector: { targetReference: NODE_NAMES.screen },
       } as flowTypes.FlowRecordRollback,
     ]);
     expect(parsedFlow.screens).toEqual([FLOW_NODES.screens[0]]);
@@ -276,8 +276,8 @@ describe('FlowParser', () => {
     ]);
   });
 
-  it('should throw an error when the XML is invalid', async () => {
-    systemUnderTest = new FlowParser('invalid XML');
+  it("should throw an error when the XML is invalid", async () => {
+    systemUnderTest = new FlowParser("invalid XML");
 
     try {
       parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -286,28 +286,28 @@ describe('FlowParser', () => {
     }
 
     expect(caught).toBeDefined();
-    expect(caught?.message).toContain('Non-whitespace before first tag');
+    expect(caught?.message).toContain("Non-whitespace before first tag");
   });
 
-  it('should throw an error when the XML is missing a start node', async () => {
+  it("should throw an error when the XML is missing a start node", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.noStartNode, ENCODING),
+      fs.readFileSync(TEST_FILES.noStartNode, ENCODING)
     );
 
     await expectAsync(
-      systemUnderTest.generateFlowDefinition(),
+      systemUnderTest.generateFlowDefinition()
     ).toBeRejectedWithError(ERROR_MESSAGES.flowStartNotDefined);
   });
 
-  it('should throw an error when the XML contains an invalid transition', async () => {
+  it("should throw an error when the XML contains an invalid transition", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.missingTransitionNode, ENCODING),
+      fs.readFileSync(TEST_FILES.missingTransitionNode, ENCODING)
     );
 
     await expectAsync(
-      systemUnderTest.generateFlowDefinition(),
+      systemUnderTest.generateFlowDefinition()
     ).toBeRejectedWithError(
-      ERROR_MESSAGES.couldNotFindConnectedNode(NON_EXISTING_ELEMENT),
+      ERROR_MESSAGES.couldNotFindConnectedNode(NON_EXISTING_ELEMENT)
     );
   });
 });

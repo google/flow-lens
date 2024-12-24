@@ -1,13 +1,12 @@
 import { it, expect, describe, beforeEach } from "jasmine";
-import * as os from "node:os";
-import { ParsedFlow } from "./flow_parser";
-import * as flowTypes from "./flow_types";
+import { ParsedFlow } from "./flow_parser.ts";
+import * as flowTypes from "./flow_types.ts";
 import {
   FontColor,
   GraphVizGenerator,
   Icon,
   SkinColor,
-} from "./graphviz_generator";
+} from "./graphviz_generator.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const NODE_NAMES = {

@@ -1,11 +1,11 @@
-import * as os from "os";
-import { Configuration } from "./argument_processor";
-import { getTestConfig } from "./argument_processor_test";
+import { it, expect, describe, beforeEach, spyOn } from "jasmine";
+import { Configuration } from "./argument_processor.ts";
+import { getTestConfig } from "./argument_processor_test.ts";
 import {
   ERROR_MESSAGES,
   FLOW_FILE_EXTENSION,
   FlowFileChangeDetector,
-} from "./flow_file_change_detector";
+} from "./flow_file_change_detector.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const FLOW_FILE_PATH = "file2" + FLOW_FILE_EXTENSION;

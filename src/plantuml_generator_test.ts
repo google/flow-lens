@@ -1,7 +1,7 @@
 import { it, expect, describe, beforeEach } from "jasmine";
-import { ParsedFlow } from "./flow_parser";
-import * as flowTypes from "./flow_types";
-import { PlantUmlGenerator } from "./plantuml_generator";
+import { ParsedFlow } from "./flow_parser.ts";
+import * as flowTypes from "./flow_types.ts";
+import { PlantUmlGenerator } from "./plantuml_generator.ts";
 
 const NODE_NAMES = {
   start: "FLOW_START",

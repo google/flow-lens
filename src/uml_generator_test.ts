@@ -1,8 +1,8 @@
-import "jasmine";
+import { it, expect, describe, beforeEach } from "jasmine";
 
-import { ParsedFlow, Transition } from "./flow_parser";
-import * as flowTypes from "./flow_types";
-import { UmlGenerator } from "./uml_generator";
+import { ParsedFlow, Transition } from "./flow_parser.ts";
+import * as flowTypes from "./flow_types.ts";
+import { UmlGenerator } from "./uml_generator.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const TRANSITION_ARROW = "-->";

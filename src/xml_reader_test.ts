@@ -1,19 +1,20 @@
-import * as fs from 'fs';
-import * as path from 'path';
-import {ERROR_MESSAGES, XmlReader} from './xml_reader';
+import { it, expect, describe, beforeEach, spyOn } from "jasmine";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import { ERROR_MESSAGES, XmlReader } from "./xml_reader.ts";
 
-const {'TEST_UNDECLARED_OUTPUTS_DIR': TEST_UNDECLARED_OUTPUTS_DIR} =
-  process.env as {[index: string]: string};
+const { TEST_UNDECLARED_OUTPUTS_DIR: TEST_UNDECLARED_OUTPUTS_DIR } =
+  process.env as { [index: string]: string };
 
-const VALID_FILE_PATH = path.join(TEST_UNDECLARED_OUTPUTS_DIR, 'test.xml');
-const INVALID_FILE_PATH = 'nonexistent.xml';
+const VALID_FILE_PATH = path.join(TEST_UNDECLARED_OUTPUTS_DIR, "test.xml");
+const INVALID_FILE_PATH = "nonexistent.xml";
 const INVALID_FILE_EXTENSION_PATH = path.join(
   TEST_UNDECLARED_OUTPUTS_DIR,
-  'test.txt',
+  "test.txt"
 );
-const XML_CONTENT = '<root></root>';
+const XML_CONTENT = "<root></root>";
 
-describe('XmlReader', () => {
+describe("XmlReader", () => {
   let caught: Error | undefined;
   let xmlReader: XmlReader;
 
@@ -25,8 +26,8 @@ describe('XmlReader', () => {
     fs.unlinkSync(VALID_FILE_PATH);
   });
 
-  describe('getXmlFileBody', () => {
-    it('should read the XML file content when the file path is valid', () => {
+  describe("getXmlFileBody", () => {
+    it("should read the XML file content when the file path is valid", () => {
       xmlReader = new XmlReader(VALID_FILE_PATH);
 
       const xmlContent = xmlReader.getXmlFileBody();
@@ -34,8 +35,8 @@ describe('XmlReader', () => {
       expect(xmlContent).toBe(xmlContent);
     });
 
-    it('should read the XML regardless of the case of the file extension', () => {
-      const xmlFilePath = path.join(TEST_UNDECLARED_OUTPUTS_DIR, 'test.XmL');
+    it("should read the XML regardless of the case of the file extension", () => {
+      const xmlFilePath = path.join(TEST_UNDECLARED_OUTPUTS_DIR, "test.XmL");
       fs.writeFileSync(xmlFilePath, XML_CONTENT);
       xmlReader = new XmlReader(xmlFilePath);
 
@@ -46,7 +47,7 @@ describe('XmlReader', () => {
       fs.unlinkSync(xmlFilePath);
     });
 
-    it('should throw an error when the file path does not exist', () => {
+    it("should throw an error when the file path does not exist", () => {
       xmlReader = new XmlReader(INVALID_FILE_PATH);
 
       try {
@@ -57,11 +58,11 @@ describe('XmlReader', () => {
 
       expect(caught).toBeDefined();
       expect(caught?.message).toEqual(
-        ERROR_MESSAGES.invalidFilePath(INVALID_FILE_PATH),
+        ERROR_MESSAGES.invalidFilePath(INVALID_FILE_PATH)
       );
     });
 
-    it('should throw an error when the file extension is not XML', () => {
+    it("should throw an error when the file extension is not XML", () => {
       fs.writeFileSync(INVALID_FILE_EXTENSION_PATH, XML_CONTENT);
       xmlReader = new XmlReader(INVALID_FILE_EXTENSION_PATH);
 
@@ -73,7 +74,7 @@ describe('XmlReader', () => {
 
       expect(caught).toBeDefined();
       expect(caught?.message).toEqual(
-        ERROR_MESSAGES.invalidFileExtension(INVALID_FILE_EXTENSION_PATH),
+        ERROR_MESSAGES.invalidFileExtension(INVALID_FILE_EXTENSION_PATH)
       );
 
       fs.unlinkSync(INVALID_FILE_EXTENSION_PATH);
