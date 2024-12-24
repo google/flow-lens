@@ -1,6 +1,7 @@
 {
   "version": "4",
   "specifiers": {
+    "npm:@types/node@^22.10.2": "22.10.2",
     "npm:jasmine@^5.5.0": "5.5.0",
     "npm:xml2js@~0.6.2": "0.6.2",
     "npm:yargs@^17.7.2": "17.7.2"
@@ -19,6 +20,12 @@
     },
     "@pkgjs/parseargs@0.11.0": {
       "integrity": "sha512-+1VkjdD0QBLPodGrJUeqarH8VAIvQODIbwh9XpP5Syisf7YoQgsJKPNFoqqLQlu+VQ/tVSshMR6loPMn8U+dPg=="
+    },
+    "@types/node@22.10.2": {
+      "integrity": "sha512-Xxr6BBRCAOQixvonOye19wnzyDiUtTeqldOOmj3CkeblonbccA12PFwlufvRdrpjXxqnmUaeiU5EOA+7s5diUQ==",
+      "dependencies": [
+        "undici-types"
+      ]
     },
     "ansi-regex@5.0.1": {
       "integrity": "sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ=="
@@ -196,6 +203,9 @@
         "ansi-regex@6.1.0"
       ]
     },
+    "undici-types@6.20.0": {
+      "integrity": "sha512-Ny6QZ2Nju20vw1SRHe3d9jVu6gJ+4e3+MMpqu7pqE5HT6WsTSlce++GQmK5UXS8mzV8DSYHrQH+Xrf2jVcuKNg=="
+    },
     "which@2.0.2": {
       "integrity": "sha512-BLI3Tl1TW3Pvl70l3yq3Y64i+awpwXqsGBYWkkqMtnbXgrMD+yj7rhW0kuEDxzJaYXGjEW5ogapKNMEKNMjibA==",
       "dependencies": [
@@ -249,6 +259,7 @@
   },
   "workspace": {
     "dependencies": [
+      "npm:@types/node@^22.10.2",
       "npm:jasmine@^5.5.0",
       "npm:xml2js@~0.6.2",
       "npm:yargs@^17.7.2"

@@ -1,4 +1,4 @@
-import { it, expect, describe, beforeEach, spyOn } from "jasmine";
+import { it, expect, describe, beforeEach, afterEach } from "jasmine";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { ERROR_MESSAGES, XmlReader } from "./xml_reader.ts";

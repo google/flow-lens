@@ -1,4 +1,4 @@
-import { it, expect, describe, beforeEach, spyOn } from "jasmine";
+import { it, expect, describe, expectAsync } from "jasmine";
 
 import * as fs from "node:fs";
 import * as path from "node:path";

@@ -5,6 +5,7 @@
 
 import { execSync } from "node:child_process";
 import { Configuration } from "./argument_processor.ts";
+import { Buffer } from "node:buffer";
 
 const ADDED = "A";
 const MODIFIED = "M";

@@ -1,4 +1,5 @@
 import { it, expect, describe, beforeEach, spyOn } from "jasmine";
+import { Buffer } from "node:buffer";
 import { Configuration } from "./argument_processor.ts";
 import { getTestConfig } from "./argument_processor_test.ts";
 import {
