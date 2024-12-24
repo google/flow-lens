@@ -1,7 +1,7 @@
-import { it, expect, describe, beforeEach } from "jasmine";
-import { ParsedFlow } from "./flow_parser.ts";
-import * as flowTypes from "./flow_types.ts";
-import { PlantUmlGenerator } from "./plantuml_generator.ts";
+import { assertEquals, assertStringIncludes } from "@std/assert";
+import { ParsedFlow } from "../main/flow_parser.ts";
+import * as flowTypes from "../main/flow_types.ts";
+import { PlantUmlGenerator } from "../main/plantuml_generator.ts";
 
 const NODE_NAMES = {
   start: "FLOW_START",
@@ -115,80 +115,86 @@ function generateStage(
   } as flowTypes.FlowOrchestratedStage;
 }
 
-describe("PlantUml", () => {
+Deno.test("PlantUml", async (t) => {
   let systemUnderTest: PlantUmlGenerator;
   let mockedFlow: ParsedFlow;
   let result: string;
 
-  beforeEach(() => {
+  await t.step("Setup", () => {
     mockedFlow = generateMockFlow();
     systemUnderTest = new PlantUmlGenerator(mockedFlow);
   });
 
-  it("should generate header", () => {
+  await t.step("should generate header", () => {
     const label = "foo";
     result = systemUnderTest.getHeader(label);
 
-    expect(result).toContain("skinparam State");
-    expect(result).toContain("BackgroundColor<<Pink>> #F9548A");
-    expect(result).toContain("FontColor<<Pink>> white");
-    expect(result).toContain("BackgroundColor<<Orange>> #DD7A00");
-    expect(result).toContain("FontColor<<Orange>> white");
-    expect(result).toContain("BackgroundColor<<Navy>> #344568");
-    expect(result).toContain("FontColor<<Navy>> white");
-    expect(result).toContain(label);
+    assertStringIncludes(result, "skinparam State");
+    assertStringIncludes(result, "BackgroundColor<<Pink>> #F9548A");
+    assertStringIncludes(result, "FontColor<<Pink>> white");
+    assertStringIncludes(result, "BackgroundColor<<Orange>> #DD7A00");
+    assertStringIncludes(result, "FontColor<<Orange>> white");
+    assertStringIncludes(result, "BackgroundColor<<Navy>> #344568");
+    assertStringIncludes(result, "FontColor<<Navy>> white");
+    assertStringIncludes(result, label);
   });
 
-  it("should generate flow apex plugin call", () => {
+  await t.step("should generate flow apex plugin call", () => {
     result = systemUnderTest.getFlowApexPluginCall(
       mockedFlow.apexPluginCalls![0]
     );
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Apex Plugin Call** <&code> \\n myApexPluginCall" as myApexPluginCall'
     );
   });
 
-  it("should generate flow assignment", () => {
+  await t.step("should generate flow assignment", () => {
     result = systemUnderTest.getFlowAssignment(mockedFlow.assignments![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Assignment** <&menu> \\n myAssignment" as myAssignment <<Orange>>'
     );
   });
 
-  it("should generate flow collection processor", () => {
+  await t.step("should generate flow collection processor", () => {
     result = systemUnderTest.getFlowCollectionProcessor(
       mockedFlow.collectionProcessors![0]
     );
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Collection Processor** \\n myCollectionProcessor" as myCollectionProcessor'
     );
   });
 
-  it("should generate flow decision", () => {
+  await t.step("should generate flow decision", () => {
     result = systemUnderTest.getFlowDecision(mockedFlow.decisions![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Decision** <&fork> \\n myDecision" as myDecision <<Orange>>'
     );
   });
 
-  it("should generate flow loop", () => {
+  await t.step("should generate flow loop", () => {
     result = systemUnderTest.getFlowLoop(mockedFlow.loops![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Loop** <&loop> \\n myLoop" as myLoop <<Orange>>'
     );
   });
 
-  it("should generate flow orchestrated stage", () => {
+  await t.step("should generate flow orchestrated stage", () => {
     result = systemUnderTest.getFlowOrchestratedStage(
       mockedFlow.orchestratedStages![0]
     );
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       `state "**Orchestrated Stage** <&chevron-right> \\n myOrchestratedStage" as myOrchestratedStage {
 state "**Stage Step** <&justify-center> \\n step1" as myOrchestratedStage_step1Action <<Navy>>
 state "**Stage Step** <&justify-center> \\n step2" as myOrchestratedStage_step2Action <<Navy>>
@@ -197,95 +203,104 @@ state "**Stage Step** <&justify-center> \\n step3" as myOrchestratedStage_step3A
     );
   });
 
-  it("should generate flow record create", () => {
+  await t.step("should generate flow record create", () => {
     result = systemUnderTest.getFlowRecordCreate(mockedFlow.recordCreates![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Record Create** <&medical-cross> \\n myRecordCreate" as myRecordCreate <<Pink>>'
     );
   });
 
-  it("should generate flow record delete", () => {
+  await t.step("should generate flow record delete", () => {
     result = systemUnderTest.getFlowRecordDelete(mockedFlow.recordDeletes![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Record Delete** \\n myRecordDelete" as myRecordDelete <<Pink>>'
     );
   });
 
-  it("should generate flow record lookup", () => {
+  await t.step("should generate flow record lookup", () => {
     result = systemUnderTest.getFlowRecordLookup(mockedFlow.recordLookups![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Record Lookup** <&magnifying-glass> \\n myRecordLookup" as myRecordLookup <<Pink>>'
     );
   });
 
-  it("should generate flow record rollback", () => {
+  await t.step("should generate flow record rollback", () => {
     result = systemUnderTest.getFlowRecordRollback(
       mockedFlow.recordRollbacks![0]
     );
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Record Rollback** \\n myRecordRollback" as myRecordRollback <<Pink>>'
     );
   });
 
-  it("should generate flow record update", () => {
+  await t.step("should generate flow record update", () => {
     result = systemUnderTest.getFlowRecordUpdate(mockedFlow.recordUpdates![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Record Update** \\n myRecordUpdate" as myRecordUpdate <<Pink>>'
     );
   });
 
-  it("should generate flow screen", () => {
+  await t.step("should generate flow screen", () => {
     result = systemUnderTest.getFlowScreen(mockedFlow.screens![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Screen** <&browser> \\n myScreen" as myScreen <<Blue>>'
     );
   });
 
-  it("should generate flow step", () => {
+  await t.step("should generate flow step", () => {
     result = systemUnderTest.getFlowStep(mockedFlow.steps![0]);
 
-    expect(result).toEqual('state "**Step** \\n myStep" as myStep');
+    assertEquals(result, 'state "**Step** \\n myStep" as myStep');
   });
 
-  it("should generate flow subflow", () => {
+  await t.step("should generate flow subflow", () => {
     result = systemUnderTest.getFlowSubflow(mockedFlow.subflows![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Subflow** \\n mySubflow" as mySubflow <<Navy>>'
     );
   });
 
-  it("should generate flow transform", () => {
+  await t.step("should generate flow transform", () => {
     result = systemUnderTest.getFlowTransform(mockedFlow.transforms![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Transform** \\n myTransform" as myTransform'
     );
   });
 
-  it("should generate flow wait", () => {
+  await t.step("should generate flow wait", () => {
     result = systemUnderTest.getFlowWait(mockedFlow.waits![0]);
 
-    expect(result).toEqual('state "**Wait** \\n myWait" as myWait');
+    assertEquals(result, 'state "**Wait** \\n myWait" as myWait');
   });
 
-  it("should generate flow action call", () => {
+  await t.step("should generate flow action call", () => {
     result = systemUnderTest.getFlowActionCall(mockedFlow.actionCalls![0]);
 
-    expect(result).toEqual(
+    assertEquals(
+      result,
       'state "**Action Call** <&code> \\n myActionCall" as myActionCall <<Navy>>'
     );
   });
 
-  it("should generate transition", () => {
+  await t.step("should generate transition", () => {
     result = systemUnderTest.getTransition(mockedFlow.transitions![0]);
 
-    expect(result).toEqual("[*] --> myApexPluginCall");
+    assertEquals(result, "[*] --> myApexPluginCall");
   });
 });
