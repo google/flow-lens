@@ -147,7 +147,7 @@ export class GraphVizGerritCommentGenerator implements GerritCommentGenerator {
     return `${GraphVizGerritCommentGenerator.PLACER_URL}${placerPath}/${fileName}`;
   }
 
-  private generateSvg(umlString: string, fileName: string) {
+  generateSvg(umlString: string, fileName: string) {
     execSync(
       GRAPH_VIZ_CLI_COMMANDS.dot(
         Configuration.getInstance().dotExecutablePath!,

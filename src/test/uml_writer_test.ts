@@ -1,5 +1,4 @@
-import { it, expect, describe, beforeEach, spyOn } from "jasmine";
-
+import { assertEquals, assertExists, assertStringIncludes } from "@std/assert";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
@@ -7,16 +6,15 @@ import {
   DiagramTool,
   GenerationType,
   RuntimeConfig,
-} from "./argument_processor.ts";
-import { FlowDifference } from "./flow_to_uml_transformer.ts";
+} from "../main/argument_processor.ts";
+import { FlowDifference } from "../main/flow_to_uml_transformer.ts";
 import {
   GRAPH_VIZ_CLI_COMMAND_FAILED,
   GraphVizGerritCommentGenerator,
   UmlWriter,
-} from "./uml_writer.ts";
+} from "../main/uml_writer.ts";
 
-const { TEST_UNDECLARED_OUTPUTS_DIR: TEST_UNDECLARED_OUTPUTS_DIR } =
-  process.env as { [index: string]: string };
+const TEST_UNDECLARED_OUTPUTS_DIR = "./";
 
 const FILE_1 = "file1.flow";
 const FILE_2 = "file2.flow";
@@ -124,114 +122,127 @@ function getRuntimeConfig(
 }
 
 function mockSuccessfulGraphVizCommand() {
-  // Mock the private methods which execute dot commands using spyOn
-  // tslint:disable:no-any
-  spyOn(
-    GraphVizGerritCommentGenerator.prototype,
-    "generateSvg" as any
-  ).and.callFake((umlString: string, fileName: string) => {
+  GraphVizGerritCommentGenerator.prototype.generateSvg = function (
+    this: GraphVizGerritCommentGenerator,
+    umlString: string,
+    fileName: string
+  ): void {
     fs.writeFileSync(
       path.join(TEST_UNDECLARED_OUTPUTS_DIR, fileName),
       umlString
     );
-  });
-  // tslint:enable:no-any
+  };
 }
 
 function mockFailedGraphVizCommand() {
-  // Mock the private methods which execute dot commands using spyOn
-  // tslint:disable:no-any
-  spyOn(
-    GraphVizGerritCommentGenerator.prototype,
-    "generateSvg" as any
-  ).and.throwError("GraphViz CLI command failed");
-  // tslint:enable:no-any
+  GraphVizGerritCommentGenerator.prototype.generateSvg = function (
+    this: GraphVizGerritCommentGenerator,
+    _umlString: string,
+    _fileName: string
+  ): void {
+    throw new Error("GraphViz CLI command failed");
+  };
 }
 
-describe("UmlWriter", () => {
+Deno.test("UmlWriter", async (t) => {
   let writer: UmlWriter;
   let fileContent: string;
 
-  it("should write UML diagrams to a file", () => {
+  await t.step("should write UML diagrams to a file", () => {
     mockSuccessfulGraphVizCommand();
-    spyOn(Configuration, "getInstance").and.returnValue(
-      getRuntimeConfig(GenerationType.UML_DIAGRAM)
-    );
+    Configuration.getInstance = () =>
+      getRuntimeConfig(GenerationType.UML_DIAGRAM);
     writer = new UmlWriter(FILE_PATH_TO_FLOW_DIFFERENCE);
 
     writer.writeUmlDiagrams();
 
-    expect(fs.existsSync(expectedFilePath)).toBeTrue();
+    assertExists(fs.existsSync(expectedFilePath));
     fileContent = fs.readFileSync(expectedFilePath, ENCODING).toString();
-    expect(fileContent).toEqual(
-      JSON.stringify(EXPECTED_DEFAULT_FORMAT, null, 2)
-    );
+    assertEquals(fileContent, JSON.stringify(EXPECTED_DEFAULT_FORMAT, null, 2));
+
+    Deno.remove(expectedFilePath);
   });
 
-  it("should write Gerrit comments to a file", () => {
+  await t.step("should write Gerrit comments to a file", () => {
     mockSuccessfulGraphVizCommand();
-    spyOn(Configuration, "getInstance").and.returnValue(
-      getRuntimeConfig(GenerationType.GERRIT_COMMENT)
-    );
+    Configuration.getInstance = () =>
+      getRuntimeConfig(GenerationType.GERRIT_COMMENT);
     writer = new UmlWriter(FILE_PATH_TO_FLOW_DIFFERENCE);
 
     writer.writeUmlDiagrams();
 
-    expect(fs.existsSync(expectedFilePath)).toBeTrue();
+    assertExists(fs.existsSync(expectedFilePath));
     fileContent = fs.readFileSync(expectedFilePath, ENCODING).toString();
-    expect(fileContent).toEqual(
+    assertEquals(
+      fileContent,
       JSON.stringify(EXPECTED_GERRIT_COMMENT_FORMAT_PLANT_UML, null, 2)
     );
+    Deno.remove(expectedFilePath);
   });
 
-  it("should write artifacts to Placer when GraphViz is selected", () => {
-    mockSuccessfulGraphVizCommand();
-    spyOn(Configuration, "getInstance").and.returnValue(
-      getRuntimeConfig(GenerationType.GERRIT_COMMENT, DiagramTool.GRAPH_VIZ)
-    );
-    writer = new UmlWriter(FILE_PATH_TO_FLOW_DIFFERENCE);
+  await t.step(
+    "should write artifacts to Placer when GraphViz is selected",
+    () => {
+      mockSuccessfulGraphVizCommand();
+      Configuration.getInstance = () =>
+        getRuntimeConfig(GenerationType.GERRIT_COMMENT, DiagramTool.GRAPH_VIZ);
+      writer = new UmlWriter(FILE_PATH_TO_FLOW_DIFFERENCE);
 
-    writer.writeUmlDiagrams();
+      writer.writeUmlDiagrams();
 
-    expect(fs.existsSync(expectedFilePath)).toBeTrue();
+      assertExists(fs.existsSync(expectedFilePath));
 
-    fileContent = fs.readFileSync(expectedFilePath, ENCODING).toString();
-    expect(fileContent).toEqual(
-      JSON.stringify(EXPECTED_GERRIT_COMMENT_FORMAT_GRAPHVIZ, null, 2)
-    );
+      fileContent = fs.readFileSync(expectedFilePath, ENCODING).toString();
+      assertEquals(
+        fileContent,
+        JSON.stringify(EXPECTED_GERRIT_COMMENT_FORMAT_GRAPHVIZ, null, 2)
+      );
 
-    const previewPathForFile1 = path.join(
-      TEST_UNDECLARED_OUTPUTS_DIR,
-      `Preview_for_${FILE_1}.svg`
-    );
-    expect(fs.existsSync(previewPathForFile1)).toBeTrue();
-    expect(fs.readFileSync(previewPathForFile1, ENCODING).toString()).toContain(
-      UML_1
-    );
+      const previewPathForFile1 = path.join(
+        TEST_UNDECLARED_OUTPUTS_DIR,
+        `Preview_for_${FILE_1}.svg`
+      );
+      assertExists(fs.existsSync(previewPathForFile1));
+      assertStringIncludes(
+        fs.readFileSync(previewPathForFile1, ENCODING).toString(),
+        UML_1
+      );
 
-    const previewPathForFile2 = path.join(
-      TEST_UNDECLARED_OUTPUTS_DIR,
-      `Preview_for_${FILE_2}.svg`
-    );
-    expect(fs.existsSync(previewPathForFile2)).toBeTrue();
-    expect(fs.readFileSync(previewPathForFile2, ENCODING).toString()).toContain(
-      UML_2
-    );
-  });
+      const previewPathForFile2 = path.join(
+        TEST_UNDECLARED_OUTPUTS_DIR,
+        `Preview_for_${FILE_2}.svg`
+      );
+      assertExists(fs.existsSync(previewPathForFile2));
+      assertStringIncludes(
+        fs.readFileSync(previewPathForFile2, ENCODING).toString(),
+        UML_2
+      );
 
-  it("should generate a comment when the GraphViz CLI command fails", () => {
-    mockFailedGraphVizCommand();
-    spyOn(Configuration, "getInstance").and.returnValue(
-      getRuntimeConfig(GenerationType.GERRIT_COMMENT, DiagramTool.GRAPH_VIZ)
-    );
-    writer = new UmlWriter(FILE_PATH_TO_FLOW_DIFFERENCE);
+      Deno.remove(expectedFilePath);
+      Deno.remove(previewPathForFile1);
+      Deno.remove(previewPathForFile2);
+      Deno.remove(`Preview_for_old_${FILE_2}.svg`);
+    }
+  );
 
-    writer.writeUmlDiagrams();
+  await t.step(
+    "should generate a comment when the GraphViz CLI command fails",
+    () => {
+      mockFailedGraphVizCommand();
+      Configuration.getInstance = () =>
+        getRuntimeConfig(GenerationType.GERRIT_COMMENT, DiagramTool.GRAPH_VIZ);
+      writer = new UmlWriter(FILE_PATH_TO_FLOW_DIFFERENCE);
 
-    expect(fs.existsSync(expectedFilePath)).toBeTrue();
-    fileContent = fs.readFileSync(expectedFilePath, ENCODING).toString();
-    expect(fileContent).toEqual(
-      JSON.stringify(EXPECTED_GERRIT_COMMENT_FORMAT_GRAPHVIZ_FAILED, null, 2)
-    );
-  });
+      writer.writeUmlDiagrams();
+
+      assertExists(fs.existsSync(expectedFilePath));
+      fileContent = fs.readFileSync(expectedFilePath, ENCODING).toString();
+      assertEquals(
+        fileContent,
+        JSON.stringify(EXPECTED_GERRIT_COMMENT_FORMAT_GRAPHVIZ_FAILED, null, 2)
+      );
+
+      Deno.remove(expectedFilePath);
+    }
+  );
 });
