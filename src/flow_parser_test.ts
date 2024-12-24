@@ -1,12 +1,11 @@
-import { it, expect, describe, expectAsync } from "jasmine";
-
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { ERROR_MESSAGES, FlowParser, ParsedFlow } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
+import { assert, assertEquals, assertRejects } from "@std/assert";
 
 const ENCODING = "utf8";
-const GOLDENS_PATH = `${process.env["RUNFILES"]}/google3/corp/peopleops/connect/salesforce/flow_to_uml/goldens`;
+const GOLDENS_PATH = "./src/goldens";
 const LOOP_NODE_NAME = "myLoop";
 const NON_EXISTING_ELEMENT = "Non_Existing_Element";
 const START_NODE_NAME = "FLOW_START";
@@ -47,65 +46,21 @@ const NODE_NAMES = {
   actionCall: "myActionCall",
 };
 
-const FLOW_NODES = {
-  apexPluginCalls: getFlowNodes(
-    NODE_NAMES.apexPluginCall
-  ) as flowTypes.FlowApexPluginCall[],
-  assignments: getFlowNodes(
-    NODE_NAMES.assignment
-  ) as flowTypes.FlowAssignment[],
-  collectionProcessors: getFlowNodes(
-    NODE_NAMES.collectionProcessor
-  ) as flowTypes.FlowCollectionProcessor[],
-  decisions: getFlowNodes(NODE_NAMES.decision) as flowTypes.FlowDecision[],
-  loops: getFlowNodes(NODE_NAMES.loop) as flowTypes.FlowLoop[],
-  orchestratedStages: getFlowNodes(
-    NODE_NAMES.orchestratedStage
-  ) as flowTypes.FlowOrchestratedStage[],
-  recordCreates: getFlowNodes(
-    NODE_NAMES.recordCreate
-  ) as flowTypes.FlowRecordCreate[],
-  recordDeletes: getFlowNodes(
-    NODE_NAMES.recordDelete
-  ) as flowTypes.FlowRecordDelete[],
-  recordLookups: getFlowNodes(
-    NODE_NAMES.recordLookup
-  ) as flowTypes.FlowRecordLookup[],
-  recordRollbacks: getFlowNodes(
-    NODE_NAMES.recordRollback
-  ) as flowTypes.FlowRecordRollback[],
-  recordUpdates: getFlowNodes(
-    NODE_NAMES.recordUpdate
-  ) as flowTypes.FlowRecordUpdate[],
-  screens: getFlowNodes(NODE_NAMES.screen) as flowTypes.FlowScreen[],
-  steps: getFlowNodes(NODE_NAMES.step) as flowTypes.FlowStep[],
-  subflows: getFlowNodes(NODE_NAMES.subflow) as flowTypes.FlowSubflow[],
-  transforms: getFlowNodes(NODE_NAMES.transform) as flowTypes.FlowTransform[],
-  waits: getFlowNodes(NODE_NAMES.wait) as flowTypes.FlowWait[],
-  actionCalls: getFlowNodes(
-    NODE_NAMES.actionCall
-  ) as flowTypes.FlowActionCall[],
-};
-
-function getFlowNodes(name: string): flowTypes.FlowNode[] {
-  return [{ name: `${name}` }, { name: `${name}2` }] as flowTypes.FlowNode[];
-}
-
-describe("FlowParser", () => {
+Deno.test("FlowParser", async (t) => {
   let systemUnderTest: FlowParser;
-  let caught: Error;
+  let caught: Error | undefined;
   let parsedFlow: ParsedFlow;
 
-  it("should parse valid XML into a flow object", async () => {
+  await t.step("should parse valid XML into a flow object", async () => {
     systemUnderTest = new FlowParser(
       fs.readFileSync(TEST_FILES.sample, ENCODING)
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
 
-    expect(parsedFlow).toBeDefined();
-    expect(parsedFlow.transitions).toBeDefined();
-    expect(parsedFlow.transitions).toEqual([
+    assert(parsedFlow);
+    assert(parsedFlow.transitions);
+    assertEquals(parsedFlow.transitions, [
       {
         from: START_NODE_NAME,
         to: "Get_Aurora_Tag_Definition",
@@ -145,16 +100,16 @@ describe("FlowParser", () => {
     ]);
   });
 
-  it("should handle circular transitions", async () => {
+  await t.step("should handle circular transitions", async () => {
     systemUnderTest = new FlowParser(
       fs.readFileSync(TEST_FILES.circularTransition, ENCODING)
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
 
-    expect(parsedFlow).toBeDefined();
-    expect(parsedFlow.transitions).toBeDefined();
-    expect(parsedFlow.transitions).toEqual([
+    assert(parsedFlow);
+    assert(parsedFlow.transitions);
+    assertEquals(parsedFlow.transitions, [
       {
         from: START_NODE_NAME,
         to: LOOP_NODE_NAME,
@@ -170,91 +125,198 @@ describe("FlowParser", () => {
     ]);
   });
 
-  it("should ensure multiple node definitions are represented as arrays", async () => {
-    systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.multipleElements, ENCODING)
-    );
+  await t.step(
+    "should ensure multiple node definitions are represented as arrays",
+    async () => {
+      systemUnderTest = new FlowParser(
+        fs.readFileSync(TEST_FILES.multipleElements, ENCODING)
+      );
 
-    parsedFlow = await systemUnderTest.generateFlowDefinition();
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
 
-    expect(parsedFlow).toBeDefined();
-    expect(parsedFlow.apexPluginCalls).toEqual(FLOW_NODES.apexPluginCalls);
-    expect(parsedFlow.assignments).toEqual(FLOW_NODES.assignments);
-    expect(parsedFlow.collectionProcessors).toEqual(
-      FLOW_NODES.collectionProcessors
-    );
-    expect(parsedFlow.decisions).toEqual(FLOW_NODES.decisions);
-    expect(parsedFlow.loops).toEqual(FLOW_NODES.loops);
-    expect(parsedFlow.orchestratedStages).toEqual(
-      FLOW_NODES.orchestratedStages
-    );
-    expect(parsedFlow.recordCreates).toEqual(FLOW_NODES.recordCreates);
-    expect(parsedFlow.recordDeletes).toEqual(FLOW_NODES.recordDeletes);
-    expect(parsedFlow.recordLookups).toEqual(FLOW_NODES.recordLookups);
-    expect(parsedFlow.recordRollbacks).toEqual(FLOW_NODES.recordRollbacks);
-    expect(parsedFlow.recordUpdates).toEqual(FLOW_NODES.recordUpdates);
-    expect(parsedFlow.screens).toEqual(FLOW_NODES.screens);
-    expect(parsedFlow.steps).toEqual(FLOW_NODES.steps);
-    expect(parsedFlow.subflows).toEqual(FLOW_NODES.subflows);
-    expect(parsedFlow.transforms).toEqual(FLOW_NODES.transforms);
-    expect(parsedFlow.waits).toEqual(FLOW_NODES.waits);
-    expect(parsedFlow.actionCalls).toEqual(FLOW_NODES.actionCalls);
-  });
+      assert(parsedFlow);
 
-  it("should ensure single node definitions are represented as arrays", async () => {
-    systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.singleElements, ENCODING)
-    );
+      // Compare actual parsedFlow nodes to expected based on the file
+      assertEquals(
+        parsedFlow.apexPluginCalls?.map((n) => n.name),
+        [NODE_NAMES.apexPluginCall, `${NODE_NAMES.apexPluginCall}2`]
+      );
+      assertEquals(
+        parsedFlow.assignments?.map((n) => n.name),
+        [NODE_NAMES.assignment, `${NODE_NAMES.assignment}2`]
+      );
+      assertEquals(
+        parsedFlow.collectionProcessors?.map((n) => n.name),
+        [NODE_NAMES.collectionProcessor, `${NODE_NAMES.collectionProcessor}2`]
+      );
+      assertEquals(
+        parsedFlow.decisions?.map((n) => n.name),
+        [NODE_NAMES.decision, `${NODE_NAMES.decision}2`]
+      );
+      assertEquals(
+        parsedFlow.loops?.map((n) => n.name),
+        [NODE_NAMES.loop, `${NODE_NAMES.loop}2`]
+      );
+      assertEquals(
+        parsedFlow.orchestratedStages?.map((n) => n.name),
+        [NODE_NAMES.orchestratedStage, `${NODE_NAMES.orchestratedStage}2`]
+      );
+      assertEquals(
+        parsedFlow.recordCreates?.map((n) => n.name),
+        [NODE_NAMES.recordCreate, `${NODE_NAMES.recordCreate}2`]
+      );
+      assertEquals(
+        parsedFlow.recordDeletes?.map((n) => n.name),
+        [NODE_NAMES.recordDelete, `${NODE_NAMES.recordDelete}2`]
+      );
+      assertEquals(
+        parsedFlow.recordLookups?.map((n) => n.name),
+        [NODE_NAMES.recordLookup, `${NODE_NAMES.recordLookup}2`]
+      );
+      assertEquals(
+        parsedFlow.recordRollbacks?.map((n) => n.name),
+        [NODE_NAMES.recordRollback, `${NODE_NAMES.recordRollback}2`]
+      );
+      assertEquals(
+        parsedFlow.recordUpdates?.map((n) => n.name),
+        [NODE_NAMES.recordUpdate, `${NODE_NAMES.recordUpdate}2`]
+      );
+      assertEquals(
+        parsedFlow.screens?.map((n) => n.name),
+        [NODE_NAMES.screen, `${NODE_NAMES.screen}2`]
+      );
+      assertEquals(
+        parsedFlow.steps?.map((n) => n.name),
+        [NODE_NAMES.step, `${NODE_NAMES.step}2`]
+      );
+      assertEquals(
+        parsedFlow.subflows?.map((n) => n.name),
+        [NODE_NAMES.subflow, `${NODE_NAMES.subflow}2`]
+      );
+      assertEquals(
+        parsedFlow.transforms?.map((n) => n.name),
+        [NODE_NAMES.transform, `${NODE_NAMES.transform}2`]
+      );
+      assertEquals(
+        parsedFlow.waits?.map((n) => n.name),
+        [NODE_NAMES.wait, `${NODE_NAMES.wait}2`]
+      );
+      assertEquals(
+        parsedFlow.actionCalls?.map((n) => n.name),
+        [NODE_NAMES.actionCall, `${NODE_NAMES.actionCall}2`]
+      );
+    }
+  );
 
-    parsedFlow = await systemUnderTest.generateFlowDefinition();
+  await t.step(
+    "should ensure single node definitions are represented as arrays",
+    async () => {
+      systemUnderTest = new FlowParser(
+        fs.readFileSync(TEST_FILES.singleElements, ENCODING)
+      );
 
-    expect(parsedFlow).toBeDefined();
-    expect(parsedFlow.apexPluginCalls).toEqual([FLOW_NODES.apexPluginCalls[0]]);
-    expect(parsedFlow.assignments).toEqual([FLOW_NODES.assignments[0]]);
-    expect(parsedFlow.collectionProcessors).toEqual([
-      FLOW_NODES.collectionProcessors[0],
-    ]);
-    expect(parsedFlow.decisions).toEqual([FLOW_NODES.decisions[0]]);
-    expect(parsedFlow.loops).toEqual([FLOW_NODES.loops[0]]);
-    expect(parsedFlow.orchestratedStages).toEqual([
-      FLOW_NODES.orchestratedStages[0],
-    ]);
-    expect(parsedFlow.recordCreates).toEqual([FLOW_NODES.recordCreates[0]]);
-    expect(parsedFlow.recordDeletes).toEqual([FLOW_NODES.recordDeletes[0]]);
-    expect(parsedFlow.recordLookups).toEqual([FLOW_NODES.recordLookups[0]]);
-    expect(parsedFlow.recordRollbacks).toEqual([FLOW_NODES.recordRollbacks[0]]);
-    expect(parsedFlow.recordUpdates).toEqual([FLOW_NODES.recordUpdates[0]]);
-    expect(parsedFlow.screens).toEqual([FLOW_NODES.screens[0]]);
-    expect(parsedFlow.steps).toEqual([FLOW_NODES.steps[0]]);
-    expect(parsedFlow.subflows).toEqual([FLOW_NODES.subflows[0]]);
-    expect(parsedFlow.transforms).toEqual([FLOW_NODES.transforms[0]]);
-    expect(parsedFlow.waits).toEqual([FLOW_NODES.waits[0]]);
-    expect(parsedFlow.actionCalls).toEqual([FLOW_NODES.actionCalls[0]]);
-  });
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
 
-  it("should properly identify rollbacks", async () => {
+      assert(parsedFlow);
+      // Compare actual parsedFlow nodes to expected based on the file
+      assertEquals(
+        parsedFlow.apexPluginCalls?.map((n) => n.name),
+        [NODE_NAMES.apexPluginCall]
+      );
+      assertEquals(
+        parsedFlow.assignments?.map((n) => n.name),
+        [NODE_NAMES.assignment]
+      );
+      assertEquals(
+        parsedFlow.collectionProcessors?.map((n) => n.name),
+        [NODE_NAMES.collectionProcessor]
+      );
+      assertEquals(
+        parsedFlow.decisions?.map((n) => n.name),
+        [NODE_NAMES.decision]
+      );
+      assertEquals(
+        parsedFlow.loops?.map((n) => n.name),
+        [NODE_NAMES.loop]
+      );
+      assertEquals(
+        parsedFlow.orchestratedStages?.map((n) => n.name),
+        [NODE_NAMES.orchestratedStage]
+      );
+      assertEquals(
+        parsedFlow.recordCreates?.map((n) => n.name),
+        [NODE_NAMES.recordCreate]
+      );
+      assertEquals(
+        parsedFlow.recordDeletes?.map((n) => n.name),
+        [NODE_NAMES.recordDelete]
+      );
+      assertEquals(
+        parsedFlow.recordLookups?.map((n) => n.name),
+        [NODE_NAMES.recordLookup]
+      );
+      assertEquals(
+        parsedFlow.recordRollbacks?.map((n) => n.name),
+        [NODE_NAMES.recordRollback]
+      );
+      assertEquals(
+        parsedFlow.recordUpdates?.map((n) => n.name),
+        [NODE_NAMES.recordUpdate]
+      );
+      assertEquals(
+        parsedFlow.screens?.map((n) => n.name),
+        [NODE_NAMES.screen]
+      );
+      assertEquals(
+        parsedFlow.steps?.map((n) => n.name),
+        [NODE_NAMES.step]
+      );
+      assertEquals(
+        parsedFlow.subflows?.map((n) => n.name),
+        [NODE_NAMES.subflow]
+      );
+      assertEquals(
+        parsedFlow.transforms?.map((n) => n.name),
+        [NODE_NAMES.transform]
+      );
+      assertEquals(
+        parsedFlow.waits?.map((n) => n.name),
+        [NODE_NAMES.wait]
+      );
+      assertEquals(
+        parsedFlow.actionCalls?.map((n) => n.name),
+        [NODE_NAMES.actionCall]
+      );
+    }
+  );
+
+  await t.step("should properly identify rollbacks", async () => {
     systemUnderTest = new FlowParser(
       fs.readFileSync(TEST_FILES.rollback, ENCODING)
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
 
-    expect(parsedFlow).toBeDefined();
-    expect(parsedFlow.recordLookups).toEqual([
+    assert(parsedFlow);
+    assertEquals(parsedFlow.recordLookups, [
       {
-        ...FLOW_NODES.recordLookups[0],
+        ...parsedFlow.recordLookups?.[0], // Keep all the properties that the parser extracts
         connector: { targetReference: NODE_NAMES.recordRollback },
       } as flowTypes.FlowRecordLookup,
     ]);
-    expect(parsedFlow.recordRollbacks).toEqual([
+    assertEquals(parsedFlow.recordRollbacks, [
       {
-        ...FLOW_NODES.recordRollbacks[0],
+        ...parsedFlow.recordRollbacks?.[0],
         connector: { targetReference: NODE_NAMES.screen },
       } as flowTypes.FlowRecordRollback,
     ]);
-    expect(parsedFlow.screens).toEqual([FLOW_NODES.screens[0]]);
 
-    expect(parsedFlow.transitions).toEqual([
+    assertEquals(
+      parsedFlow.screens?.map((n) => n.name),
+      [NODE_NAMES.screen]
+    );
+
+    assertEquals(parsedFlow.transitions, [
       {
         from: START_NODE_NAME,
         to: NODE_NAMES.recordLookup,
@@ -276,7 +338,7 @@ describe("FlowParser", () => {
     ]);
   });
 
-  it("should throw an error when the XML is invalid", async () => {
+  await t.step("should throw an error when the XML is invalid", async () => {
     systemUnderTest = new FlowParser("invalid XML");
 
     try {
@@ -285,29 +347,37 @@ describe("FlowParser", () => {
       caught = error as Error;
     }
 
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain("Non-whitespace before first tag");
+    assert(caught);
+    assert(caught?.message?.includes("Non-whitespace before first tag"));
   });
 
-  it("should throw an error when the XML is missing a start node", async () => {
-    systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.noStartNode, ENCODING)
-    );
+  await t.step(
+    "should throw an error when the XML is missing a start node",
+    async () => {
+      systemUnderTest = new FlowParser(
+        fs.readFileSync(TEST_FILES.noStartNode, ENCODING)
+      );
 
-    await expectAsync(
-      systemUnderTest.generateFlowDefinition()
-    ).toBeRejectedWithError(ERROR_MESSAGES.flowStartNotDefined);
-  });
+      await assertRejects(
+        async () => await systemUnderTest.generateFlowDefinition(),
+        Error,
+        ERROR_MESSAGES.flowStartNotDefined
+      );
+    }
+  );
 
-  it("should throw an error when the XML contains an invalid transition", async () => {
-    systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.missingTransitionNode, ENCODING)
-    );
+  await t.step(
+    "should throw an error when the XML contains an invalid transition",
+    async () => {
+      systemUnderTest = new FlowParser(
+        fs.readFileSync(TEST_FILES.missingTransitionNode, ENCODING)
+      );
 
-    await expectAsync(
-      systemUnderTest.generateFlowDefinition()
-    ).toBeRejectedWithError(
-      ERROR_MESSAGES.couldNotFindConnectedNode(NON_EXISTING_ELEMENT)
-    );
-  });
+      await assertRejects(
+        async () => await systemUnderTest.generateFlowDefinition(),
+        Error,
+        ERROR_MESSAGES.couldNotFindConnectedNode(NON_EXISTING_ELEMENT)
+      );
+    }
+  );
 });
