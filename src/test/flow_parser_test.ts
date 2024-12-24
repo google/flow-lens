@@ -1,11 +1,11 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { ERROR_MESSAGES, FlowParser, ParsedFlow } from "./flow_parser.ts";
-import * as flowTypes from "./flow_types.ts";
+import { ERROR_MESSAGES, FlowParser, ParsedFlow } from "../main/flow_parser.ts";
+import * as flowTypes from "../main/flow_types.ts";
 import { assert, assertEquals, assertRejects } from "@std/assert";
 
 const ENCODING = "utf8";
-const GOLDENS_PATH = "./src/goldens";
+const GOLDENS_PATH = "./src/test/goldens";
 const LOOP_NODE_NAME = "myLoop";
 const NON_EXISTING_ELEMENT = "Non_Existing_Element";
 const START_NODE_NAME = "FLOW_START";
