@@ -3,39 +3,41 @@
  * changed in a git repo.
  */
 
-import {execSync} from 'child_process';
-import * as os from 'os';
-import {Configuration} from './argument_processor';
+import { execSync } from "node:child_process";
+import * as os from "node:fs";
+import { Configuration } from "./argument_processor.ts";
 
-const ADDED = 'A';
-const MODIFIED = 'M';
-const RENAMED = 'R';
-const COPIED = 'C';
-const SUPPORTED_DIFF_TYPES = [ADDED, MODIFIED, RENAMED, COPIED].join('');
+const ADDED = "A";
+const MODIFIED = "M";
+const RENAMED = "R";
+const COPIED = "C";
+const SUPPORTED_DIFF_TYPES = [ADDED, MODIFIED, RENAMED, COPIED].join("");
 
 /** Git commands used by the FlowFileChangeDetector. */
 const GIT_COMMANDS = {
   diff: (fromHash: string, toHash: string, repo: string | undefined) =>
-    `git ${repo ? `-C ${repo}` : ''} diff --diff-filter=${SUPPORTED_DIFF_TYPES} --name-only ${fromHash} ${toHash}`,
+    `git ${
+      repo ? `-C ${repo}` : ""
+    } diff --diff-filter=${SUPPORTED_DIFF_TYPES} --name-only ${fromHash} ${toHash}`,
   revParse: (repo: string | undefined) =>
-    `git ${repo ? `-C ${repo}` : ''} rev-parse --is-inside-work-tree`,
+    `git ${repo ? `-C ${repo}` : ""} rev-parse --is-inside-work-tree`,
   version: (repo: string | undefined) =>
-    `git ${repo ? `-C ${repo}` : ''} --version`,
+    `git ${repo ? `-C ${repo}` : ""} --version`,
   getFileContent: (
     filePath: string,
     commitHash: string,
-    repo: string | undefined,
-  ) => `git ${repo ? `-C ${repo}` : ''} show ${commitHash}:${filePath}`,
+    repo: string | undefined
+  ) => `git ${repo ? `-C ${repo}` : ""} show ${commitHash}:${filePath}`,
 };
 
 /** The extension of flow files. */
-export const FLOW_FILE_EXTENSION = '.flow-meta.xml';
+export const FLOW_FILE_EXTENSION = ".flow-meta.xml";
 
 /** Error messages used by the FlowFileChangeDetector. */
 export const ERROR_MESSAGES = {
   diffError: (error: Error) => `Git diff command failed: ${error.message}`,
-  gitIsNotInstalledError: 'Git is not installed on this machine.',
-  notInGitRepoError: 'Not in a git repo.',
+  gitIsNotInstalledError: "Git is not installed on this machine.",
+  notInGitRepoError: "Not in a git repo.",
   unableToGetFileContent: (filePath: string, error: Error) =>
     `Unable to get file content for ${filePath}: ${error.message}`,
 };
@@ -55,19 +57,19 @@ export class FlowFileChangeDetector {
     return this.getFlowFilesFromDiff(diff);
   }
 
-  getFileContent(filePath: string, fromOrTo: 'old' | 'new'): string {
+  getFileContent(filePath: string, fromOrTo: "old" | "new"): string {
     let fileContent: Buffer;
     try {
       fileContent = this.executeGetFileContentCommand(
         filePath,
-        fromOrTo === 'old'
+        fromOrTo === "old"
           ? (Configuration.getInstance().gitDiffFromHash as string)
           : (Configuration.getInstance().gitDiffToHash as string),
-        Configuration.getInstance().gitRepo,
+        Configuration.getInstance().gitRepo
       );
     } catch (error: unknown) {
       throw new Error(
-        ERROR_MESSAGES.unableToGetFileContent(filePath, error as Error),
+        ERROR_MESSAGES.unableToGetFileContent(filePath, error as Error)
       );
     }
     return fileContent.toString();
@@ -112,15 +114,15 @@ export class FlowFileChangeDetector {
       GIT_COMMANDS.diff(
         Configuration.getInstance().gitDiffFromHash!,
         Configuration.getInstance().gitDiffToHash!,
-        Configuration.getInstance().gitRepo,
-      ),
+        Configuration.getInstance().gitRepo
+      )
     );
   }
 
   private executeGetFileContentCommand(
     filePath: string,
     commitHash: string,
-    repo: string | undefined,
+    repo: string | undefined
   ) {
     return execSync(GIT_COMMANDS.getFileContent(filePath, commitHash, repo));
   }
@@ -130,7 +132,7 @@ export class FlowFileChangeDetector {
       .split(os.EOL)
       .filter(
         (filePath) =>
-          filePath && filePath.toLowerCase().endsWith(FLOW_FILE_EXTENSION),
+          filePath && filePath.toLowerCase().endsWith(FLOW_FILE_EXTENSION)
       );
   }
 }

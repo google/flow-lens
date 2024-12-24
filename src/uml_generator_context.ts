@@ -5,11 +5,11 @@
  * to be used.
  */
 
-import {DiagramTool} from './argument_processor';
-import {ParsedFlow} from './flow_parser';
-import {GraphVizGenerator} from './graphviz_generator';
-import {PlantUmlGenerator} from './plantuml_generator';
-import {UmlGenerator} from './uml_generator';
+import { DiagramTool } from "./argument_processor.ts";
+import { ParsedFlow } from "./flow_parser.ts";
+import { GraphVizGenerator } from "./graphviz_generator.ts";
+import { PlantUmlGenerator } from "./plantuml_generator.ts";
+import { UmlGenerator } from "./uml_generator.ts";
 
 /**
  * This class is responsible for generating a UML diagram representation of a

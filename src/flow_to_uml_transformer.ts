@@ -3,13 +3,13 @@
  * flow file into a UML diagram.
  */
 
-import * as path from 'path';
-import {Configuration} from './argument_processor';
-import {compareFlows} from './flow_comparator';
-import {FlowFileChangeDetector} from './flow_file_change_detector';
-import {FlowParser, ParsedFlow} from './flow_parser';
-import {UmlGeneratorContext} from './uml_generator_context';
-import {XmlReader} from './xml_reader';
+import * as path from "node:path";
+import { Configuration } from "./argument_processor.ts";
+import { compareFlows } from "./flow_comparator.ts";
+import { FlowFileChangeDetector } from "./flow_file_change_detector.ts";
+import { FlowParser, ParsedFlow } from "./flow_parser.ts";
+import { UmlGeneratorContext } from "./uml_generator_context.ts";
+import { XmlReader } from "./xml_reader.ts";
 
 /**
  * This object contains the error messages that are used in the
@@ -43,7 +43,7 @@ export class FlowToUmlTransformer {
   constructor(
     private readonly filePaths: string[],
     private readonly generatorContext: UmlGeneratorContext,
-    private readonly changeDetector: FlowFileChangeDetector,
+    private readonly changeDetector: FlowFileChangeDetector
   ) {}
 
   async transformToUmlDiagrams(): Promise<Map<string, FlowDifference>> {
@@ -59,7 +59,7 @@ export class FlowToUmlTransformer {
   }
 
   private async transformToUmlDiagram(
-    filePath: string,
+    filePath: string
   ): Promise<FlowDifference> {
     return new Promise<FlowDifference>(async (resolve, reject) => {
       try {
@@ -99,13 +99,13 @@ class Reader implements Filter<FlowDifference> {
     if (Configuration.getInstance().gitDiffFromHash) {
       let old: string | undefined = undefined;
       try {
-        old = this.changeDetector.getFileContent(input, 'old');
+        old = this.changeDetector.getFileContent(input, "old");
       } catch (error: unknown) {
         console.log(ERROR_MESSAGES.previousFlowNotFound(input));
       }
       return {
         old,
-        new: this.changeDetector.getFileContent(input, 'new'),
+        new: this.changeDetector.getFileContent(input, "new"),
       };
     }
     return {

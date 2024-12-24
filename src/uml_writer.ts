@@ -2,23 +2,25 @@
  * @fileoverview This file contains the UmlWriter class which is used to write
  * the generated UML diagrams to a file.
  */
-
-import {execSync} from 'child_process';
-import * as fs from 'fs';
-import {castExists} from 'google3/javascript/common/asserts/asserts';
-import * as path from 'path';
-import {Configuration, DiagramTool, GenerationType} from './argument_processor';
-import {FlowDifference} from './flow_to_uml_transformer';
+import { execSync } from "node:child_process";
+import * as fs from "node:fs";
+import * as path from "node:path";
+import {
+  Configuration,
+  DiagramTool,
+  GenerationType,
+} from "./argument_processor.ts";
+import { FlowDifference } from "./flow_to_uml_transformer.ts";
 
 /**
  * The error message to display when the GraphViz CLI command fails.
  */
 export const GRAPH_VIZ_CLI_COMMAND_FAILED =
-  'The system failed to generate a preview for this flow. Please see the sponge log for more details.';
+  "The system failed to generate a preview for this flow. Please see the sponge log for more details.";
 
-const FILE_EXTENSION = '.json';
+const FILE_EXTENSION = ".json";
 
-const RED_TERMINAL_COLOR = '\x1b[31m%s\x1b[0m';
+const RED_TERMINAL_COLOR = "\x1b[31m%s\x1b[0m";
 
 const GRAPH_VIZ_CLI_COMMANDS = {
   dot(dotExecutablePath: string, digraph: string, filePathAndName: string) {
@@ -33,7 +35,7 @@ END_OF_DIGRAPH`;
  */
 export class UmlWriter {
   constructor(
-    private readonly filePathToFlowDifference: Map<string, FlowDifference>,
+    private readonly filePathToFlowDifference: Map<string, FlowDifference>
   ) {}
 
   /**
@@ -44,9 +46,9 @@ export class UmlWriter {
     fs.writeFileSync(
       path.join(
         Configuration.getInstance().outputDirectory,
-        `${Configuration.getInstance().outputFileName}${FILE_EXTENSION}`,
+        `${Configuration.getInstance().outputFileName}${FILE_EXTENSION}`
       ),
-      JSON.stringify(fileBody, null, 2),
+      JSON.stringify(fileBody, null, 2)
     );
   }
 }
@@ -67,12 +69,12 @@ interface GerritCommentGenerator {
 
 interface Formatter {
   format(
-    filePathToFlowDifference: Map<string, FlowDifference>,
+    filePathToFlowDifference: Map<string, FlowDifference>
   ): DefaultFormat[] | GerritCommentFormat[];
 }
 
 class PlantUmlGerritCommentGenerator implements GerritCommentGenerator {
-  static readonly PLANTUML_URL = 'https://plantuml.corp.google.com/?syntax=';
+  static readonly PLANTUML_URL = "https://plantuml.corp.google.com/?syntax=";
 
   /**
    * Generates a gerrit comment for a UML diagram.
@@ -94,9 +96,9 @@ class PlantUmlGerritCommentGenerator implements GerritCommentGenerator {
  */
 export class GraphVizGerritCommentGenerator implements GerritCommentGenerator {
   static readonly PLACER_URL =
-    'https://cnsviewer-static.corp.google.com/placer/prod/home/kokoro-dedicated/build_artifacts/';
-  static readonly PREVIEW_FILE_PREFIX = 'Preview_for_';
-  static readonly PREVIEW_FILE_OLD_PREFIX = 'Preview_for_old_';
+    "https://cnsviewer-static.corp.google.com/placer/prod/home/kokoro-dedicated/build_artifacts/";
+  static readonly PREVIEW_FILE_PREFIX = "Preview_for_";
+  static readonly PREVIEW_FILE_OLD_PREFIX = "Preview_for_old_";
 
   /**
    * Generates a gerrit comment for a UML diagram.
@@ -105,11 +107,11 @@ export class GraphVizGerritCommentGenerator implements GerritCommentGenerator {
   generate(uml: string, flowApiName: string, oldUml?: string): string {
     const fileName = this.generateFileName(
       flowApiName,
-      GraphVizGerritCommentGenerator.PREVIEW_FILE_PREFIX,
+      GraphVizGerritCommentGenerator.PREVIEW_FILE_PREFIX
     );
     const oldFileName = this.generateFileName(
       flowApiName,
-      GraphVizGerritCommentGenerator.PREVIEW_FILE_OLD_PREFIX,
+      GraphVizGerritCommentGenerator.PREVIEW_FILE_OLD_PREFIX
     );
     try {
       this.generateSvg(uml, fileName);
@@ -119,18 +121,18 @@ export class GraphVizGerritCommentGenerator implements GerritCommentGenerator {
     } catch (e) {
       console.error(
         RED_TERMINAL_COLOR,
-        this.generateErrorMessage(e as Error, fileName),
+        this.generateErrorMessage(e as Error, fileName)
       );
       return GRAPH_VIZ_CLI_COMMAND_FAILED;
     }
     const placerUrl = this.generatePlacerUrl(
-      castExists(Configuration.getInstance().placerPath),
-      fileName,
+      Configuration.getInstance().placerPath!,
+      fileName
     );
     if (oldUml) {
       const oldPlacerUrl = this.generatePlacerUrl(
-        castExists(Configuration.getInstance().placerPath),
-        oldFileName,
+        Configuration.getInstance().placerPath!,
+        oldFileName
       );
       return `Click [before](${oldPlacerUrl}) or [after](${placerUrl}) to see a preview of the flow versions.`;
     }
@@ -148,13 +150,10 @@ export class GraphVizGerritCommentGenerator implements GerritCommentGenerator {
   private generateSvg(umlString: string, fileName: string) {
     execSync(
       GRAPH_VIZ_CLI_COMMANDS.dot(
-        castExists(Configuration.getInstance().dotExecutablePath),
+        Configuration.getInstance().dotExecutablePath!,
         umlString,
-        path.join(
-          castExists(Configuration.getInstance().outputDirectory),
-          fileName,
-        ),
-      ),
+        path.join(Configuration.getInstance().outputDirectory!, fileName)
+      )
     );
   }
 
@@ -170,7 +169,7 @@ class GerritCommentFormatter implements Formatter {
    * @param filePathToFlowDifference A map of file paths to UML diagrams.
    */
   format(
-    filePathToFlowDifference: Map<string, FlowDifference>,
+    filePathToFlowDifference: Map<string, FlowDifference>
   ): GerritCommentFormat[] {
     const commentGenerator = this.getCommentGenerator();
 
@@ -182,7 +181,7 @@ class GerritCommentFormatter implements Formatter {
         message: commentGenerator.generate(
           flowDifference.new,
           fileName,
-          flowDifference.old,
+          flowDifference.old
         ),
       });
     }
@@ -214,7 +213,7 @@ class DefaultFormatter implements Formatter {
    * @param filePathToFlowDifference A map of file paths to UML diagrams.
    */
   format(
-    filePathToFlowDifference: Map<string, FlowDifference>,
+    filePathToFlowDifference: Map<string, FlowDifference>
   ): DefaultFormat[] {
     const result: DefaultFormat[] = [];
     for (const [filePath, flowDifference] of filePathToFlowDifference) {

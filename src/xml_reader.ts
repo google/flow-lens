@@ -2,10 +2,10 @@
  * @fileoverview Validates and reads an XML file.
  */
 
-import * as fs from 'fs';
+import * as fs from "node:fs";
 
-const XML_FILE_EXTENSION = '.xml';
-const ENCODING = 'utf8';
+const XML_FILE_EXTENSION = ".xml";
+const ENCODING = "utf8";
 
 /**
  * Error messages for the XmlReader class.

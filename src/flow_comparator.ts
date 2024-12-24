@@ -2,10 +2,10 @@
  * @fileoverview Utility functions to compare two flows.
  */
 
-import {ParsedFlow} from './flow_parser';
-import * as flowTypes from './flow_types';
+import { ParsedFlow } from "./flow_parser.ts";
+import * as flowTypes from "./flow_types.ts";
 
-const OBJECT = 'object';
+const OBJECT = "object";
 
 /**
  * Compares two flows and sets the diff status of each node.

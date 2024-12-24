@@ -2,31 +2,31 @@
  * @fileoverview A PlantUML generator for Salesforce flows.
  */
 
-import * as os from 'os';
-import {Transition} from './flow_parser';
-import * as flowTypes from './flow_types';
-import {UmlGenerator} from './uml_generator';
+import * as os from "node:os";
+import { Transition } from "./flow_parser.ts";
+import * as flowTypes from "./flow_types.ts";
+import { UmlGenerator } from "./uml_generator.ts";
 
 enum SkinColor {
-  NONE = '',
-  PINK = ' <<Pink>>',
-  ORANGE = ' <<Orange>>',
-  NAVY = ' <<Navy>>',
-  BLUE = ' <<Blue>>',
+  NONE = "",
+  PINK = " <<Pink>>",
+  ORANGE = " <<Orange>>",
+  NAVY = " <<Navy>>",
+  BLUE = " <<Blue>>",
 }
 
 enum Icon {
-  BROWSER = ' <&browser>',
-  CHEVRON_RIGHT = ' <&chevron-right>',
-  CODE = ' <&code>',
-  FORK = ' <&fork>',
-  JUSTIFY_CENTER = ' <&justify-center>',
-  LOOP = ' <&loop>',
-  MAGNIFYING_GLASS = ' <&magnifying-glass>',
-  MEDICAL_CROSS = ' <&medical-cross>',
-  MENU = ' <&menu>',
-  NONE = '',
-  PENCIL = ' <&pencil>',
+  BROWSER = " <&browser>",
+  CHEVRON_RIGHT = " <&chevron-right>",
+  CODE = " <&code>",
+  FORK = " <&fork>",
+  JUSTIFY_CENTER = " <&justify-center>",
+  LOOP = " <&loop>",
+  MAGNIFYING_GLASS = " <&magnifying-glass>",
+  MEDICAL_CROSS = " <&medical-cross>",
+  MENU = " <&menu>",
+  NONE = "",
+  PENCIL = " <&pencil>",
 }
 
 /**
@@ -55,9 +55,9 @@ title ${label}`;
     return getHeader(
       node.label,
       node.name,
-      'Apex Plugin Call',
+      "Apex Plugin Call",
       Icon.CODE,
-      SkinColor.NONE,
+      SkinColor.NONE
     );
   }
 
@@ -65,9 +65,9 @@ title ${label}`;
     return getHeader(
       node.label,
       node.name,
-      'Assignment',
+      "Assignment",
       Icon.MENU,
-      SkinColor.ORANGE,
+      SkinColor.ORANGE
     );
   }
 
@@ -75,9 +75,9 @@ title ${label}`;
     return getHeader(
       node.label,
       node.name,
-      'Collection Processor',
+      "Collection Processor",
       Icon.NONE,
-      SkinColor.NONE,
+      SkinColor.NONE
     );
   }
 
@@ -85,9 +85,9 @@ title ${label}`;
     return getHeader(
       node.label,
       node.name,
-      'Decision',
+      "Decision",
       Icon.FORK,
-      SkinColor.ORANGE,
+      SkinColor.ORANGE
     );
   }
 
@@ -95,9 +95,9 @@ title ${label}`;
     return getHeader(
       node.label,
       node.name,
-      'Loop',
+      "Loop",
       Icon.LOOP,
-      SkinColor.ORANGE,
+      SkinColor.ORANGE
     );
   }
 
@@ -105,9 +105,9 @@ title ${label}`;
     const header = getHeader(
       node.label,
       node.name,
-      'Orchestrated Stage',
+      "Orchestrated Stage",
       Icon.CHEVRON_RIGHT,
-      SkinColor.NONE,
+      SkinColor.NONE
     );
     const body = getOrchestratedStageBody(node);
     return `${header} {
@@ -119,9 +119,9 @@ ${body}
     return getHeader(
       node.label,
       node.name,
-      'Record Create',
+      "Record Create",
       Icon.MEDICAL_CROSS,
-      SkinColor.PINK,
+      SkinColor.PINK
     );
   }
 
@@ -129,9 +129,9 @@ ${body}
     return getHeader(
       node.label,
       node.name,
-      'Record Delete',
+      "Record Delete",
       Icon.NONE,
-      SkinColor.PINK,
+      SkinColor.PINK
     );
   }
 
@@ -139,9 +139,9 @@ ${body}
     return getHeader(
       node.label,
       node.name,
-      'Record Lookup',
+      "Record Lookup",
       Icon.MAGNIFYING_GLASS,
-      SkinColor.PINK,
+      SkinColor.PINK
     );
   }
 
@@ -149,9 +149,9 @@ ${body}
     return getHeader(
       node.label,
       node.name,
-      'Record Rollback',
+      "Record Rollback",
       Icon.NONE,
-      SkinColor.PINK,
+      SkinColor.PINK
     );
   }
 
@@ -159,9 +159,9 @@ ${body}
     return getHeader(
       node.label,
       node.name,
-      'Record Update',
+      "Record Update",
       Icon.NONE,
-      SkinColor.PINK,
+      SkinColor.PINK
     );
   }
 
@@ -169,23 +169,23 @@ ${body}
     return getHeader(
       node.label,
       node.name,
-      'Screen',
+      "Screen",
       Icon.BROWSER,
-      SkinColor.BLUE,
+      SkinColor.BLUE
     );
   }
 
   getFlowStep(node: flowTypes.FlowStep): string {
-    return getHeader(node.label, node.name, 'Step', Icon.NONE, SkinColor.NONE);
+    return getHeader(node.label, node.name, "Step", Icon.NONE, SkinColor.NONE);
   }
 
   getFlowSubflow(node: flowTypes.FlowSubflow): string {
     return getHeader(
       node.label,
       node.name,
-      'Subflow',
+      "Subflow",
       Icon.NONE,
-      SkinColor.NAVY,
+      SkinColor.NAVY
     );
   }
 
@@ -193,34 +193,36 @@ ${body}
     return getHeader(
       node.label,
       node.name,
-      'Transform',
+      "Transform",
       Icon.NONE,
-      SkinColor.NONE,
+      SkinColor.NONE
     );
   }
 
   getFlowWait(node: flowTypes.FlowWait): string {
-    return getHeader(node.label, node.name, 'Wait', Icon.NONE, SkinColor.NONE);
+    return getHeader(node.label, node.name, "Wait", Icon.NONE, SkinColor.NONE);
   }
 
   getFlowActionCall(node: flowTypes.FlowActionCall): string {
     return getHeader(
       node.label,
       node.name,
-      'Action Call',
+      "Action Call",
       Icon.CODE,
-      SkinColor.NAVY,
+      SkinColor.NAVY
     );
   }
 
   getTransition(transition: Transition): string {
-    const label = transition.label ? ` : ${transition.label}` : '';
-    const arrow = transition.fault ? '-[#red,dashed]->' : '-->';
-    return `${transition.from === 'FLOW_START' ? '[*]' : transition.from} ${arrow} ${transition.to}${label}`;
+    const label = transition.label ? ` : ${transition.label}` : "";
+    const arrow = transition.fault ? "-[#red,dashed]->" : "-->";
+    return `${
+      transition.from === "FLOW_START" ? "[*]" : transition.from
+    } ${arrow} ${transition.to}${label}`;
   }
 
   getFooter(): string {
-    return '';
+    return "";
   }
 }
 
@@ -229,9 +231,11 @@ function getHeader(
   name: string,
   type: string,
   icon: Icon,
-  skinColor: SkinColor,
+  skinColor: SkinColor
 ): string {
-  return `state "**${type}**${icon} \\n ${getLabel(label)}" as ${name}${skinColor}`;
+  return `state "**${type}**${icon} \\n ${getLabel(
+    label
+  )}" as ${name}${skinColor}`;
 }
 
 function getLabel(label: string) {
@@ -243,10 +247,10 @@ function getLabel(label: string) {
  * @param node The Orchestrated Stage node.
  */
 function getOrchestratedStageBody(
-  node: flowTypes.FlowOrchestratedStage,
+  node: flowTypes.FlowOrchestratedStage
 ): string {
   if (!node.stageSteps) {
-    return '';
+    return "";
   }
   const result: string[] = [];
   for (const step of node.stageSteps) {
@@ -262,15 +266,15 @@ function getOrchestratedStageBody(
  */
 function getStageStepHeader(
   stageStep: flowTypes.FlowStageStep,
-  stageName: string,
+  stageName: string
 ): string {
   return getHeader(
     stageStep.label,
     `${stageName}_${stageStep.actionName}`,
-    'Stage Step',
+    "Stage Step",
     stageStep.actionType === flowTypes.FlowStageStepActionType.STEP_BACKGROUND
       ? Icon.JUSTIFY_CENTER
       : Icon.PENCIL,
-    SkinColor.NAVY,
+    SkinColor.NAVY
   );
 }
