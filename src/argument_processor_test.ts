@@ -1,5 +1,3 @@
-import { it, expect, describe, beforeEach } from "jasmine";
-
 import {
   ArgumentProcessor,
   DiagramTool,
@@ -7,6 +5,7 @@ import {
   GenerationType,
   RuntimeConfig,
 } from "./argument_processor.ts";
+import { assertEquals, assertThrows } from "@std/assert";
 
 /**
  * The test configuration object that is used by the ArgumentProcessor tests.
@@ -31,231 +30,236 @@ const INVALID_GENERATION_TYPE = "unsupported";
 const INVALID_OUTPUT_FILE_NAME = "unsupported.file.name";
 const INVALID_OUTPUT_DIRECTORY = "invalid/directory/path";
 
-describe("ArgumentProcessor", () => {
-  let argumentProcessor: ArgumentProcessor;
-  let result: RuntimeConfig;
-  let caught: Error | undefined;
-  let testConfiguration: RuntimeConfig;
+function setupTest(
+  configModifications: (config: RuntimeConfig) => void = () => {}
+) {
+  let testConfiguration = getTestConfig();
+  configModifications(testConfiguration);
+  return {
+    argumentProcessor: new ArgumentProcessor(testConfiguration),
+    config: testConfiguration,
+  };
+}
 
-  beforeEach(() => {
-    testConfiguration = getTestConfig();
-  });
+Deno.test(
+  "ArgumentProcessor should validate when it has the proper configuration",
+  () => {
+    const { argumentProcessor, config } = setupTest();
+    const result = argumentProcessor.getConfig();
+    assertEquals(result, config);
+  }
+);
 
-  it("should validate when it has the proper configuration", () => {
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    result = argumentProcessor.getConfig();
-
-    expect(result).toEqual(testConfiguration);
-  });
-
-  it("should throw an exception when the diagram tool is not supported", () => {
-    testConfiguration.diagramTool = INVALID_DIAGRAM_TOOL as DiagramTool;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when the diagram tool is not supported",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) => (config.diagramTool = INVALID_DIAGRAM_TOOL as DiagramTool)
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.unsupportedDiagramTool(INVALID_DIAGRAM_TOOL)
     );
-  });
+  }
+);
 
-  it("should throw an exception when the file path is not valid", () => {
-    testConfiguration.filePath = [INVALID_FILE_PATH];
-    testConfiguration.gitDiffFromHash = undefined;
-    testConfiguration.gitDiffToHash = undefined;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when the file path is not valid",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest((config) => {
+          config.filePath = [INVALID_FILE_PATH];
+          config.gitDiffFromHash = undefined;
+          config.gitDiffToHash = undefined;
+        });
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.filePathDoesNotExist(INVALID_FILE_PATH)
     );
-  });
+  }
+);
 
-  it("should throw an exception when the generation type is not supported", () => {
-    testConfiguration.generationType =
-      INVALID_GENERATION_TYPE as GenerationType;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when the generation type is not supported",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) =>
+            (config.generationType = INVALID_GENERATION_TYPE as GenerationType)
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.unsupportedGenerationType(INVALID_GENERATION_TYPE)
     );
-  });
+  }
+);
 
-  it("should throw an exception when the output file name is not populated", () => {
-    testConfiguration.outputFileName = "";
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
+Deno.test(
+  "ArgumentProcessor should throw an exception when the output file name is not populated",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) => (config.outputFileName = "")
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
+      ERROR_MESSAGES.outputFileNameRequired
+    );
+  }
+);
 
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(ERROR_MESSAGES.outputFileNameRequired);
-  });
-
-  it("should throw an exception when the output file name is not supported", () => {
-    testConfiguration.outputFileName = INVALID_OUTPUT_FILE_NAME;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when the output file name is not supported",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) => (config.outputFileName = INVALID_OUTPUT_FILE_NAME)
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.invalidOutputFileName(INVALID_OUTPUT_FILE_NAME)
     );
-  });
+  }
+);
 
-  it("should throw an exception when the output directory is not valid", () => {
-    testConfiguration.outputDirectory = INVALID_OUTPUT_DIRECTORY;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when the output directory is not valid",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) => (config.outputDirectory = INVALID_OUTPUT_DIRECTORY)
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.invalidOutputDirectory(INVALID_OUTPUT_DIRECTORY)
     );
-  });
+  }
+);
 
-  it("should throw an exception when the output directory is not specified", () => {
-    testConfiguration.outputDirectory = "";
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
+Deno.test(
+  "ArgumentProcessor should throw an exception when the output directory is not specified",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) => (config.outputDirectory = "")
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
+      ERROR_MESSAGES.outputDirectoryRequired
+    );
+  }
+);
 
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(ERROR_MESSAGES.outputDirectoryRequired);
-  });
-
-  it("should throw an exception when either the filePath or (gitDiffFromHash and gitDiffToHash) are not specified", () => {
-    testConfiguration.gitDiffToHash = undefined;
-    testConfiguration.gitDiffFromHash = undefined;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when either the filePath or (gitDiffFromHash and gitDiffToHash) are not specified",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest((config) => {
+          config.gitDiffToHash = undefined;
+          config.gitDiffFromHash = undefined;
+        });
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.filePathOrGitDiffFromAndToHashRequired
     );
-  });
+  }
+);
 
-  it("should throw an exception when either the filePath and gitDiffFromHash and gitDiffToHash are specified", () => {
-    testConfiguration.filePath = [INVALID_FILE_PATH];
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when either the filePath and gitDiffFromHash and gitDiffToHash are specified",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) => (config.filePath = [INVALID_FILE_PATH])
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.filePathAndGitDiffFromAndToHashMutuallyExclusive
     );
-  });
+  }
+);
 
-  it("should throw an exception when the `gitDiffFromHash` is specified but `gitDiffToHash` is not", () => {
-    testConfiguration.gitDiffToHash = undefined;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when the `gitDiffFromHash` is specified but `gitDiffToHash` is not",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) => (config.gitDiffToHash = undefined)
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether
     );
-  });
+  }
+);
 
-  it("should throw an exception when the `gitDiffToHash` is specified but `gitDiffFromHash` is not", () => {
-    testConfiguration.gitDiffFromHash = undefined;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when the `gitDiffToHash` is specified but `gitDiffFromHash` is not",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) => (config.gitDiffFromHash = undefined)
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether
     );
-  });
+  }
+);
 
-  it("should throw an exception when the `placerPath` is not specified and the diagram tool is graphviz", () => {
-    testConfiguration.placerPath = undefined;
-    testConfiguration.diagramTool = DiagramTool.GRAPH_VIZ;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when the `placerPath` is not specified and the diagram tool is graphviz",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest((config) => {
+          config.placerPath = undefined;
+          config.diagramTool = DiagramTool.GRAPH_VIZ;
+        });
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.placerPathRequiredForGraphViz
     );
-  });
+  }
+);
 
-  it("should throw an exception when the `dotExecutablePath` is not specified and the diagram tool is graphviz", () => {
-    testConfiguration.dotExecutablePath = undefined;
-    testConfiguration.diagramTool = DiagramTool.GRAPH_VIZ;
-    argumentProcessor = new ArgumentProcessor(testConfiguration);
-
-    try {
-      result = argumentProcessor.getConfig();
-    } catch (error: unknown) {
-      caught = error as Error;
-    }
-
-    expect(caught).toBeDefined();
-    expect(caught?.message).toContain(
+Deno.test(
+  "ArgumentProcessor should throw an exception when the `dotExecutablePath` is not specified and the diagram tool is graphviz",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest((config) => {
+          config.dotExecutablePath = undefined;
+          config.diagramTool = DiagramTool.GRAPH_VIZ;
+        });
+        argumentProcessor.getConfig();
+      },
+      Error,
       ERROR_MESSAGES.dotExecutablePathRequiredForGraphViz
     );
-  });
-});
+  }
+);

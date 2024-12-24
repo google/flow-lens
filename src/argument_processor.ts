@@ -3,60 +3,42 @@
  * object containing the arguments.
  */
 import * as fs from "node:fs";
-import yargs from "yargs";
-import { hideBin } from "yargs/helpers";
+import { parseArgs } from "@std/cli/parse-args";
 
 const VALID_OUTPUT_FILE_NAME_REGEX = new RegExp("^[a-zA-Z0-9_]+$");
 
-const argv = yargs(hideBin(process.argv))
-  .options({
-    diagramTool: {
-      description: "Diagram tool",
-      type: "string",
-      default: "plantuml",
-    },
-    filePath: {
-      description: "File path",
-      type: "string",
-      array: true,
-    },
-    generationType: {
-      description: "Generation type",
-      type: "string",
-      default: "uml-diagram",
-    },
-    gitRepo: {
-      description:
-        "Path to git repo. Used when executing git commands originating from a different directory.",
-      type: "string",
-    },
-    gitDiffFromHash: {
-      description: "Git diff from hash",
-      type: "string",
-    },
-    gitDiffToHash: {
-      description: "Git diff to hash",
-      type: "string",
-    },
-    outputDirectory: {
-      description: "Output directory",
-      type: "string",
-    },
-    outputFileName: {
-      description: "Output file name",
-      type: "string",
-    },
-    placerPath: {
-      description:
-        "Placer path - this should be the KOKORO_BUILD_ARTIFACTS_SUBDIR",
-      type: "string",
-    },
-    dotExecutablePath: {
-      description: "Dot executable path",
-      type: "string",
-    },
-  })
-  .parseSync();
+const flags = parseArgs(Deno.args, {
+  string: [
+    "diagramTool",
+    "filePath",
+    "generationType",
+    "gitRepo",
+    "gitDiffFromHash",
+    "gitDiffToHash",
+    "outputDirectory",
+    "outputFileName",
+    "placerPath",
+    "dotExecutablePath",
+  ],
+  default: {
+    diagramTool: "plantuml",
+    generationType: "uml-diagram",
+    filePath: null,
+  },
+  alias: {
+    diagramTool: "d",
+    filePath: "f",
+    generationType: "g",
+    gitRepo: "r",
+    gitDiffFromHash: "from",
+    gitDiffToHash: "to",
+    outputDirectory: "o",
+    outputFileName: "n",
+    placerPath: "p",
+    dotExecutablePath: "dot",
+  },
+  collect: ["filePath"],
+});
 
 /**
  * The diagram tool that is used to generate the UML diagram.
@@ -147,10 +129,8 @@ export class ArgumentProcessor {
   readonly config: RuntimeConfig;
   readonly errorsEncountered: string[] = [];
 
-  constructor(commandLineArguments?: yargs.Arguments | RuntimeConfig) {
-    this.config = commandLineArguments
-      ? (commandLineArguments as unknown as RuntimeConfig)
-      : (argv as unknown as RuntimeConfig);
+  constructor(commandLineArguments?: RuntimeConfig) {
+    this.config = commandLineArguments ?? (flags as unknown as RuntimeConfig);
   }
 
   getConfig(): RuntimeConfig {
@@ -198,7 +178,7 @@ export class ArgumentProcessor {
     if (!this.config.filePath) {
       return;
     }
-    for (const filePath of this.config?.filePath) {
+    for (const filePath of this.config.filePath) {
       if (!fs.existsSync(filePath)) {
         this.errorsEncountered.push(
           ERROR_MESSAGES.filePathDoesNotExist(filePath)
