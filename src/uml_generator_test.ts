@@ -1,32 +1,32 @@
-import 'jasmine';
+import "jasmine";
 
-import * as os from 'os';
-import {ParsedFlow, Transition} from './flow_parser';
-import * as flowTypes from './flow_types';
-import {UmlGenerator} from './uml_generator';
+import { ParsedFlow, Transition } from "./flow_parser";
+import * as flowTypes from "./flow_types";
+import { UmlGenerator } from "./uml_generator";
 
-const TRANSITION_ARROW = '-->';
+const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+const TRANSITION_ARROW = "-->";
 
 const NODE_NAMES = {
-  label: 'test',
-  start: 'start',
-  apexPluginCall: 'myApexPluginCall',
-  assignment: 'myAssignment',
-  collectionProcessor: 'myCollectionProcessor',
-  decision: 'myDecision',
-  loop: 'myLoop',
-  orchestratedStage: 'myOrchestratedStage',
-  recordCreate: 'myRecordCreate',
-  recordDelete: 'myRecordDelete',
-  recordLookup: 'myRecordLookup',
-  recordRollback: 'myRecordRollback',
-  recordUpdate: 'myRecordUpdate',
-  screen: 'myScreen',
-  step: 'myStep',
-  subflow: 'mySubflow',
-  transform: 'myTransform',
-  wait: 'myWait',
-  actionCall: 'myActionCall',
+  label: "test",
+  start: "start",
+  apexPluginCall: "myApexPluginCall",
+  assignment: "myAssignment",
+  collectionProcessor: "myCollectionProcessor",
+  decision: "myDecision",
+  loop: "myLoop",
+  orchestratedStage: "myOrchestratedStage",
+  recordCreate: "myRecordCreate",
+  recordDelete: "myRecordDelete",
+  recordLookup: "myRecordLookup",
+  recordRollback: "myRecordRollback",
+  recordUpdate: "myRecordUpdate",
+  screen: "myScreen",
+  step: "myStep",
+  subflow: "mySubflow",
+  transform: "myTransform",
+  wait: "myWait",
+  actionCall: "myActionCall",
 };
 
 const UML_REPRESENTATIONS = {
@@ -57,33 +57,33 @@ function generateMockFlow() {
       name: NODE_NAMES.start,
     } as flowTypes.FlowStart,
     apexPluginCalls: getFlowNodes(
-      NODE_NAMES.apexPluginCall,
+      NODE_NAMES.apexPluginCall
     ) as flowTypes.FlowApexPluginCall[],
     assignments: getFlowNodes(
-      NODE_NAMES.assignment,
+      NODE_NAMES.assignment
     ) as flowTypes.FlowAssignment[],
     collectionProcessors: getFlowNodes(
-      NODE_NAMES.collectionProcessor,
+      NODE_NAMES.collectionProcessor
     ) as flowTypes.FlowCollectionProcessor[],
     decisions: getFlowNodes(NODE_NAMES.decision) as flowTypes.FlowDecision[],
     loops: getFlowNodes(NODE_NAMES.loop) as flowTypes.FlowLoop[],
     orchestratedStages: getFlowNodes(
-      NODE_NAMES.orchestratedStage,
+      NODE_NAMES.orchestratedStage
     ) as flowTypes.FlowOrchestratedStage[],
     recordCreates: getFlowNodes(
-      NODE_NAMES.recordCreate,
+      NODE_NAMES.recordCreate
     ) as flowTypes.FlowRecordCreate[],
     recordDeletes: getFlowNodes(
-      NODE_NAMES.recordDelete,
+      NODE_NAMES.recordDelete
     ) as flowTypes.FlowRecordDelete[],
     recordLookups: getFlowNodes(
-      NODE_NAMES.recordLookup,
+      NODE_NAMES.recordLookup
     ) as flowTypes.FlowRecordLookup[],
     recordRollbacks: getFlowNodes(
-      NODE_NAMES.recordRollback,
+      NODE_NAMES.recordRollback
     ) as flowTypes.FlowRecordRollback[],
     recordUpdates: getFlowNodes(
-      NODE_NAMES.recordUpdate,
+      NODE_NAMES.recordUpdate
     ) as flowTypes.FlowRecordUpdate[],
     screens: getFlowNodes(NODE_NAMES.screen) as flowTypes.FlowScreen[],
     steps: getFlowNodes(NODE_NAMES.step) as flowTypes.FlowStep[],
@@ -91,7 +91,7 @@ function generateMockFlow() {
     transforms: getFlowNodes(NODE_NAMES.transform) as flowTypes.FlowTransform[],
     waits: getFlowNodes(NODE_NAMES.wait) as flowTypes.FlowWait[],
     actionCalls: getFlowNodes(
-      NODE_NAMES.actionCall,
+      NODE_NAMES.actionCall
     ) as flowTypes.FlowActionCall[],
     transitions: [
       {
@@ -114,10 +114,10 @@ function generateMockFlow() {
 }
 
 function getFlowNodes(name: string): flowTypes.FlowNode[] {
-  return [{name: `${name}`}] as flowTypes.FlowNode[];
+  return [{ name: `${name}` }] as flowTypes.FlowNode[];
 }
 
-describe('UmlGenerator', () => {
+describe("UmlGenerator", () => {
   let systemUnderTest: UmlGenerator;
   let mockParsedFlow: ParsedFlow;
 
@@ -135,7 +135,7 @@ describe('UmlGenerator', () => {
         return UML_REPRESENTATIONS.assignment(node.name);
       }
       getFlowCollectionProcessor(
-        node: flowTypes.FlowCollectionProcessor,
+        node: flowTypes.FlowCollectionProcessor
       ): string {
         return UML_REPRESENTATIONS.collectionProcessor(node.name);
       }
@@ -185,14 +185,14 @@ describe('UmlGenerator', () => {
         return UML_REPRESENTATIONS.transition(transition.from, transition.to);
       }
       getFooter(): string {
-        return '';
+        return "";
       }
     }
 
     systemUnderTest = new ConcreteUmlGenerator(mockParsedFlow);
   });
 
-  it('should generate UML with all flow elements', () => {
+  it("should generate UML with all flow elements", () => {
     const uml = systemUnderTest.generateUml();
 
     const expectedUml = [
@@ -216,22 +216,22 @@ describe('UmlGenerator', () => {
       UML_REPRESENTATIONS.actionCall(NODE_NAMES.actionCall),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.start,
-        NODE_NAMES.apexPluginCall,
+        NODE_NAMES.apexPluginCall
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.apexPluginCall,
-        NODE_NAMES.assignment,
+        NODE_NAMES.assignment
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.assignment,
-        NODE_NAMES.collectionProcessor,
+        NODE_NAMES.collectionProcessor
       ),
-    ].join(os.EOL);
+    ].join(EOL);
 
     expect(uml).toEqual(expectedUml);
   });
 
-  it('should handle empty flow elements', () => {
+  it("should handle empty flow elements", () => {
     mockParsedFlow.screens = [];
 
     const uml = systemUnderTest.generateUml();
@@ -239,7 +239,7 @@ describe('UmlGenerator', () => {
     expect(uml).not.toContain(UML_REPRESENTATIONS.screen(NODE_NAMES.screen));
   });
 
-  it('should handle undefined flow elements', () => {
+  it("should handle undefined flow elements", () => {
     mockParsedFlow.screens = undefined;
 
     const uml = systemUnderTest.generateUml();
@@ -247,14 +247,14 @@ describe('UmlGenerator', () => {
     expect(uml).not.toContain(UML_REPRESENTATIONS.screen(NODE_NAMES.screen));
   });
 
-  it('should handle empty transitions', () => {
+  it("should handle empty transitions", () => {
     mockParsedFlow.transitions = [];
     const uml = systemUnderTest.generateUml();
 
     expect(uml).not.toContain(TRANSITION_ARROW);
   });
 
-  it('should handle undefined transitions', () => {
+  it("should handle undefined transitions", () => {
     mockParsedFlow.transitions = undefined;
     const uml = systemUnderTest.generateUml();
 

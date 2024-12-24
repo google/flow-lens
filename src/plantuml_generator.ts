@@ -2,10 +2,10 @@
  * @fileoverview A PlantUML generator for Salesforce flows.
  */
 
-import * as os from "node:os";
 import { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 import { UmlGenerator } from "./uml_generator.ts";
+const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 
 enum SkinColor {
   NONE = "",
@@ -256,7 +256,7 @@ function getOrchestratedStageBody(
   for (const step of node.stageSteps) {
     result.push(getStageStepHeader(step, node.name));
   }
-  return result.join(os.EOL);
+  return result.join(EOL);
 }
 
 /**

@@ -4,7 +4,6 @@
  */
 
 import { execSync } from "node:child_process";
-import * as os from "node:fs";
 import { Configuration } from "./argument_processor.ts";
 
 const ADDED = "A";
@@ -12,6 +11,7 @@ const MODIFIED = "M";
 const RENAMED = "R";
 const COPIED = "C";
 const SUPPORTED_DIFF_TYPES = [ADDED, MODIFIED, RENAMED, COPIED].join("");
+const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 
 /** Git commands used by the FlowFileChangeDetector. */
 const GIT_COMMANDS = {
@@ -129,7 +129,7 @@ export class FlowFileChangeDetector {
 
   private getFlowFilesFromDiff(diff: string): string[] {
     return diff
-      .split(os.EOL)
+      .split(EOL)
       .filter(
         (filePath) =>
           filePath && filePath.toLowerCase().endsWith(FLOW_FILE_EXTENSION)

@@ -7,6 +7,7 @@ import { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 import { UmlGenerator } from "./uml_generator.ts";
 
+const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const TABLE_BEGIN = `<
 <TABLE CELLSPACING="0" CELLPADDING="0">`;
 const TABLE_END = `</TABLE>
@@ -98,7 +99,7 @@ node [shape=box, style=filled]`;
       );
       result.push(innerNodeBody);
     }
-    return result.join(os.EOL);
+    return result.join(EOL);
   }
 
   getRuleContent(rule: flowTypes.FlowRule): string[] {
@@ -151,7 +152,7 @@ node [shape=box, style=filled]`;
       );
       result.push(innerNodeBody);
     }
-    return result.join(os.EOL);
+    return result.join(EOL);
   }
 
   getFlowRecordCreate(node: flowTypes.FlowRecordCreate): string {
@@ -224,7 +225,7 @@ function getNodeBody(
   innerNodeBody?: string
 ): string {
   const formattedInnerNodeBody = innerNodeBody
-    ? `${os.EOL}${innerNodeBody}${os.EOL}`
+    ? `${EOL}${innerNodeBody}${EOL}`
     : "";
   const fontColor =
     skinColor === SkinColor.NONE ? FontColor.BLACK : FontColor.WHITE;

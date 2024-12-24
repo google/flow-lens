@@ -7,6 +7,8 @@ import * as os from "node:os";
 import { ParsedFlow, Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 
+const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+
 /**
  * The UmlGenerator class is used to generate a UML string representation of a
  * Salesforce flow.
@@ -92,7 +94,7 @@ export abstract class UmlGenerator {
       this.processTransitions(this.parsedFlow.transitions),
       this.getFooter(),
     ].filter((element) => element !== "");
-    return result.join(os.EOL);
+    return result.join(EOL);
   }
 
   abstract getHeader(label: string): string;
@@ -124,14 +126,14 @@ export abstract class UmlGenerator {
     elements: T[] | undefined,
     elementProcessor: (element: T) => string
   ): string {
-    return elements?.map(elementProcessor).join(os.EOL) ?? "";
+    return elements?.map(elementProcessor).join(EOL) ?? "";
   }
 
   private processTransitions(transitions: Transition[] | undefined): string {
     return (
       transitions
         ?.map((transition) => this.getTransition(transition))
-        .join(os.EOL) ?? ""
+        .join(EOL) ?? ""
     );
   }
 }

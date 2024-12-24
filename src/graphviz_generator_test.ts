@@ -9,6 +9,7 @@ import {
   SkinColor,
 } from "./graphviz_generator";
 
+const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const NODE_NAMES = {
   start: "FLOW_START",
   apexPluginCall: "myApexPluginCall",
@@ -166,7 +167,7 @@ function generateTable(
   innerNodeBody?: string
 ) {
   const formattedInnerNodeBody = innerNodeBody
-    ? `${os.EOL}${innerNodeBody}${os.EOL}`
+    ? `${EOL}${innerNodeBody}${EOL}`
     : "";
   return `${nodeName} [
   label=<
@@ -200,7 +201,7 @@ function generateInnerNodeCell(
 }
 
 function generateInnerNodeCells(cells: string[]) {
-  return cells.join(os.EOL);
+  return cells.join(EOL);
 }
 
 describe("GraphViz", () => {
