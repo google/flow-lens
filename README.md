@@ -34,7 +34,7 @@ deno run main.ts -- \
   --filePath="/some/path/force-app/main/default/flows/ArticleSubmissionStatus.flow-meta.xml" \
   --filePath="/some/path/force-app/main/default/flows/LeadConversionScreen.flow-meta.xml" \
   --filePath="/some/path/force-app/main/default/flows/OpportunityClosure.flow-meta.xml" \
-  --outputDirectory="/some/path/" \
+  --outputDirectory="." \
   --outputFileName="test"
 ```
 
@@ -46,7 +46,7 @@ deno run main.ts -- \
   --gitDiffFromHash="HEAD~1" \
   --gitDiffToHash="HEAD" \
   --gitRepo="/some/path/" \
-  --outputDirectory="/some/path/" \
+  --outputDirectory="." \
   --outputFileName="test"
 ```
 
@@ -72,7 +72,7 @@ applicable) and new UML strings.
   </tr>
 </table>
 
-```xml
+```diff
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
 +  <actionCalls>
