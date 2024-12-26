@@ -76,6 +76,25 @@ The output is a JSON file containing the generated UML diagram(s). The
 structure will contain the file paths and their associated old (if
 applicable) and new UML strings.
 
+```json
+[
+  {
+    "path": "force-app/main/default/flows/ArticleSubmissionStatus.flow-meta.xml",
+    "difference": {
+      "old": "UML_STRING_HERE",
+      "new": "UML_STRING_HERE"
+    }
+  },
+  {
+    "path": "force-app/main/default/flows/LeadConversionScreen.flow-meta.xml",
+    "difference": {
+      "old": "UML_STRING_HERE",
+      "new": "UML_STRING_HERE"
+    }
+  }
+]
+```
+
 ## Example
 
 <table>
