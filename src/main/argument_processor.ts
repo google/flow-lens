@@ -32,11 +32,9 @@ const flags = parseArgs(Deno.args, {
     "gitDiffToHash",
     "outputDirectory",
     "outputFileName",
-    "placerPath",
-    "dotExecutablePath",
   ],
   default: {
-    diagramTool: "plantuml",
+    diagramTool: "graphviz",
     filePath: null,
   },
   alias: {
@@ -47,8 +45,6 @@ const flags = parseArgs(Deno.args, {
     gitDiffToHash: "to",
     outputDirectory: "o",
     outputFileName: "n",
-    placerPath: "p",
-    dotExecutablePath: "dot",
   },
   collect: ["filePath"],
 });
@@ -70,23 +66,20 @@ export const ERROR_MESSAGES = {
       DiagramTool
     ).join(", ")}`,
   filePathDoesNotExist: (filePath: string) =>
-    `File path does not exist: ${filePath}`,
+    `filePath does not exist: ${filePath}`,
   invalidOutputFileName: (outputFileName: string) =>
-    `Output file name must be alphanumeric with underscores: ${outputFileName}`,
+    `outputFileName must be alphanumeric with underscores: ${outputFileName}`,
   invalidOutputDirectory: (outputDirectory: string) =>
-    `Output directory does not exist: ${outputDirectory}`,
+    `outputDirectory does not exist: ${outputDirectory}`,
   filePathOrGitDiffFromAndToHashRequired:
     "Either filePath or (gitDiffFrom and gitDiffToHash) must be specified",
   filePathAndGitDiffFromAndToHashMutuallyExclusive:
     "filePath and (gitDiffFrom and gitDiffToHash) are mutually exclusive",
   gitDiffFromAndToHashMustBeSpecifiedTogether:
     "gitDiffFromHash and gitDiffToHash must be specified together",
-  outputFileNameRequired: "Output file name is required",
-  outputDirectoryRequired: "Output directory is required",
+  outputFileNameRequired: "outputFileName is required",
+  outputDirectoryRequired: "outputDirectory is required",
   header: "The following errors were encountered:",
-  placerPathRequiredForGraphViz: "Placer path is required for graphviz",
-  dotExecutablePathRequiredForGraphViz:
-    "Dot executable path is required for graphviz",
 };
 
 /**
@@ -158,18 +151,6 @@ export class ArgumentProcessor {
       this.errorsEncountered.push(
         ERROR_MESSAGES.unsupportedDiagramTool(this.config.diagramTool)
       );
-    }
-    if (this.config.diagramTool === DiagramTool.GRAPH_VIZ) {
-      if (!this.config.placerPath) {
-        this.errorsEncountered.push(
-          ERROR_MESSAGES.placerPathRequiredForGraphViz
-        );
-      }
-      if (!this.config.dotExecutablePath) {
-        this.errorsEncountered.push(
-          ERROR_MESSAGES.dotExecutablePathRequiredForGraphViz
-        );
-      }
     }
   }
 

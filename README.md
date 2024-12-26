@@ -1,19 +1,14 @@
 # Flow Lens
 
-<table>
-  <tr>
-    <td>
-      <p>This project helps decode Salesforce Flows by translating their raw XML definition files into
-        human-understandable UML diagrams. These visualizations clarify the flow's structure and logic, making
-        documentation and code review significantly easier. It supports generating diagrams using both PlantUML
-        and Graphviz, and can even highlight changes between different versions of a flow by processing Git
-        diffs.</p>
-    </td>
-    <td>
-      <img src="docs/img/Flow_Lens.png">
-    </td>
-  </tr>
-</table>
+<img src="docs/img/Flow_Lens.png">
+
+This project helps decode Salesforce Flows by translating their raw XML definition files into
+human-understandable UML diagrams. These visualizations clarify the flow's structure and logic, making
+documentation and code review significantly easier. It supports generating diagrams using both PlantUML
+and Graphviz, and can even highlight changes between different versions of a flow by processing Git
+diffs.
+
+**This is not an official Google product.**
 
 ## Features
 
@@ -29,7 +24,7 @@ available:
 
 | Option              | Description                                                                                            | Type     | Default    | Required                            |
 | ------------------- | ------------------------------------------------------------------------------------------------------ | -------- | ---------- | ----------------------------------- |
-| `--diagramTool`     | The diagram tool to use ('plantuml' or 'graphviz').                                                    | string   | `plantuml` | No                                  |
+| `--diagramTool`     | The diagram tool to use ('plantuml' or 'graphviz').                                                    | string   | `graphviz` | No                                  |
 | `--filePath`        | Path(s) to the Salesforce Flow XML file(s). Specify multiple files using space separated values.       | string[] |            | No (Git diff or file path required) |
 | `--gitDiffFromHash` | The starting commit hash for the Git diff.                                                             | string   |            | No (Only with Git diff)             |
 | `--gitDiffToHash`   | The ending commit hash for the Git diff.                                                               | string   |            | No (Only with Git diff)             |
