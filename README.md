@@ -33,8 +33,8 @@ available:
 deno run main.ts -- \
   --diagramTool="graphviz" \
   --filePath="/some/path/force-app/main/default/flows/ArticleSubmissionStatus.flow-meta.xml" \
-  --filePath="/some/path/force-app/main/default/flows/Mass_Email_Eval_Flow.flow-meta.xml" \
-  --filePath="/some/path/force-app/main/default/flows/FOW_Orchestration.flow-meta.xml" \
+  --filePath="/some/path/force-app/main/default/flows/LeadConversionScreen.flow-meta.xml" \
+  --filePath="/some/path/force-app/main/default/flows/OpportunityClosure.flow-meta.xml" \
   --outputDirectory="/some/path/" \
   --outputFileName="test"
 ```
