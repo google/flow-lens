@@ -1,8 +1,22 @@
-# Flowsetta Stone
+# Flosetta Stone
 
-<img src="docs/img/Flowsetta_Stone.png" height="250">
+<html>
+<table>
+  <tr>
+    <td>
+      <p>This project helps decode Salesforce Flows by translating their raw XML definition files into
+        human-understandable UML diagrams. These visualizations clarify the flow's structure and logic, making
+        documentation and code review significantly easier. It supports generating diagrams using both PlantUML
+        and Graphviz, and can even highlight changes between different versions of a flow by processing Git
+        diffs.</p>
+    </td>
+    <td>
+      <img src="docs/img/Flowsetta_Stone.png">
+    </td>
+  </tr>
+</table>
 
-This project helps decode Salesforce Flows by translating their raw XML definition files into human-understandable UML diagrams. These visualizations clarify the flow's structure and logic, making documentation and code review significantly easier. It supports generating diagrams using both PlantUML and Graphviz, and can even highlight changes between different versions of a flow by processing Git diffs.
+</html>
 
 ## Features
 
@@ -29,7 +43,10 @@ available:
 **Example using file path:**
 
 ```shell
-deno run main.ts -- \
+deno run \
+  --allow-read \
+  --allow-write \
+  main.ts \
   --diagramTool="graphviz" \
   --filePath="/some/path/force-app/main/default/flows/ArticleSubmissionStatus.flow-meta.xml" \
   --filePath="/some/path/force-app/main/default/flows/LeadConversionScreen.flow-meta.xml" \
@@ -41,7 +58,10 @@ deno run main.ts -- \
 **Example using Git diff:**
 
 ```shell
-deno run main.ts -- \
+deno run \
+  --allow-read \
+  --allow-write \
+  main.ts \
   --diagramTool="graphviz" \
   --gitDiffFromHash="HEAD~1" \
   --gitDiffToHash="HEAD" \
