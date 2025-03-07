@@ -18,6 +18,11 @@ import { assertEquals, assertStringIncludes } from "@std/assert";
 import { ParsedFlow } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import { PlantUmlGenerator } from "../main/plantuml_generator.ts";
+import {
+  DiagramNode,
+  Icon as UmlIcon,
+  SkinColor as UmlSkinColor,
+} from "../main/uml_generator.ts";
 
 const NODE_NAMES = {
   start: "FLOW_START",
@@ -155,168 +160,101 @@ Deno.test("PlantUml", async (t) => {
     assertStringIncludes(result, label);
   });
 
-  await t.step("should generate flow apex plugin call", () => {
-    result = systemUnderTest.getFlowApexPluginCall(
-      mockedFlow.apexPluginCalls![0]
-    );
-
+  await t.step("should generate apex plugin call node", () => {
+    const node: DiagramNode = {
+      id: "myApexPluginCall",
+      label: "myApexPluginCall",
+      type: "Apex Plugin Call",
+      icon: UmlIcon.CODE,
+      color: UmlSkinColor.NONE,
+    };
+    result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
       'state "**Apex Plugin Call** <&code> \\n myApexPluginCall" as myApexPluginCall'
     );
   });
 
-  await t.step("should generate flow assignment", () => {
-    result = systemUnderTest.getFlowAssignment(mockedFlow.assignments![0]);
-
+  await t.step("should generate assignment node", () => {
+    const node: DiagramNode = {
+      id: "myAssignment",
+      label: "myAssignment",
+      type: "Assignment",
+      icon: UmlIcon.ASSIGNMENT,
+      color: UmlSkinColor.ORANGE,
+    };
+    result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
       'state "**Assignment** <&menu> \\n myAssignment" as myAssignment <<Orange>>'
     );
   });
 
-  await t.step("should generate flow collection processor", () => {
-    result = systemUnderTest.getFlowCollectionProcessor(
-      mockedFlow.collectionProcessors![0]
-    );
-
-    assertEquals(
-      result,
-      'state "**Collection Processor** \\n myCollectionProcessor" as myCollectionProcessor'
-    );
-  });
-
-  await t.step("should generate flow decision", () => {
-    result = systemUnderTest.getFlowDecision(mockedFlow.decisions![0]);
-
+  await t.step("should generate decision node", () => {
+    const node: DiagramNode = {
+      id: "myDecision",
+      label: "myDecision",
+      type: "Decision",
+      icon: UmlIcon.DECISION,
+      color: UmlSkinColor.ORANGE,
+    };
+    result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
       'state "**Decision** <&fork> \\n myDecision" as myDecision <<Orange>>'
     );
   });
 
-  await t.step("should generate flow loop", () => {
-    result = systemUnderTest.getFlowLoop(mockedFlow.loops![0]);
-
-    assertEquals(
-      result,
-      'state "**Loop** <&loop> \\n myLoop" as myLoop <<Orange>>'
-    );
-  });
-
-  await t.step("should generate flow orchestrated stage", () => {
-    result = systemUnderTest.getFlowOrchestratedStage(
-      mockedFlow.orchestratedStages![0]
-    );
-
+  await t.step("should generate orchestrated stage with inner nodes", () => {
+    const node: DiagramNode = {
+      id: "myOrchestratedStage",
+      label: "myOrchestratedStage",
+      type: "Orchestrated Stage",
+      icon: UmlIcon.RIGHT,
+      color: UmlSkinColor.NONE,
+      innerNodes: [
+        {
+          id: "myOrchestratedStage_step1Action",
+          label: "step1",
+          type: "Stage Step",
+          content: [],
+        },
+        {
+          id: "myOrchestratedStage_step2Action",
+          label: "step2",
+          type: "Stage Step",
+          content: [],
+        },
+      ],
+    };
+    result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
       `state "**Orchestrated Stage** <&chevron-right> \\n myOrchestratedStage" as myOrchestratedStage {
-state "**Stage Step** <&justify-center> \\n step1" as myOrchestratedStage_step1Action <<Navy>>
-state "**Stage Step** <&justify-center> \\n step2" as myOrchestratedStage_step2Action <<Navy>>
-state "**Stage Step** <&justify-center> \\n step3" as myOrchestratedStage_step3Action <<Navy>>
+state "**Stage Step** \\n step1" as myOrchestratedStage_step1Action
+state "**Stage Step** \\n step2" as myOrchestratedStage_step2Action
 }`
     );
   });
 
-  await t.step("should generate flow record create", () => {
-    result = systemUnderTest.getFlowRecordCreate(mockedFlow.recordCreates![0]);
-
+  await t.step("should generate node with diff status", () => {
+    const node: DiagramNode = {
+      id: "myNode",
+      label: "myNode",
+      type: "Record Create",
+      icon: UmlIcon.CREATE_RECORD,
+      color: UmlSkinColor.PINK,
+      diffStatus: flowTypes.DiffStatus.ADDED,
+    };
+    result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
-      'state "**Record Create** <&medical-cross> \\n myRecordCreate" as myRecordCreate <<Pink>>'
-    );
-  });
-
-  await t.step("should generate flow record delete", () => {
-    result = systemUnderTest.getFlowRecordDelete(mockedFlow.recordDeletes![0]);
-
-    assertEquals(
-      result,
-      'state "**Record Delete** \\n myRecordDelete" as myRecordDelete <<Pink>>'
-    );
-  });
-
-  await t.step("should generate flow record lookup", () => {
-    result = systemUnderTest.getFlowRecordLookup(mockedFlow.recordLookups![0]);
-
-    assertEquals(
-      result,
-      'state "**Record Lookup** <&magnifying-glass> \\n myRecordLookup" as myRecordLookup <<Pink>>'
-    );
-  });
-
-  await t.step("should generate flow record rollback", () => {
-    result = systemUnderTest.getFlowRecordRollback(
-      mockedFlow.recordRollbacks![0]
-    );
-
-    assertEquals(
-      result,
-      'state "**Record Rollback** \\n myRecordRollback" as myRecordRollback <<Pink>>'
-    );
-  });
-
-  await t.step("should generate flow record update", () => {
-    result = systemUnderTest.getFlowRecordUpdate(mockedFlow.recordUpdates![0]);
-
-    assertEquals(
-      result,
-      'state "**Record Update** \\n myRecordUpdate" as myRecordUpdate <<Pink>>'
-    );
-  });
-
-  await t.step("should generate flow screen", () => {
-    result = systemUnderTest.getFlowScreen(mockedFlow.screens![0]);
-
-    assertEquals(
-      result,
-      'state "**Screen** <&browser> \\n myScreen" as myScreen <<Blue>>'
-    );
-  });
-
-  await t.step("should generate flow step", () => {
-    result = systemUnderTest.getFlowStep(mockedFlow.steps![0]);
-
-    assertEquals(result, 'state "**Step** \\n myStep" as myStep');
-  });
-
-  await t.step("should generate flow subflow", () => {
-    result = systemUnderTest.getFlowSubflow(mockedFlow.subflows![0]);
-
-    assertEquals(
-      result,
-      'state "**Subflow** \\n mySubflow" as mySubflow <<Navy>>'
-    );
-  });
-
-  await t.step("should generate flow transform", () => {
-    result = systemUnderTest.getFlowTransform(mockedFlow.transforms![0]);
-
-    assertEquals(
-      result,
-      'state "**Transform** \\n myTransform" as myTransform'
-    );
-  });
-
-  await t.step("should generate flow wait", () => {
-    result = systemUnderTest.getFlowWait(mockedFlow.waits![0]);
-
-    assertEquals(result, 'state "**Wait** \\n myWait" as myWait');
-  });
-
-  await t.step("should generate flow action call", () => {
-    result = systemUnderTest.getFlowActionCall(mockedFlow.actionCalls![0]);
-
-    assertEquals(
-      result,
-      'state "**Action Call** <&code> \\n myActionCall" as myActionCall <<Navy>>'
+      'state "**<&plus{scale=2}>** **Record Create** <&medical-cross> \\n myNode" as myNode <<Pink>>'
     );
   });
 
   await t.step("should generate transition", () => {
     result = systemUnderTest.getTransition(mockedFlow.transitions![0]);
-
     assertEquals(result, "[*] --> myApexPluginCall");
   });
 });

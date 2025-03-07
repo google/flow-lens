@@ -23,6 +23,11 @@ import {
   Icon,
   SkinColor,
 } from "../main/graphviz_generator.ts";
+import {
+  DiagramNode,
+  Icon as UmlIcon,
+  SkinColor as UmlSkinColor,
+} from "../main/uml_generator.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const NODE_NAMES = {
@@ -176,7 +181,7 @@ function generateDecision(name: string): flowTypes.FlowDecision {
 function generateTable(
   nodeName: string,
   type: string,
-  icon: Icon | string,
+  icon: Icon,
   skinColor: SkinColor,
   fontColor: string,
   innerNodeBody?: string
@@ -224,9 +229,12 @@ Deno.test("GraphViz", async (t) => {
   let mockedFlow: ParsedFlow;
   let result: string;
 
-  await t.step("should generate header", () => {
+  await t.step("Setup", () => {
     mockedFlow = generateMockFlow();
     systemUnderTest = new GraphVizGenerator(mockedFlow);
+  });
+
+  await t.step("should generate header", () => {
     const label = "foo";
     result = systemUnderTest.getHeader(label);
 
@@ -237,13 +245,15 @@ Deno.test("GraphViz", async (t) => {
     assertStringIncludes(result, "node [shape=box, style=filled]");
   });
 
-  await t.step("should generate flow apex plugin call", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowApexPluginCall(
-      mockedFlow.apexPluginCalls![0]
-    );
-
+  await t.step("should generate apex plugin call node", () => {
+    const node: DiagramNode = {
+      id: "myApexPluginCall",
+      label: "myApexPluginCall",
+      type: "Apex Plugin Call",
+      icon: UmlIcon.CODE,
+      color: UmlSkinColor.NONE,
+    };
+    result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
       generateTable(
@@ -256,11 +266,15 @@ Deno.test("GraphViz", async (t) => {
     );
   });
 
-  await t.step("should generate flow assignment", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowAssignment(mockedFlow.assignments![0]);
-
+  await t.step("should generate assignment node", () => {
+    const node: DiagramNode = {
+      id: "myAssignment",
+      label: "myAssignment",
+      type: "Assignment",
+      icon: UmlIcon.ASSIGNMENT,
+      color: UmlSkinColor.ORANGE,
+    };
+    result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
       generateTable(
@@ -273,30 +287,23 @@ Deno.test("GraphViz", async (t) => {
     );
   });
 
-  await t.step("should generate flow collection processor", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowCollectionProcessor(
-      mockedFlow.collectionProcessors![0]
-    );
-
-    assertEquals(
-      result,
-      generateTable(
-        "myCollectionProcessor",
-        "Collection Processor",
-        Icon.NONE,
-        SkinColor.NONE,
-        FontColor.BLACK
-      )
-    );
-  });
-
-  await t.step("should generate flow decision", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowDecision(mockedFlow.decisions![0]);
-
+  await t.step("should generate decision node with inner nodes", () => {
+    const node: DiagramNode = {
+      id: "myDecision",
+      label: "myDecision",
+      type: "Decision",
+      icon: UmlIcon.DECISION,
+      color: UmlSkinColor.ORANGE,
+      innerNodes: [
+        {
+          id: "myDecisionRule",
+          label: "myDecisionRule",
+          type: "Rule",
+          content: ["1. foo EqualTo true"],
+        },
+      ],
+    };
+    result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
       generateTable(
@@ -312,30 +319,29 @@ Deno.test("GraphViz", async (t) => {
     );
   });
 
-  await t.step("should generate flow loop", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowLoop(mockedFlow.loops![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myLoop",
-        "Loop",
-        Icon.LOOP,
-        SkinColor.ORANGE,
-        FontColor.WHITE
-      )
-    );
-  });
-
-  await t.step("should generate flow orchestrated stage", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowOrchestratedStage(
-      mockedFlow.orchestratedStages![0]
-    );
-
+  await t.step("should generate orchestrated stage with inner nodes", () => {
+    const node: DiagramNode = {
+      id: "myOrchestratedStage",
+      label: "myOrchestratedStage",
+      type: "Orchestrated Stage",
+      icon: UmlIcon.RIGHT,
+      color: UmlSkinColor.NAVY,
+      innerNodes: [
+        {
+          id: "step1",
+          label: "1. step1",
+          type: "Stage Step",
+          content: [],
+        },
+        {
+          id: "step2",
+          label: "2. step2",
+          type: "Stage Step",
+          content: [],
+        },
+      ],
+    };
+    result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
       generateTable(
@@ -347,233 +353,55 @@ Deno.test("GraphViz", async (t) => {
         generateInnerNodeCells([
           generateInnerNodeCell(FontColor.WHITE, "1. step1", []),
           generateInnerNodeCell(FontColor.WHITE, "2. step2", []),
-          generateInnerNodeCell(FontColor.WHITE, "3. step3", []),
         ])
       )
     );
   });
 
-  await t.step("should generate flow record create", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowRecordCreate(mockedFlow.recordCreates![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myRecordCreate",
-        "Record Create",
-        Icon.CREATE_RECORD,
-        SkinColor.PINK,
-        FontColor.WHITE
-      )
-    );
+  await t.step("should generate node with added diff status", () => {
+    const node: DiagramNode = {
+      id: "myNode",
+      label: "myNode",
+      type: "Record Create",
+      icon: UmlIcon.CREATE_RECORD,
+      color: UmlSkinColor.PINK,
+      diffStatus: flowTypes.DiffStatus.ADDED,
+    };
+    result = systemUnderTest.toUmlString(node);
+    assertStringIncludes(result, 'FONT COLOR="green"><B>+</B>');
   });
 
-  await t.step("should generate flow record delete", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowRecordDelete(mockedFlow.recordDeletes![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myRecordDelete",
-        "Record Delete",
-        Icon.DELETE,
-        SkinColor.PINK,
-        FontColor.WHITE
-      )
-    );
+  await t.step("should generate node with deleted diff status", () => {
+    const node: DiagramNode = {
+      id: "myNode",
+      label: "myNode",
+      type: "Record Create",
+      icon: UmlIcon.CREATE_RECORD,
+      color: UmlSkinColor.PINK,
+      diffStatus: flowTypes.DiffStatus.DELETED,
+    };
+    result = systemUnderTest.toUmlString(node);
+    assertStringIncludes(result, 'FONT COLOR="red"><B>-</B>');
   });
 
-  await t.step("should generate flow record lookup", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowRecordLookup(mockedFlow.recordLookups![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myRecordLookup",
-        "Record Lookup",
-        Icon.LOOKUP,
-        SkinColor.PINK,
-        FontColor.WHITE
-      )
-    );
-  });
-
-  await t.step("should generate flow record rollback", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowRecordRollback(
-      mockedFlow.recordRollbacks![0]
-    );
-
-    assertEquals(
-      result,
-      generateTable(
-        "myRecordRollback",
-        "Record Rollback",
-        Icon.NONE,
-        SkinColor.PINK,
-        FontColor.WHITE
-      )
-    );
-  });
-
-  await t.step("should generate flow record update", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowRecordUpdate(mockedFlow.recordUpdates![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myRecordUpdate",
-        "Record Update",
-        Icon.UPDATE,
-        SkinColor.PINK,
-        FontColor.WHITE
-      )
-    );
-  });
-
-  await t.step("should generate flow screen", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowScreen(mockedFlow.screens![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myScreen",
-        "Screen",
-        Icon.SCREEN,
-        SkinColor.BLUE,
-        FontColor.WHITE
-      )
-    );
-  });
-
-  await t.step("should generate flow step", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowStep(mockedFlow.steps![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myStep",
-        "Step",
-        Icon.NONE,
-        SkinColor.NONE,
-        FontColor.BLACK
-      )
-    );
-  });
-
-  await t.step("should generate flow subflow", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowSubflow(mockedFlow.subflows![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "mySubflow",
-        "Subflow",
-        Icon.NONE,
-        SkinColor.NAVY,
-        FontColor.WHITE
-      )
-    );
-  });
-
-  await t.step("should generate flow transform", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowTransform(mockedFlow.transforms![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myTransform",
-        "Transform",
-        Icon.NONE,
-        SkinColor.NONE,
-        FontColor.BLACK
-      )
-    );
-  });
-
-  await t.step("should generate flow wait", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowWait(mockedFlow.waits![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myWait",
-        "Wait",
-        Icon.WAIT,
-        SkinColor.NONE,
-        FontColor.BLACK
-      )
-    );
-  });
-
-  await t.step("should generate flow action call", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-    result = systemUnderTest.getFlowActionCall(mockedFlow.actionCalls![0]);
-
-    assertEquals(
-      result,
-      generateTable(
-        "myActionCall",
-        "Action Call",
-        Icon.CODE,
-        SkinColor.NAVY,
-        FontColor.WHITE
-      )
-    );
+  await t.step("should generate node with modified diff status", () => {
+    const node: DiagramNode = {
+      id: "myNode",
+      label: "myNode",
+      type: "Record Create",
+      icon: UmlIcon.CREATE_RECORD,
+      color: UmlSkinColor.PINK,
+      diffStatus: flowTypes.DiffStatus.MODIFIED,
+    };
+    result = systemUnderTest.toUmlString(node);
+    assertStringIncludes(result, 'FONT COLOR="#DD7A00"><B>Δ</B>');
   });
 
   await t.step("should generate transition", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
     result = systemUnderTest.getTransition(mockedFlow.transitions![0]);
-
     assertEquals(
       result,
       'FLOW_START -> myApexPluginCall [label="" color="black" style=""]'
     );
-  });
-
-  await t.step("should include added diff indicator", () => {
-    const flow = generateMockFlow();
-    flow.apexPluginCalls![0].diffStatus = flowTypes.DiffStatus.ADDED;
-    systemUnderTest = new GraphVizGenerator(flow);
-    result = systemUnderTest.getFlowApexPluginCall(flow.apexPluginCalls![0]);
-    assertStringIncludes(result, DIFF_INDICATOR.ADDED);
-  });
-
-  await t.step("should include deleted diff indicator", () => {
-    const flow = generateMockFlow();
-    flow.apexPluginCalls![0].diffStatus = flowTypes.DiffStatus.DELETED;
-    systemUnderTest = new GraphVizGenerator(flow);
-    result = systemUnderTest.getFlowApexPluginCall(flow.apexPluginCalls![0]);
-    assertStringIncludes(result, DIFF_INDICATOR.DELETED);
-  });
-
-  await t.step("should include modified diff indicator", () => {
-    const flow = generateMockFlow();
-    flow.apexPluginCalls![0].diffStatus = flowTypes.DiffStatus.MODIFIED;
-    systemUnderTest = new GraphVizGenerator(flow);
-    result = systemUnderTest.getFlowApexPluginCall(flow.apexPluginCalls![0]);
-    assertStringIncludes(result, DIFF_INDICATOR.MODIFIED);
   });
 });

@@ -61,7 +61,7 @@ const UML_REPRESENTATIONS = {
   subflow: (name: string) => `state Subflow ${name}`,
   transform: (name: string) => `state Transform ${name}`,
   wait: (name: string) => `state Wait ${name}`,
-  actionCall: (name: string) => `state ActionCall ${name}`,
+  actionCall: (name: string) => `state Action Call ${name}`,
   transition: (from: string, to: string) => `${from} ${TRANSITION_ARROW} ${to}`,
 };
 

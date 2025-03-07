@@ -219,6 +219,9 @@ export abstract class UmlGenerator {
 
   private getFlowDecisionInnerNodes(node: flowTypes.FlowDecision): InnerNode[] {
     const result: InnerNode[] = [];
+    if (!node.rules) {
+      return result;
+    }
     for (const rule of node.rules) {
       let conditionCounter = 1;
       const conditions = rule.conditions.map(
@@ -271,6 +274,9 @@ export abstract class UmlGenerator {
   ): InnerNode[] {
     let counter = 1;
     const result: InnerNode[] = [];
+    if (!node.stageSteps) {
+      return result;
+    }
     for (const step of node.stageSteps) {
       result.push({
         id: `${node.name}.${step.actionName}`,

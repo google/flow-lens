@@ -133,8 +133,8 @@ title ${label}`;
 
     // Handle inner nodes if they exist
     if (node.innerNodes && node.innerNodes.length > 0) {
-      result += `{
-  ${this.generateInnerNodesString(node)}
+      result += ` {
+${this.generateInnerNodesString(node)}
 }`;
     }
 
