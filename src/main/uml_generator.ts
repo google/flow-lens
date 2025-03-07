@@ -3,11 +3,60 @@
  * generate a UML string representation of a Salesforce flow.
  */
 
-import * as os from "node:os";
 import { ParsedFlow, Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+
+/**
+ * The skin color of the node.
+ */
+export enum SkinColor {
+  NONE,
+  PINK,
+  ORANGE,
+  NAVY,
+  BLUE,
+}
+
+/**
+ * The icon of the node.
+ */
+export enum Icon {
+  ASSIGNMENT,
+  CODE,
+  CREATE_RECORD,
+  DECISION,
+  DELETE,
+  LOOKUP,
+  LOOP,
+  NONE,
+  RIGHT,
+  SCREEN,
+  STAGE_STEP,
+  UPDATE,
+  WAIT,
+}
+
+/**
+ * The content of the node.
+ */
+export interface DiagramNode {
+  id: string;
+  label: string;
+  type: string;
+  color: SkinColor;
+  icon: Icon;
+  innerNodes?: InnerNode[];
+}
+
+/**
+ * The inner node of the node.
+ */
+export interface InnerNode {
+  label: string;
+  content: string[];
+}
 
 /**
  * The UmlGenerator class is used to generate a UML string representation of a
@@ -98,29 +147,221 @@ export abstract class UmlGenerator {
   }
 
   abstract getHeader(label: string): string;
-  abstract getFlowApexPluginCall(node: flowTypes.FlowApexPluginCall): string;
-  abstract getFlowAssignment(node: flowTypes.FlowAssignment): string;
-  abstract getFlowCollectionProcessor(
-    node: flowTypes.FlowCollectionProcessor
-  ): string;
-  abstract getFlowDecision(node: flowTypes.FlowDecision): string;
-  abstract getFlowLoop(node: flowTypes.FlowLoop): string;
-  abstract getFlowOrchestratedStage(
-    node: flowTypes.FlowOrchestratedStage
-  ): string;
-  abstract getFlowRecordCreate(node: flowTypes.FlowRecordCreate): string;
-  abstract getFlowRecordDelete(node: flowTypes.FlowRecordDelete): string;
-  abstract getFlowRecordLookup(node: flowTypes.FlowRecordLookup): string;
-  abstract getFlowRecordRollback(node: flowTypes.FlowRecordRollback): string;
-  abstract getFlowRecordUpdate(node: flowTypes.FlowRecordUpdate): string;
-  abstract getFlowScreen(node: flowTypes.FlowScreen): string;
-  abstract getFlowStep(node: flowTypes.FlowStep): string;
-  abstract getFlowSubflow(node: flowTypes.FlowSubflow): string;
-  abstract getFlowTransform(node: flowTypes.FlowTransform): string;
-  abstract getFlowWait(node: flowTypes.FlowWait): string;
-  abstract getFlowActionCall(node: flowTypes.FlowActionCall): string;
+  abstract toUmlString(node: DiagramNode): string;
   abstract getTransition(transition: Transition): string;
   abstract getFooter(): string;
+
+  private getFlowApexPluginCall(node: flowTypes.FlowApexPluginCall): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Apex Plugin Call",
+      color: SkinColor.NONE,
+      icon: Icon.CODE,
+    });
+  }
+
+  private getFlowAssignment(node: flowTypes.FlowAssignment): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Assignment",
+      color: SkinColor.ORANGE,
+      icon: Icon.ASSIGNMENT,
+    });
+  }
+
+  private getFlowCollectionProcessor(
+    node: flowTypes.FlowCollectionProcessor
+  ): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Collection Processor",
+      color: SkinColor.NONE,
+      icon: Icon.LOOP,
+    });
+  }
+
+  private getFlowDecision(node: flowTypes.FlowDecision): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Decision",
+      color: SkinColor.ORANGE,
+      icon: Icon.DECISION,
+      innerNodes: this.getFlowDecisionInnerNodes(node), // special case
+    });
+  }
+
+  private getFlowDecisionInnerNodes(node: flowTypes.FlowDecision): InnerNode[] {
+    const result: InnerNode[] = [];
+    for (const rule of node.rules) {
+      let conditionCounter = 1;
+      const conditions = rule.conditions.map(
+        (condition) =>
+          `${conditionCounter++}. ${condition.leftValueReference} ${
+            condition.operator
+          } ${toString(condition.rightValue)}`
+      );
+      if (conditions.length > 1) {
+        const logicLabel = `Logic: ${rule.conditionLogic}`;
+        conditions.push(logicLabel);
+      }
+      result.push({
+        label: rule.label,
+        content: conditions,
+      });
+    }
+    return result;
+  }
+
+  private getFlowLoop(node: flowTypes.FlowLoop): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Loop",
+      color: SkinColor.ORANGE,
+      icon: Icon.LOOP,
+    });
+  }
+
+  private getFlowOrchestratedStage(
+    node: flowTypes.FlowOrchestratedStage
+  ): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Orchestrated Stage",
+      color: SkinColor.NAVY,
+      icon: Icon.RIGHT,
+      innerNodes: this.getFlowOrchestratedStageInnerNodes(node), // special case
+    });
+  }
+
+  private getFlowOrchestratedStageInnerNodes(
+    node: flowTypes.FlowOrchestratedStage
+  ): InnerNode[] {
+    let counter = 1;
+    const result: InnerNode[] = [];
+    for (const step of node.stageSteps) {
+      result.push({
+        label: `${counter++}. ${step.label}`,
+        content: [],
+      });
+    }
+    return result;
+  }
+
+  private getFlowRecordCreate(node: flowTypes.FlowRecordCreate): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Record Create",
+      color: SkinColor.PINK,
+      icon: Icon.CREATE_RECORD,
+    });
+  }
+
+  private getFlowRecordDelete(node: flowTypes.FlowRecordDelete): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Record Delete",
+      color: SkinColor.PINK,
+      icon: Icon.DELETE,
+    });
+  }
+
+  private getFlowRecordLookup(node: flowTypes.FlowRecordLookup): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Record Lookup",
+      color: SkinColor.PINK,
+      icon: Icon.LOOKUP,
+    });
+  }
+
+  private getFlowRecordRollback(node: flowTypes.FlowRecordRollback): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Record Rollback",
+      color: SkinColor.PINK,
+      icon: Icon.NONE,
+    });
+  }
+
+  private getFlowRecordUpdate(node: flowTypes.FlowRecordUpdate): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Record Update",
+      color: SkinColor.PINK,
+      icon: Icon.UPDATE,
+    });
+  }
+
+  private getFlowScreen(node: flowTypes.FlowScreen): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Screen",
+      color: SkinColor.BLUE,
+      icon: Icon.SCREEN,
+    });
+  }
+
+  private getFlowStep(node: flowTypes.FlowStep): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Step",
+      color: SkinColor.NONE,
+      icon: Icon.STAGE_STEP,
+    });
+  }
+
+  private getFlowSubflow(node: flowTypes.FlowSubflow): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Subflow",
+      color: SkinColor.NAVY,
+      icon: Icon.RIGHT,
+    });
+  }
+
+  private getFlowTransform(node: flowTypes.FlowTransform): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Transform",
+      color: SkinColor.NONE,
+      icon: Icon.CODE,
+    });
+  }
+
+  private getFlowWait(node: flowTypes.FlowWait): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Wait",
+      color: SkinColor.NONE,
+      icon: Icon.WAIT,
+    });
+  }
+
+  private getFlowActionCall(node: flowTypes.FlowActionCall): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      type: "Action Call",
+      color: SkinColor.NAVY,
+      icon: Icon.CODE,
+    });
+  }
 
   private processFlowElements<T extends flowTypes.FlowNode>(
     elements: T[] | undefined,
@@ -136,4 +377,41 @@ export abstract class UmlGenerator {
         .join(EOL) ?? ""
     );
   }
+}
+
+function toString(element: flowTypes.FlowElementReferenceOrValue) {
+  if (
+    element.apexValue ||
+    element.elementReference ||
+    element.formulaExpression ||
+    element.setupReference ||
+    element.sobjectValue ||
+    element.stringValue ||
+    element.transformValueReference ||
+    element.formulaDataType
+  ) {
+    return (
+      element.stringValue ??
+      element.sobjectValue ??
+      element.apexValue ??
+      element.elementReference ??
+      element.formulaExpression ??
+      element.setupReference ??
+      element.transformValueReference ??
+      element.formulaDataType
+    );
+  }
+  if (element.dateTimeValue) {
+    return new Date(element.dateTimeValue).toLocaleDateString();
+  }
+  if (element.dateValue) {
+    return new Date(element.dateValue).toLocaleDateString();
+  }
+  if (element.numberValue) {
+    return element.numberValue.toString();
+  }
+  if (element.booleanValue) {
+    return element.booleanValue ? "true" : "false";
+  }
+  return "";
 }
