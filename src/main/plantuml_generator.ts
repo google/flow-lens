@@ -3,8 +3,12 @@
  */
 
 import { Transition } from "./flow_parser.ts";
-import * as flowTypes from "./flow_types.ts";
-import { UmlGenerator } from "./uml_generator.ts";
+import {
+  UmlGenerator,
+  DiagramNode,
+  InnerNode,
+  Icon as UmlIcon,
+} from "./uml_generator.ts";
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 
 enum SkinColor {
@@ -33,6 +37,23 @@ enum Icon {
  * A PlantUML generator for Salesforce flows.
  */
 export class PlantUmlGenerator extends UmlGenerator {
+  // Static mapping from UmlGenerator Icon to PlantUML Icon
+  private static readonly ICON_MAP: Record<number, Icon> = {
+    [UmlIcon.ASSIGNMENT]: Icon.MENU,
+    [UmlIcon.CODE]: Icon.CODE,
+    [UmlIcon.CREATE_RECORD]: Icon.MEDICAL_CROSS,
+    [UmlIcon.DECISION]: Icon.FORK,
+    [UmlIcon.DELETE]: Icon.NONE,
+    [UmlIcon.LOOKUP]: Icon.MAGNIFYING_GLASS,
+    [UmlIcon.LOOP]: Icon.LOOP,
+    [UmlIcon.NONE]: Icon.NONE,
+    [UmlIcon.RIGHT]: Icon.CHEVRON_RIGHT,
+    [UmlIcon.SCREEN]: Icon.BROWSER,
+    [UmlIcon.STAGE_STEP]: Icon.JUSTIFY_CENTER,
+    [UmlIcon.UPDATE]: Icon.PENCIL,
+    [UmlIcon.WAIT]: Icon.NONE,
+  };
+
   getHeader(label: string): string {
     return `skinparam State {
   BackgroundColor<<Pink>> #F9548A
@@ -51,166 +72,60 @@ export class PlantUmlGenerator extends UmlGenerator {
 title ${label}`;
   }
 
-  getFlowApexPluginCall(node: flowTypes.FlowApexPluginCall): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Apex Plugin Call",
-      Icon.CODE,
-      SkinColor.NONE
-    );
-  }
+  toUmlString(node: DiagramNode): string {
+    // Map SkinColor enum values from UmlGenerator to PlantUML's SkinColor
+    const skinColorMap: Record<number, SkinColor> = {
+      0: SkinColor.NONE,
+      1: SkinColor.PINK,
+      2: SkinColor.ORANGE,
+      3: SkinColor.NAVY,
+      4: SkinColor.BLUE,
+    };
 
-  getFlowAssignment(node: flowTypes.FlowAssignment): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Assignment",
-      Icon.MENU,
-      SkinColor.ORANGE
-    );
-  }
+    const plantUmlSkinColor = skinColorMap[node.color] || SkinColor.NONE;
+    const plantUmlIcon = PlantUmlGenerator.ICON_MAP[node.icon] || Icon.NONE;
 
-  getFlowCollectionProcessor(node: flowTypes.FlowCollectionProcessor): string {
-    return getHeader(
+    let result = generateNode(
       node.label,
-      node.name,
-      "Collection Processor",
-      Icon.NONE,
-      SkinColor.NONE
+      node.id,
+      node.type,
+      plantUmlIcon,
+      plantUmlSkinColor
     );
-  }
 
-  getFlowDecision(node: flowTypes.FlowDecision): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Decision",
-      Icon.FORK,
-      SkinColor.ORANGE
-    );
-  }
-
-  getFlowLoop(node: flowTypes.FlowLoop): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Loop",
-      Icon.LOOP,
-      SkinColor.ORANGE
-    );
-  }
-
-  getFlowOrchestratedStage(node: flowTypes.FlowOrchestratedStage): string {
-    const header = getHeader(
-      node.label,
-      node.name,
-      "Orchestrated Stage",
-      Icon.CHEVRON_RIGHT,
-      SkinColor.NONE
-    );
-    const body = getOrchestratedStageBody(node);
-    return `${header} {
-${body}
+    // Handle inner nodes if they exist
+    if (node.innerNodes && node.innerNodes.length > 0) {
+      result += `{
+  ${this.generateInnerNodesString(node)}
 }`;
+    }
+
+    return result;
   }
 
-  getFlowRecordCreate(node: flowTypes.FlowRecordCreate): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Record Create",
-      Icon.MEDICAL_CROSS,
-      SkinColor.PINK
-    );
-  }
+  private generateInnerNodesString(parentNode: DiagramNode): string {
+    if (!parentNode.innerNodes) return "";
 
-  getFlowRecordDelete(node: flowTypes.FlowRecordDelete): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Record Delete",
-      Icon.NONE,
-      SkinColor.PINK
-    );
-  }
+    const result: string[] = [];
+    parentNode.innerNodes.forEach((innerNode) => {
+      result.push(
+        generateNode(
+          innerNode.label,
+          innerNode.id,
+          "",
+          Icon.NONE,
+          SkinColor.NONE
+        )
+      );
+    });
 
-  getFlowRecordLookup(node: flowTypes.FlowRecordLookup): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Record Lookup",
-      Icon.MAGNIFYING_GLASS,
-      SkinColor.PINK
-    );
-  }
+    parentNode.innerNodes.forEach((innerNode) => {
+      innerNode.content.forEach((content) => {
+        result.push(`${innerNode.id}: ${content}`);
+      });
+    });
 
-  getFlowRecordRollback(node: flowTypes.FlowRecordRollback): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Record Rollback",
-      Icon.NONE,
-      SkinColor.PINK
-    );
-  }
-
-  getFlowRecordUpdate(node: flowTypes.FlowRecordUpdate): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Record Update",
-      Icon.NONE,
-      SkinColor.PINK
-    );
-  }
-
-  getFlowScreen(node: flowTypes.FlowScreen): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Screen",
-      Icon.BROWSER,
-      SkinColor.BLUE
-    );
-  }
-
-  getFlowStep(node: flowTypes.FlowStep): string {
-    return getHeader(node.label, node.name, "Step", Icon.NONE, SkinColor.NONE);
-  }
-
-  getFlowSubflow(node: flowTypes.FlowSubflow): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Subflow",
-      Icon.NONE,
-      SkinColor.NAVY
-    );
-  }
-
-  getFlowTransform(node: flowTypes.FlowTransform): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Transform",
-      Icon.NONE,
-      SkinColor.NONE
-    );
-  }
-
-  getFlowWait(node: flowTypes.FlowWait): string {
-    return getHeader(node.label, node.name, "Wait", Icon.NONE, SkinColor.NONE);
-  }
-
-  getFlowActionCall(node: flowTypes.FlowActionCall): string {
-    return getHeader(
-      node.label,
-      node.name,
-      "Action Call",
-      Icon.CODE,
-      SkinColor.NAVY
-    );
+    return result.join(EOL);
   }
 
   getTransition(transition: Transition): string {
@@ -226,7 +141,7 @@ ${body}
   }
 }
 
-function getHeader(
+function generateNode(
   label: string,
   name: string,
   type: string,
@@ -240,41 +155,4 @@ function getHeader(
 
 function getLabel(label: string) {
   return label.replaceAll('"', "'");
-}
-
-/**
- * Returns the body of an Orchestrated Stage node.
- * @param node The Orchestrated Stage node.
- */
-function getOrchestratedStageBody(
-  node: flowTypes.FlowOrchestratedStage
-): string {
-  if (!node.stageSteps) {
-    return "";
-  }
-  const result: string[] = [];
-  for (const step of node.stageSteps) {
-    result.push(getStageStepHeader(step, node.name));
-  }
-  return result.join(EOL);
-}
-
-/**
- * Returns the header of a Stage Step node.
- * @param stageStep The Stage Step node.
- * @param stageName The name of the Orchestrated Stage node.
- */
-function getStageStepHeader(
-  stageStep: flowTypes.FlowStageStep,
-  stageName: string
-): string {
-  return getHeader(
-    stageStep.label,
-    `${stageName}_${stageStep.actionName}`,
-    "Stage Step",
-    stageStep.actionType === flowTypes.FlowStageStepActionType.STEP_BACKGROUND
-      ? Icon.JUSTIFY_CENTER
-      : Icon.PENCIL,
-    SkinColor.NAVY
-  );
 }
