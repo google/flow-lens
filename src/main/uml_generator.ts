@@ -72,6 +72,7 @@ export interface DiagramNode {
  */
 export interface InnerNode {
   id: string;
+  type: string;
   label: string;
   content: string[];
 }
@@ -232,6 +233,7 @@ export abstract class UmlGenerator {
       }
       result.push({
         id: rule.name,
+        type: "Rule",
         label: rule.label,
         content: conditions,
       });
@@ -272,6 +274,7 @@ export abstract class UmlGenerator {
     for (const step of node.stageSteps) {
       result.push({
         id: `${node.name}.${step.actionName}`,
+        type: "Step",
         label: `${counter++}. ${step.label}`,
         content: [],
       });

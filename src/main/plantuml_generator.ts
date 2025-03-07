@@ -150,7 +150,7 @@ title ${label}`;
         generateNode(
           innerNode.label,
           innerNode.id,
-          "",
+          innerNode.type,
           Icon.NONE,
           SkinColor.NONE
         )
