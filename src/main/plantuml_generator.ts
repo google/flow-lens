@@ -3,6 +3,7 @@
  */
 
 import { Transition } from "./flow_parser.ts";
+import * as flowTypes from "./flow_types.ts";
 import {
   UmlGenerator,
   DiagramNode,
@@ -34,6 +35,16 @@ enum Icon {
 }
 
 /**
+ * Icons used to represent diff status
+ */
+enum DiffIcon {
+  ADDED = "**<&plus{scale=2}>** ",
+  DELETED = "**<&minus{scale=2}>** ",
+  MODIFIED = "**<&pencil{scale=2}>** ",
+  NONE = "",
+}
+
+/**
  * A PlantUML generator for Salesforce flows.
  */
 export class PlantUmlGenerator extends UmlGenerator {
@@ -52,6 +63,13 @@ export class PlantUmlGenerator extends UmlGenerator {
     [UmlIcon.STAGE_STEP]: Icon.JUSTIFY_CENTER,
     [UmlIcon.UPDATE]: Icon.PENCIL,
     [UmlIcon.WAIT]: Icon.NONE,
+  };
+
+  // Static mapping from flowTypes.DiffStatus to DiffIcon
+  private static readonly DIFF_ICON_MAP: Record<string, DiffIcon> = {
+    [flowTypes.DiffStatus.ADDED]: DiffIcon.ADDED,
+    [flowTypes.DiffStatus.DELETED]: DiffIcon.DELETED,
+    [flowTypes.DiffStatus.MODIFIED]: DiffIcon.MODIFIED,
   };
 
   getHeader(label: string): string {
@@ -84,13 +102,17 @@ title ${label}`;
 
     const plantUmlSkinColor = skinColorMap[node.color] || SkinColor.NONE;
     const plantUmlIcon = PlantUmlGenerator.ICON_MAP[node.icon] || Icon.NONE;
+    const diffIcon = node.diffStatus
+      ? PlantUmlGenerator.DIFF_ICON_MAP[node.diffStatus]
+      : DiffIcon.NONE;
 
     let result = generateNode(
       node.label,
       node.id,
       node.type,
       plantUmlIcon,
-      plantUmlSkinColor
+      plantUmlSkinColor,
+      diffIcon
     );
 
     // Handle inner nodes if they exist
@@ -146,9 +168,10 @@ function generateNode(
   name: string,
   type: string,
   icon: Icon,
-  skinColor: SkinColor
+  skinColor: SkinColor,
+  diffIcon: DiffIcon = DiffIcon.NONE
 ): string {
-  return `state "**${type}**${icon} \\n ${getLabel(
+  return `state "${diffIcon}**${type}**${icon} \\n ${getLabel(
     label
   )}" as ${name}${skinColor}`;
 }
