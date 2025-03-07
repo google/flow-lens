@@ -12,18 +12,6 @@ processing Git diffs.
 This is not an officially supported Google product. This project is not eligible
 for the
 [Google Open Source Software Vulnerability Rewards Program](https://bughunters.google.com/open-source-security).
-<img src="docs/img/Flow_Lens.png">
-
-This project helps decode Salesforce Flows by translating their raw XML
-definition files into human-understandable UML diagrams. These visualizations
-clarify the flow's structure and logic, making documentation and code review
-significantly easier. It supports generating diagrams using both PlantUML and
-Graphviz, and can even highlight changes between different versions of a flow by
-processing Git diffs.
-
-This is not an officially supported Google product. This project is not eligible
-for the
-[Google Open Source Software Vulnerability Rewards Program](https://bughunters.google.com/open-source-security).
 
 ## Features
 
