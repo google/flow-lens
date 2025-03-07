@@ -16,8 +16,6 @@ const flags = parseArgs(Deno.args, {
     "gitDiffToHash",
     "outputDirectory",
     "outputFileName",
-    "placerPath",
-    "dotExecutablePath",
   ],
   default: {
     diagramTool: "plantuml",
@@ -31,8 +29,6 @@ const flags = parseArgs(Deno.args, {
     gitDiffToHash: "to",
     outputDirectory: "o",
     outputFileName: "n",
-    placerPath: "p",
-    dotExecutablePath: "dot",
   },
   collect: ["filePath"],
 });
@@ -68,9 +64,6 @@ export const ERROR_MESSAGES = {
   outputFileNameRequired: "Output file name is required",
   outputDirectoryRequired: "Output directory is required",
   header: "The following errors were encountered:",
-  placerPathRequiredForGraphViz: "Placer path is required for graphviz",
-  dotExecutablePathRequiredForGraphViz:
-    "Dot executable path is required for graphviz",
 };
 
 /**
@@ -85,8 +78,6 @@ export interface RuntimeConfig {
   gitDiffToHash?: string;
   outputDirectory: string;
   outputFileName: string;
-  placerPath?: string;
-  dotExecutablePath?: string;
 }
 
 /**
@@ -135,25 +126,14 @@ export class ArgumentProcessor {
   }
 
   private validateDiagramTool() {
-    const lowerCaseDiagramTool = this.config.diagramTool.toLowerCase();
+    const lowerCaseDiagramTool = this.config.diagramTool?.toLowerCase();
     if (
+      !this.config.diagramTool ||
       !Object.values(DiagramTool).includes(lowerCaseDiagramTool as DiagramTool)
     ) {
       this.errorsEncountered.push(
         ERROR_MESSAGES.unsupportedDiagramTool(this.config.diagramTool)
       );
-    }
-    if (this.config.diagramTool === DiagramTool.GRAPH_VIZ) {
-      if (!this.config.placerPath) {
-        this.errorsEncountered.push(
-          ERROR_MESSAGES.placerPathRequiredForGraphViz
-        );
-      }
-      if (!this.config.dotExecutablePath) {
-        this.errorsEncountered.push(
-          ERROR_MESSAGES.dotExecutablePathRequiredForGraphViz
-        );
-      }
     }
   }
 

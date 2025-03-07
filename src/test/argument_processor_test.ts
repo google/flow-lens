@@ -17,8 +17,6 @@ export function getTestConfig(): RuntimeConfig {
     gitDiffToHash: "HEAD",
     outputDirectory: "/",
     outputFileName: "test",
-    placerPath: "/",
-    dotExecutablePath: "echo",
   };
 }
 
@@ -207,40 +205,6 @@ Deno.test(
       },
       Error,
       ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether
-    );
-  }
-);
-
-Deno.test(
-  "ArgumentProcessor should throw an exception when the `placerPath` is not specified and the diagram tool is graphviz",
-  () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest((config) => {
-          config.placerPath = undefined;
-          config.diagramTool = DiagramTool.GRAPH_VIZ;
-        });
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.placerPathRequiredForGraphViz
-    );
-  }
-);
-
-Deno.test(
-  "ArgumentProcessor should throw an exception when the `dotExecutablePath` is not specified and the diagram tool is graphviz",
-  () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest((config) => {
-          config.dotExecutablePath = undefined;
-          config.diagramTool = DiagramTool.GRAPH_VIZ;
-        });
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.dotExecutablePathRequiredForGraphViz
     );
   }
 );

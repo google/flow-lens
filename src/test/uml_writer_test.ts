@@ -57,8 +57,6 @@ function getRuntimeConfig(
     diagramTool,
     outputDirectory: TEST_UNDECLARED_OUTPUTS_DIR,
     outputFileName: OUTPUT_FILE_NAME,
-    placerPath: "sample/placer/path",
-    dotExecutablePath: "echo",
   };
 }
 
