@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { ParsedFlow, Transition } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
-import { UmlGenerator } from "../main/uml_generator.ts";
+import { UmlGenerator, DiagramNode } from "../main/uml_generator.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const TRANSITION_ARROW = "-->";
@@ -29,17 +29,17 @@ const NODE_NAMES = {
 };
 
 const UML_REPRESENTATIONS = {
-  apexPluginCall: (name: string) => `state ApexPluginCall ${name}`,
+  apexPluginCall: (name: string) => `state Apex Plugin Call ${name}`,
   assignment: (name: string) => `state Assignment ${name}`,
-  collectionProcessor: (name: string) => `state CollectionProcessor ${name}`,
+  collectionProcessor: (name: string) => `state Collection Processor ${name}`,
   decision: (name: string) => `state Decision ${name}`,
   loop: (name: string) => `state Loop ${name}`,
-  orchestratedStage: (name: string) => `state OrchestratedStage ${name}`,
-  recordCreate: (name: string) => `state RecordCreate ${name}`,
-  recordDelete: (name: string) => `state RecordDelete ${name}`,
-  recordLookup: (name: string) => `state RecordLookup ${name}`,
-  recordRollback: (name: string) => `state RecordRollback ${name}`,
-  recordUpdate: (name: string) => `state RecordUpdate ${name}`,
+  orchestratedStage: (name: string) => `state Orchestrated Stage ${name}`,
+  recordCreate: (name: string) => `state Record Create ${name}`,
+  recordDelete: (name: string) => `state Record Delete ${name}`,
+  recordLookup: (name: string) => `state Record Lookup ${name}`,
+  recordRollback: (name: string) => `state Record Rollback ${name}`,
+  recordUpdate: (name: string) => `state Record Update ${name}`,
   screen: (name: string) => `state Screen ${name}`,
   step: (name: string) => `state Step ${name}`,
   subflow: (name: string) => `state Subflow ${name}`,
@@ -127,58 +127,8 @@ Deno.test("UmlGenerator", async (t) => {
       getHeader(label: string): string {
         return label;
       }
-      getFlowApexPluginCall(node: flowTypes.FlowApexPluginCall): string {
-        return UML_REPRESENTATIONS.apexPluginCall(node.name);
-      }
-      getFlowAssignment(node: flowTypes.FlowAssignment): string {
-        return UML_REPRESENTATIONS.assignment(node.name);
-      }
-      getFlowCollectionProcessor(
-        node: flowTypes.FlowCollectionProcessor
-      ): string {
-        return UML_REPRESENTATIONS.collectionProcessor(node.name);
-      }
-      getFlowDecision(node: flowTypes.FlowDecision): string {
-        return UML_REPRESENTATIONS.decision(node.name);
-      }
-      getFlowLoop(node: flowTypes.FlowLoop): string {
-        return UML_REPRESENTATIONS.loop(node.name);
-      }
-      getFlowOrchestratedStage(node: flowTypes.FlowOrchestratedStage): string {
-        return UML_REPRESENTATIONS.orchestratedStage(node.name);
-      }
-      getFlowRecordCreate(node: flowTypes.FlowRecordCreate): string {
-        return UML_REPRESENTATIONS.recordCreate(node.name);
-      }
-      getFlowRecordDelete(node: flowTypes.FlowRecordDelete): string {
-        return UML_REPRESENTATIONS.recordDelete(node.name);
-      }
-      getFlowRecordLookup(node: flowTypes.FlowRecordLookup): string {
-        return UML_REPRESENTATIONS.recordLookup(node.name);
-      }
-      getFlowRecordRollback(node: flowTypes.FlowRecordRollback): string {
-        return UML_REPRESENTATIONS.recordRollback(node.name);
-      }
-      getFlowRecordUpdate(node: flowTypes.FlowRecordUpdate): string {
-        return UML_REPRESENTATIONS.recordUpdate(node.name);
-      }
-      getFlowScreen(node: flowTypes.FlowScreen): string {
-        return UML_REPRESENTATIONS.screen(node.name);
-      }
-      getFlowStep(node: flowTypes.FlowStep): string {
-        return UML_REPRESENTATIONS.step(node.name);
-      }
-      getFlowSubflow(node: flowTypes.FlowSubflow): string {
-        return UML_REPRESENTATIONS.subflow(node.name);
-      }
-      getFlowTransform(node: flowTypes.FlowTransform): string {
-        return UML_REPRESENTATIONS.transform(node.name);
-      }
-      getFlowWait(node: flowTypes.FlowWait): string {
-        return UML_REPRESENTATIONS.wait(node.name);
-      }
-      getFlowActionCall(node: flowTypes.FlowActionCall): string {
-        return UML_REPRESENTATIONS.actionCall(node.name);
+      toUmlString(node: DiagramNode): string {
+        return `state ${node.type} ${node.id}`;
       }
       getTransition(transition: Transition): string {
         return UML_REPRESENTATIONS.transition(transition.from, transition.to);

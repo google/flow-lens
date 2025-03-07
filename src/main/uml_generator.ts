@@ -47,6 +47,7 @@ export interface DiagramNode {
   type: string;
   color: SkinColor;
   icon: Icon;
+  diffStatus?: flowTypes.DiffStatus;
   innerNodes?: InnerNode[];
 }
 
@@ -54,6 +55,7 @@ export interface DiagramNode {
  * The inner node of the node.
  */
 export interface InnerNode {
+  id: string;
   label: string;
   content: string[];
 }
@@ -155,6 +157,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Apex Plugin Call",
       color: SkinColor.NONE,
       icon: Icon.CODE,
@@ -165,6 +168,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Assignment",
       color: SkinColor.ORANGE,
       icon: Icon.ASSIGNMENT,
@@ -177,6 +181,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Collection Processor",
       color: SkinColor.NONE,
       icon: Icon.LOOP,
@@ -187,6 +192,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Decision",
       color: SkinColor.ORANGE,
       icon: Icon.DECISION,
@@ -209,6 +215,7 @@ export abstract class UmlGenerator {
         conditions.push(logicLabel);
       }
       result.push({
+        id: rule.name,
         label: rule.label,
         content: conditions,
       });
@@ -220,6 +227,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Loop",
       color: SkinColor.ORANGE,
       icon: Icon.LOOP,
@@ -232,6 +240,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Orchestrated Stage",
       color: SkinColor.NAVY,
       icon: Icon.RIGHT,
@@ -246,6 +255,7 @@ export abstract class UmlGenerator {
     const result: InnerNode[] = [];
     for (const step of node.stageSteps) {
       result.push({
+        id: `${node.name}.${step.actionName}`,
         label: `${counter++}. ${step.label}`,
         content: [],
       });
@@ -257,6 +267,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Record Create",
       color: SkinColor.PINK,
       icon: Icon.CREATE_RECORD,
@@ -267,6 +278,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Record Delete",
       color: SkinColor.PINK,
       icon: Icon.DELETE,
@@ -277,6 +289,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Record Lookup",
       color: SkinColor.PINK,
       icon: Icon.LOOKUP,
@@ -287,6 +300,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Record Rollback",
       color: SkinColor.PINK,
       icon: Icon.NONE,
@@ -297,6 +311,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Record Update",
       color: SkinColor.PINK,
       icon: Icon.UPDATE,
@@ -307,6 +322,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Screen",
       color: SkinColor.BLUE,
       icon: Icon.SCREEN,
@@ -317,6 +333,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Step",
       color: SkinColor.NONE,
       icon: Icon.STAGE_STEP,
@@ -327,6 +344,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Subflow",
       color: SkinColor.NAVY,
       icon: Icon.RIGHT,
@@ -337,6 +355,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Transform",
       color: SkinColor.NONE,
       icon: Icon.CODE,
@@ -347,6 +366,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Wait",
       color: SkinColor.NONE,
       icon: Icon.WAIT,
@@ -357,6 +377,7 @@ export abstract class UmlGenerator {
     return this.toUmlString({
       id: node.name,
       label: node.label,
+      diffStatus: node.diffStatus,
       type: "Action Call",
       color: SkinColor.NAVY,
       icon: Icon.CODE,
