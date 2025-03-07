@@ -2,12 +2,17 @@
  * @fileoverview A Graphviz generator for Salesforce flows.
  */
 
-import * as os from "node:os";
 import { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
-import { UmlGenerator } from "./uml_generator.ts";
+import {
+  UmlGenerator,
+  DiagramNode,
+  InnerNode,
+  SkinColor as UmlSkinColor,
+  Icon as UmlIcon,
+} from "./uml_generator.ts";
 
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+const EOL = "\n";
 const TABLE_BEGIN = `<
 <TABLE CELLSPACING="0" CELLPADDING="0">`;
 const TABLE_END = `</TABLE>
@@ -28,17 +33,17 @@ export enum SkinColor {
  * Icons used to represent the type of node.
  */
 export enum Icon {
-  SCREEN = " 🖥️",
-  RIGHT = " ➡️",
+  ASSIGNMENT = " ⬅️",
   CODE = " ⚡",
+  CREATE_RECORD = " ➕",
   DECISION = " 🔷",
   DELETE = " 🗑️",
-  STAGE_STEP = " 🔃",
-  LOOP = " 🔄",
   LOOKUP = " 🔍",
-  CREATE_RECORD = " ➕",
-  ASSIGNMENT = " ⬅️",
+  LOOP = " 🔄",
   NONE = "",
+  RIGHT = " ➡️",
+  SCREEN = " 🖥️",
+  STAGE_STEP = " 🔃",
   UPDATE = " ✏️",
   WAIT = " ⏲️",
 }
@@ -55,6 +60,32 @@ export enum FontColor {
  * A GraphViz generator for Salesforce flows.
  */
 export class GraphVizGenerator extends UmlGenerator {
+  // Static mapping from UmlGenerator SkinColor to GraphViz SkinColor
+  private static readonly SKIN_COLOR_MAP: Record<number, SkinColor> = {
+    [UmlSkinColor.NONE]: SkinColor.NONE,
+    [UmlSkinColor.PINK]: SkinColor.PINK,
+    [UmlSkinColor.ORANGE]: SkinColor.ORANGE,
+    [UmlSkinColor.NAVY]: SkinColor.NAVY,
+    [UmlSkinColor.BLUE]: SkinColor.BLUE,
+  };
+
+  // Static mapping from UmlGenerator Icon to GraphViz Icon
+  private static readonly ICON_MAP: Record<number, Icon> = {
+    [UmlIcon.ASSIGNMENT]: Icon.ASSIGNMENT,
+    [UmlIcon.CODE]: Icon.CODE,
+    [UmlIcon.CREATE_RECORD]: Icon.CREATE_RECORD,
+    [UmlIcon.DECISION]: Icon.DECISION,
+    [UmlIcon.DELETE]: Icon.DELETE,
+    [UmlIcon.LOOKUP]: Icon.LOOKUP,
+    [UmlIcon.LOOP]: Icon.LOOP,
+    [UmlIcon.NONE]: Icon.NONE,
+    [UmlIcon.RIGHT]: Icon.RIGHT,
+    [UmlIcon.SCREEN]: Icon.SCREEN,
+    [UmlIcon.STAGE_STEP]: Icon.STAGE_STEP,
+    [UmlIcon.UPDATE]: Icon.UPDATE,
+    [UmlIcon.WAIT]: Icon.WAIT,
+  };
+
   getHeader(label: string): string {
     return `digraph {
 label=<<B>${getLabel(label)}</B>>
@@ -63,145 +94,48 @@ labelloc = "t";
 node [shape=box, style=filled]`;
   }
 
-  getFlowApexPluginCall(node: flowTypes.FlowApexPluginCall): string {
-    return getNodeBody(node, "Apex Plugin Call", Icon.CODE, SkinColor.NONE);
-  }
+  toUmlString(node: DiagramNode): string {
+    const graphvizSkinColor =
+      GraphVizGenerator.SKIN_COLOR_MAP[node.color] || SkinColor.NONE;
+    const graphvizIcon = GraphVizGenerator.ICON_MAP[node.icon] || Icon.NONE;
 
-  getFlowAssignment(node: flowTypes.FlowAssignment): string {
-    return getNodeBody(node, "Assignment", Icon.ASSIGNMENT, SkinColor.ORANGE);
-  }
-
-  getFlowCollectionProcessor(node: flowTypes.FlowCollectionProcessor): string {
-    return getNodeBody(node, "Collection Processor", Icon.NONE, SkinColor.NONE);
-  }
-
-  getFlowDecision(node: flowTypes.FlowDecision): string {
-    return getNodeBody(
-      node,
-      "Decision",
-      Icon.DECISION,
-      SkinColor.ORANGE,
-      this.generateInnerNodeBodyForDecisionRules(node, node.rules)
-    );
-  }
-
-  generateInnerNodeBodyForDecisionRules(
-    parentNode: flowTypes.FlowNode,
-    rules: flowTypes.FlowRule[]
-  ): string {
-    const result = [];
-    for (const rule of rules) {
-      const innerNodeBody = getInnerNodeBody(
-        parentNode,
-        FontColor.WHITE,
-        getLabel(rule.label),
-        this.getRuleContent(rule)
-      );
-      result.push(innerNodeBody);
-    }
-    return result.join(EOL);
-  }
-
-  getRuleContent(rule: flowTypes.FlowRule): string[] {
-    const result = [];
-    let conditionCounter = 1;
-    for (const condition of rule.conditions) {
-      result.push(
-        `${conditionCounter++}. ${condition.leftValueReference} ${
-          condition.operator
-        } ${toString(condition.rightValue)}`
+    // Handle nodes with inner nodes
+    if (node.innerNodes) {
+      return getNodeBody(
+        node,
+        node.type,
+        graphvizIcon,
+        graphvizSkinColor,
+        this.generateInnerNodeBodyFromInnerNodes(node, node.innerNodes)
       );
     }
-    const logicLabel =
-      result.length > 1 ? `<I>Logic: ${rule.conditionLogic}</I>` : "";
-    if (logicLabel) {
-      result.push(logicLabel);
-    }
-    return result;
+
+    // Handle regular nodes
+    return getNodeBody(node, node.type, graphvizIcon, graphvizSkinColor);
   }
 
-  getFlowLoop(node: flowTypes.FlowLoop): string {
-    return getNodeBody(node, "Loop", Icon.LOOP, SkinColor.ORANGE);
-  }
-
-  getFlowOrchestratedStage(node: flowTypes.FlowOrchestratedStage): string {
-    return getNodeBody(
-      node,
-      "Orchestrated Stage",
-      Icon.RIGHT,
-      SkinColor.NAVY,
-      this.getInnerNodeBodyForOrchestratedStage(node, node.stageSteps)
-    );
-  }
-
-  getInnerNodeBodyForOrchestratedStage(
-    parentNode: flowTypes.FlowNode,
-    steps: flowTypes.FlowStageStep[]
+  // Helper method to generate inner node body from DiagramNode's innerNodes
+  generateInnerNodeBodyFromInnerNodes(
+    parentNode: DiagramNode,
+    innerNodes: InnerNode[]
   ): string {
-    if (!steps || steps.length === 0) {
+    if (!innerNodes || innerNodes.length === 0) {
       return "";
     }
-    const result = [];
-    let counter = 1;
-    for (const step of steps) {
+
+    const result: string[] = [];
+
+    for (const innerNode of innerNodes) {
       const innerNodeBody = getInnerNodeBody(
         parentNode,
         FontColor.WHITE,
-        `${counter++}. ${getLabel(step.label)}`,
-        []
+        getLabel(innerNode.label),
+        innerNode.content
       );
       result.push(innerNodeBody);
     }
+
     return result.join(EOL);
-  }
-
-  getFlowRecordCreate(node: flowTypes.FlowRecordCreate): string {
-    return getNodeBody(
-      node,
-      "Record Create",
-      Icon.CREATE_RECORD,
-      SkinColor.PINK
-    );
-  }
-
-  getFlowRecordDelete(node: flowTypes.FlowRecordDelete): string {
-    return getNodeBody(node, "Record Delete", Icon.DELETE, SkinColor.PINK);
-  }
-
-  getFlowRecordLookup(node: flowTypes.FlowRecordLookup): string {
-    return getNodeBody(node, "Record Lookup", Icon.LOOKUP, SkinColor.PINK);
-  }
-
-  getFlowRecordRollback(node: flowTypes.FlowRecordRollback): string {
-    return getNodeBody(node, "Record Rollback", Icon.NONE, SkinColor.PINK);
-  }
-
-  getFlowRecordUpdate(node: flowTypes.FlowRecordUpdate): string {
-    return getNodeBody(node, "Record Update", Icon.UPDATE, SkinColor.PINK);
-  }
-
-  getFlowScreen(node: flowTypes.FlowScreen): string {
-    return getNodeBody(node, "Screen", Icon.SCREEN, SkinColor.BLUE);
-  }
-
-  getFlowStep(node: flowTypes.FlowStep): string {
-    return getNodeBody(node, "Step", Icon.NONE, SkinColor.NONE);
-  }
-
-  getFlowSubflow(node: flowTypes.FlowSubflow): string {
-    return getNodeBody(node, "Subflow", Icon.NONE, SkinColor.NAVY);
-  }
-
-  getFlowTransform(node: flowTypes.FlowTransform): string {
-    return getNodeBody(node, "Transform", Icon.NONE, SkinColor.NONE);
-  }
-
-  getFlowWait(node: flowTypes.FlowWait): string {
-    return getNodeBody(node, "Wait", Icon.WAIT, SkinColor.NONE);
-  }
-
-  getFlowActionCall(node: flowTypes.FlowActionCall): string {
-    return getNodeBody(node, "Action Call", Icon.CODE, SkinColor.NAVY);
   }
 
   getTransition(transition: Transition): string {
@@ -218,7 +152,7 @@ node [shape=box, style=filled]`;
 }
 
 function getNodeBody(
-  node: flowTypes.FlowNode,
+  node: DiagramNode,
   type: string,
   icon: Icon,
   skinColor: SkinColor,
@@ -232,7 +166,7 @@ function getNodeBody(
   const htmlLabel = `${TABLE_BEGIN}
 ${getTableHeader(type, icon, node)}${formattedInnerNodeBody}
 ${TABLE_END}`;
-  return `${node.name} [
+  return `${node.id} [
   label=${htmlLabel}
   color="${skinColor}"
   fontcolor="${fontColor}"
@@ -240,7 +174,7 @@ ${TABLE_END}`;
 }
 
 function getInnerNodeBody(
-  parentNode: flowTypes.FlowNode,
+  parentNode: DiagramNode,
   color: FontColor,
   label: string,
   content: string[]
@@ -255,11 +189,11 @@ function getInnerNodeBody(
   </TR>`;
 }
 
-function getColSpan(node: flowTypes.FlowNode) {
+function getColSpan(node: DiagramNode) {
   return node.diffStatus ? ' COLSPAN="2"' : "";
 }
 
-function getTableHeader(type: string, icon: Icon, node: flowTypes.FlowNode) {
+function getTableHeader(type: string, icon: Icon, node: DiagramNode) {
   return `  <TR>${getDiffIndicator(node.diffStatus)}
     <TD>
       <B>${type}${icon}</B>
@@ -298,41 +232,4 @@ function getLabel(label: string) {
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;");
-}
-
-function toString(element: flowTypes.FlowElementReferenceOrValue) {
-  if (
-    element.apexValue ||
-    element.elementReference ||
-    element.formulaExpression ||
-    element.setupReference ||
-    element.sobjectValue ||
-    element.stringValue ||
-    element.transformValueReference ||
-    element.formulaDataType
-  ) {
-    return (
-      element.stringValue ??
-      element.sobjectValue ??
-      element.apexValue ??
-      element.elementReference ??
-      element.formulaExpression ??
-      element.setupReference ??
-      element.transformValueReference ??
-      element.formulaDataType
-    );
-  }
-  if (element.dateTimeValue) {
-    return new Date(element.dateTimeValue).toLocaleDateString();
-  }
-  if (element.dateValue) {
-    return new Date(element.dateValue).toLocaleDateString();
-  }
-  if (element.numberValue) {
-    return element.numberValue.toString();
-  }
-  if (element.booleanValue) {
-    return element.booleanValue ? "true" : "false";
-  }
-  return "";
 }
