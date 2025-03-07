@@ -1,4 +1,20 @@
 /**
+ * Copyright 2024 Google LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
  * @fileoverview This module processes command line arguments and returns an
  * object containing the arguments.
  */
@@ -18,7 +34,7 @@ const flags = parseArgs(Deno.args, {
     "outputFileName",
   ],
   default: {
-    diagramTool: "plantuml",
+    diagramTool: "graphviz",
     filePath: null,
   },
   alias: {
@@ -50,19 +66,19 @@ export const ERROR_MESSAGES = {
       DiagramTool
     ).join(", ")}`,
   filePathDoesNotExist: (filePath: string) =>
-    `File path does not exist: ${filePath}`,
+    `filePath does not exist: ${filePath}`,
   invalidOutputFileName: (outputFileName: string) =>
-    `Output file name must be alphanumeric with underscores: ${outputFileName}`,
+    `outputFileName must be alphanumeric with underscores: ${outputFileName}`,
   invalidOutputDirectory: (outputDirectory: string) =>
-    `Output directory does not exist: ${outputDirectory}`,
+    `outputDirectory does not exist: ${outputDirectory}`,
   filePathOrGitDiffFromAndToHashRequired:
     "Either filePath or (gitDiffFrom and gitDiffToHash) must be specified",
   filePathAndGitDiffFromAndToHashMutuallyExclusive:
     "filePath and (gitDiffFrom and gitDiffToHash) are mutually exclusive",
   gitDiffFromAndToHashMustBeSpecifiedTogether:
     "gitDiffFromHash and gitDiffToHash must be specified together",
-  outputFileNameRequired: "Output file name is required",
-  outputDirectoryRequired: "Output directory is required",
+  outputFileNameRequired: "outputFileName is required",
+  outputDirectoryRequired: "outputDirectory is required",
   header: "The following errors were encountered:",
 };
 
