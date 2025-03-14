@@ -32,10 +32,12 @@ const flags = parseArgs(Deno.args, {
     "gitDiffToHash",
     "outputDirectory",
     "outputFileName",
+    "mode",
   ],
   default: {
     diagramTool: "graphviz",
     filePath: null,
+    mode: "raw",
   },
   alias: {
     diagramTool: "d",
@@ -45,6 +47,7 @@ const flags = parseArgs(Deno.args, {
     gitDiffToHash: "to",
     outputDirectory: "o",
     outputFileName: "n",
+    mode: "m",
   },
   collect: ["filePath"],
 });
@@ -59,6 +62,14 @@ export enum DiagramTool {
 }
 
 /**
+ * The mode in which the tool operates.
+ */
+export enum Mode {
+  RAW = "raw",
+  GITHUB_ACTION = "github_action",
+}
+
+/**
  * The error messages that are used in the ArgumentProcessor.
  */
 export const ERROR_MESSAGES = {
@@ -66,6 +77,10 @@ export const ERROR_MESSAGES = {
     `Unsupported diagram tool: ${diagramTool}. Valid options are: ${Object.values(
       DiagramTool
     ).join(", ")}`,
+  unsupportedMode: (mode: string) =>
+    `Unsupported mode: ${mode}. Valid options are: ${Object.values(Mode).join(
+      ", "
+    )}`,
   filePathDoesNotExist: (filePath: string) =>
     `filePath does not exist: ${filePath}`,
   invalidOutputFileName: (outputFileName: string) =>
@@ -95,6 +110,7 @@ export interface RuntimeConfig {
   gitDiffToHash?: string;
   outputDirectory: string;
   outputFileName: string;
+  mode: Mode;
 }
 
 /**
@@ -133,6 +149,7 @@ export class ArgumentProcessor {
 
   private validateArguments() {
     this.validateDiagramTool();
+    this.validateMode();
     this.validateFilePath();
     this.validateOutputDirectory();
     this.validateOutputFileName();
@@ -150,6 +167,18 @@ export class ArgumentProcessor {
     ) {
       this.errorsEncountered.push(
         ERROR_MESSAGES.unsupportedDiagramTool(this.config.diagramTool)
+      );
+    }
+  }
+
+  private validateMode() {
+    const lowerCaseMode = this.config.mode?.toLowerCase();
+    if (
+      !this.config.mode ||
+      !Object.values(Mode).includes(lowerCaseMode as Mode)
+    ) {
+      this.errorsEncountered.push(
+        ERROR_MESSAGES.unsupportedMode(this.config.mode)
       );
     }
   }

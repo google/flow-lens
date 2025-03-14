@@ -18,13 +18,13 @@
  * @fileoverview An injection point for the flow to UML tool.
  */
 
-import { Configuration } from "./argument_processor.ts";
+import { Configuration, Mode } from "./argument_processor.ts";
 import { FlowFileChangeDetector } from "./flow_file_change_detector.ts";
 import {
   FlowDifference,
   FlowToUmlTransformer,
 } from "./flow_to_uml_transformer.ts";
-import { GithubActions } from "./github_actions.ts";
+import { GithubActions, GithubComment } from "./github_actions.ts";
 import { UmlGeneratorContext } from "./uml_generator_context.ts";
 import { UmlWriter } from "./uml_writer.ts";
 
@@ -41,16 +41,21 @@ export class Runner {
 
   async execute() {
     console.log(`Flow to UML is now running...`);
-    const githubToken = Deno.env.get("GITHUB_TOKEN");
-    if (githubToken) {
-      console.log("GITHUB_TOKEN is set, fetching comments...");
-      const githubActions = new GithubActions(githubToken);
-      const comments = await githubActions.getComments();
-      console.log({ comments });
-    }
     this.flowFilePaths = this.getFlowFilePaths();
     await this.generateUml();
-    this.writeDiagrams();
+    if (Configuration.getInstance().mode === Mode.GITHUB_ACTION) {
+      const githubToken = Deno.env.get("GITHUB_TOKEN");
+      const githubActions = new GithubActions(githubToken);
+      this.filePathToFlowDifference.forEach((flowDifference, filePath) => {
+        const comment: GithubComment = githubActions.translateToComment(
+          flowDifference,
+          filePath
+        );
+        githubActions.writeComment(comment);
+      });
+    } else {
+      this.writeDiagrams();
+    }
   }
   private async generateUml() {
     const generatorContext = new UmlGeneratorContext(
