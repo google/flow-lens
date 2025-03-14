@@ -12,14 +12,26 @@ jobs:
       - uses: actions/checkout@v3
         with:
           ref: ${{ github.ref }}
-          fetch-depth: 0
+          fetch-depth: 2
 
       - name: Set up Deno
         uses: denoland/setup-deno@v2
         with:
           deno-version: latest
 
-      - name: Run Deno
-        run: deno run --allow-read --allow-write --allow-env --allow-net src/main/main.ts
+      - name: Run Action
+        run: |
+          git diff --name-only HEAD^1 HEAD
+          deno run \
+            --allow-read \
+            --allow-write \
+            --allow-env \
+            --allow-net \
+            src/main/main.ts \
+            --gitDiffFromHash="HEAD^1" \
+            --gitDiffToHash="HEAD" \
+            --outputDirectory="." \
+            --outputFileName="test"
+          cat test.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

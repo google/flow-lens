@@ -47,11 +47,10 @@ export class Runner {
       const githubActions = new GithubActions(githubToken);
       const comments = await githubActions.getComments();
       console.log({ comments });
-    } else {
-      this.flowFilePaths = this.getFlowFilePaths();
-      await this.generateUml();
-      this.writeDiagrams();
     }
+    this.flowFilePaths = this.getFlowFilePaths();
+    await this.generateUml();
+    this.writeDiagrams();
   }
   private async generateUml() {
     const generatorContext = new UmlGeneratorContext(
