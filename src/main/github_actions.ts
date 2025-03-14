@@ -53,16 +53,16 @@ export class GithubActions {
   private getBody(flowDifference: FlowDifference) {
     const oldDiagram = flowDifference.old
       ? `Previous:
-    ${MERMAID_OPEN_TAG}
-    ${flowDifference.old}
-    ${MERMAID_CLOSE_TAG}
+${MERMAID_OPEN_TAG}
+${flowDifference.old}
+${MERMAID_CLOSE_TAG}
 
     `
       : "";
     const newDiagram = `Current:
-    ${MERMAID_OPEN_TAG}
-    ${flowDifference.new}
-    ${MERMAID_CLOSE_TAG}
+${MERMAID_OPEN_TAG}
+${flowDifference.new}
+${MERMAID_CLOSE_TAG}
     `;
     return `${oldDiagram}${newDiagram}`;
   }
