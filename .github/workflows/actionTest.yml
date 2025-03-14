@@ -32,6 +32,5 @@ jobs:
             --gitDiffToHash="HEAD" \
             --outputDirectory="." \
             --outputFileName="test"
-          cat test.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

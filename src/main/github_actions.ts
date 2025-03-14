@@ -1,6 +1,6 @@
 import { Octokit } from "npm:@octokit/core";
 import { context } from "npm:@actions/github";
-import { FlowDifference } from "./flow_to_uml_transformer";
+import { FlowDifference } from "./flow_to_uml_transformer.ts";
 
 const HIDDEN_COMMENT_PREFIX = "<!--flow-lens-hidden-comment-->";
 const MERMAID_OPEN_TAG = "```mermaid";
