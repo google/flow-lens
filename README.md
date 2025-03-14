@@ -5,8 +5,8 @@
 This project helps decode Salesforce Flows by translating their raw XML
 definition files into human-understandable UML diagrams. These visualizations
 clarify the flow's structure and logic, making documentation and code review
-significantly easier. It supports generating diagrams using both PlantUML and
-Graphviz, and can even highlight changes between different versions of a flow by
+significantly easier. It supports generating diagrams using PlantUML, Graphviz, and
+Mermaid, and can even highlight changes between different versions of a flow by
 processing Git diffs.
 
 This is not an officially supported Google product. This project is not eligible
@@ -15,8 +15,8 @@ for the
 
 ## Features
 
-- **Supports multiple diagram tools:** Generates diagrams using PlantUML and
-  Graphviz.
+- **Supports multiple diagram tools:** Generates diagrams using PlantUML,
+  Graphviz, and Mermaid.
 - **Handles Git diffs:** Can process changes between two Git commits,
   highlighting added, modified, and deleted elements in the resulting diagram.
 
@@ -27,7 +27,7 @@ available:
 
 | Option              | Description                                                                                            | Type     | Default    | Required                            |
 | ------------------- | ------------------------------------------------------------------------------------------------------ | -------- | ---------- | ----------------------------------- |
-| `--diagramTool`     | The diagram tool to use ('plantuml' or 'graphviz').                                                    | string   | `graphviz` | No                                  |
+| `--diagramTool`     | The diagram tool to use ('plantuml', 'graphviz', or 'mermaid').                                        | string   | `graphviz` | No                                  |
 | `--filePath`        | Path(s) to the Salesforce Flow XML file(s). Specify multiple files using space separated values.       | string[] |            | No (Git diff or file path required) |
 | `--gitDiffFromHash` | The starting commit hash for the Git diff.                                                             | string   |            | No (Only with Git diff)             |
 | `--gitDiffToHash`   | The ending commit hash for the Git diff.                                                               | string   |            | No (Only with Git diff)             |
