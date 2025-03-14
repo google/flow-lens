@@ -9,6 +9,8 @@ significantly easier. It supports generating diagrams using PlantUML, Graphviz, 
 Mermaid, and can even highlight changes between different versions of a flow by
 processing Git diffs.
 
+Flow Lens is available on JSR, the JavaScript Registry. You can find the package at [jsr.io/@goog/flow-lens](https://jsr.io/@goog/flow-lens).
+
 This is not an officially supported Google product. This project is not eligible
 for the
 [Google Open Source Software Vulnerability Rewards Program](https://bughunters.google.com/open-source-security).
@@ -41,7 +43,7 @@ available:
 deno run \
   --allow-read \
   --allow-write \
-  src/main/main.ts \
+  jsr:@goog/flow-lens \
   --diagramTool="graphviz" \
   --filePath="/some/path/force-app/main/default/flows/ArticleSubmissionStatus.flow-meta.xml" \
   --filePath="/some/path/force-app/main/default/flows/LeadConversionScreen.flow-meta.xml" \
@@ -56,7 +58,7 @@ deno run \
 deno run \
   --allow-read \
   --allow-write \
-  src/main/main.ts \
+  jsr:@goog/flow-lens \
   --diagramTool="graphviz" \
   --gitDiffFromHash="HEAD~1" \
   --gitDiffToHash="HEAD" \
@@ -261,7 +263,7 @@ We have two main goals for the future of Flow Lens:
 deno run \
   --allow-read \
   --allow-write \
-  src/main/main.ts \
+  jsr:@goog/flow-lens \
   --diagramTool="graphviz" \
   --gitRepo="/path/to/salesforce_project/" \
   --gitDiffFromHash="HEAD~1" \

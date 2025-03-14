@@ -31,9 +31,12 @@ import { UmlWriter } from "./uml_writer.ts";
  * The main class for the flow to UML tool.
  */
 export class Runner {
-  changeDetector = new FlowFileChangeDetector();
+  changeDetector: FlowFileChangeDetector = new FlowFileChangeDetector();
   flowFilePaths: string[] = [];
-  filePathToFlowDifference = new Map<string, FlowDifference>();
+  filePathToFlowDifference: Map<string, FlowDifference> = new Map<
+    string,
+    FlowDifference
+  >();
 
   async execute() {
     console.log(`Flow to UML is now running...`);

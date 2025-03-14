@@ -1,4 +1,8 @@
 {
+  "name": "@goog/flow-lens",
+  "version": "0.1.0",
+  "license": "Apache",
+  "exports": "./src/main/main.ts",
   "imports": {
     "@std/assert": "jsr:@std/assert@^1.0.10",
     "@std/cli": "jsr:@std/cli@^1.0.9",
