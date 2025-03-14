@@ -45,7 +45,8 @@ export class Runner {
     if (githubToken) {
       console.log("GITHUB_TOKEN is set, fetching comments...");
       const githubActions = new GithubActions(githubToken);
-      await githubActions.getComments();
+      const comments = await githubActions.getComments();
+      console.log({ comments });
     } else {
       this.flowFilePaths = this.getFlowFilePaths();
       await this.generateUml();

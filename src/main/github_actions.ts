@@ -14,16 +14,16 @@ export type GithubComment = {
   url?: string;
 };
 export class GithubActions {
-  private octokit: Octokit;
+  private readonly octokit: Octokit;
 
   constructor(githubToken: string) {
     this.octokit = new Octokit({ auth: githubToken });
   }
 
   async getComments() {
-    const comments = await this.octokit.request(
-      `GET /repos/${context.repo.owner}/${context.repo.repo}/issues/${context.issue.number}/comments`
-    );
+    const endpoint = `GET /repos/${context.repo.owner}/${context.repo.repo}/issues/${context.issue.number}/comments`;
+    console.log({ endpoint });
+    const comments = await this.octokit.request(endpoint);
     return comments.data;
   }
 }
