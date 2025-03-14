@@ -68,8 +68,8 @@ export const ERROR_MESSAGES = {
 // tslint:disable:no-private-class-methods-without-this-ref
 export class FlowFileChangeDetector {
   getFlowFiles(): string[] {
-    // this.validateGitIsInstalled();
-    // this.validateInCurrentGitRepo();
+    this.validateGitIsInstalled();
+    this.validateInCurrentGitRepo();
     const diff = this.getDiff();
     return this.getFlowFilesFromDiff(diff);
   }
