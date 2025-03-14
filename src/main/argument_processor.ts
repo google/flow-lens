@@ -55,6 +55,7 @@ const flags = parseArgs(Deno.args, {
 export enum DiagramTool {
   PLANTUML = "plantuml",
   GRAPH_VIZ = "graphviz",
+  MERMAID = "mermaid",
 }
 
 /**
