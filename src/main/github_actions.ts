@@ -56,6 +56,7 @@ export class GithubActions {
     ${MERMAID_OPEN_TAG}
     ${flowDifference.old}
     ${MERMAID_CLOSE_TAG}
+
     `
       : "";
     const newDiagram = `Current:
