@@ -45,14 +45,14 @@ export class MermaidGenerator extends UmlGenerator {
   // Static mapping from Icon to emoji
   private static readonly ICON_MAP: Record<Icon, string> = {
     [Icon.ASSIGNMENT]: "📝",
-    [Icon.CODE]: "💻",
+    [Icon.CODE]: "⚡",
     [Icon.CREATE_RECORD]: "➕",
     [Icon.DECISION]: "🔹",
     [Icon.DELETE]: "🗑️",
     [Icon.LOOKUP]: "🔍",
     [Icon.LOOP]: "🔄",
     [Icon.RIGHT]: "➡️",
-    [Icon.SCREEN]: "📱",
+    [Icon.SCREEN]: "💻",
     [Icon.STAGE_STEP]: "📍",
     [Icon.UPDATE]: "✏️",
     [Icon.WAIT]: "⏳",
@@ -90,7 +90,6 @@ export class MermaidGenerator extends UmlGenerator {
     const styleClass = MermaidGenerator.STYLE_CLASS_MAP[node.color];
     const lines: string[] = [];
 
-    // Add inner nodes if they exist using a state definition
     if (node.innerNodes && node.innerNodes.length > 0) {
       const content: string[] = [];
       content.push(nodeLabel);
@@ -111,9 +110,11 @@ export class MermaidGenerator extends UmlGenerator {
   getTransition(transition: Transition): string {
     const fromId = this.sanitizeId(transition.from);
     const toId = this.sanitizeId(transition.to);
-    const label = transition.label ? ` : ${transition.label}` : "";
+    const faultIndicator = transition.fault ? "❌" : "";
+    let label = transition.label
+      ? ` : ${faultIndicator} ${transition.label} ${faultIndicator}`
+      : "";
 
-    // In state diagrams, transitions use --> syntax
     return `  ${fromId} --> ${toId}${label}`;
   }
 
@@ -125,6 +126,10 @@ export class MermaidGenerator extends UmlGenerator {
     return id.replace(/[^a-zA-Z0-9]/g, "_");
   }
 
+  private sanitizeLabel(label: string): string {
+    return label.replace(/"/g, "'");
+  }
+
   private getNodeLabel(node: DiagramNode): string {
     const icon = MermaidGenerator.ICON_MAP[node.icon] || "";
     const diffStatus = node.diffStatus
@@ -132,13 +137,17 @@ export class MermaidGenerator extends UmlGenerator {
           MermaidGenerator.DIFF_STATUS_PREFIX_MAP[node.diffStatus]
         }</span> `
       : "";
-    const escapedLabel = node.label.replace(/"/g, '\\"');
-    return `${diffStatus}${icon} <b>${node.type}</b> <u>${escapedLabel}</u>`;
+    const sanitizedLabel = this.sanitizeLabel(node.label);
+    return `${diffStatus}${icon} <b>${node.type}</b> <br> <u>${sanitizedLabel}</u>`;
   }
 
   private formatInnerNodeLabel(node: InnerNode): string {
-    return `<b>${node.type}</b> <br ><u>${
-      node.label
-    }</u> <br>${node.content.join("<br>")}`;
+    const sanitizedLabel = this.sanitizeLabel(node.label);
+    const sanitizedContent = node.content.map((item) =>
+      this.sanitizeLabel(item)
+    );
+    return `<b>${
+      node.type
+    }</b> <br ><u>${sanitizedLabel}</u> <br>${sanitizedContent.join("<br>")}`;
   }
 }
