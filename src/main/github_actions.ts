@@ -45,7 +45,7 @@ export class GithubActions {
       start_line: 1,
       start_side: "RIGHT",
       side: "RIGHT",
-      line: 1,
+      line: 2,
       body: this.getBody(flowDifference),
     };
   }
