@@ -28,6 +28,7 @@ jobs:
             --allow-net \
             --allow-run \
             src/main/main.ts \
+            --mode="github_action" \
             --gitDiffFromHash="HEAD^1" \
             --gitDiffToHash="HEAD" \
             --outputDirectory="." \
