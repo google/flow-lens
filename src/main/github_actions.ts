@@ -21,7 +21,7 @@ export class GithubActions {
   }
 
   async getComments() {
-    const endpoint = `GET /repos/${context.repo.owner}/${context.repo.repo}/pulls/${context.payload.pull_request.number}`;
+    const endpoint = `GET /repos/${context.repo.owner}/${context.repo.repo}/pulls/${context.payload.pull_request.number}/comments`;
     console.log({ endpoint });
     const comments = await this.octokit.request(endpoint);
     return comments.data;
