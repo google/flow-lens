@@ -69,7 +69,7 @@ export const ERROR_MESSAGES = {
 export class FlowFileChangeDetector {
   getFlowFiles(): string[] {
     // this.validateGitIsInstalled();
-    this.validateInCurrentGitRepo();
+    // this.validateInCurrentGitRepo();
     const diff = this.getDiff();
     return this.getFlowFilesFromDiff(diff);
   }
