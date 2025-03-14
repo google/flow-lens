@@ -184,6 +184,7 @@ function generateDecision(name: string): flowTypes.FlowDecision {
   } as flowTypes.FlowDecision;
 }
 
+// @ts-ignore: Deno types
 Deno.test("MermaidGenerator", async (t) => {
   let systemUnderTest: MermaidGenerator;
   let mockedFlow: ParsedFlow;
@@ -215,7 +216,7 @@ Deno.test("MermaidGenerator", async (t) => {
       color: UmlSkinColor.NONE,
     };
     result = systemUnderTest.toUmlString(node);
-    assertStringIncludes(result, 'state "⚡ <b>Apex Plugin Call</b>');
+    assertStringIncludes(result, "<b>Apex Plugin Call</b> ⚡");
     assertStringIncludes(result, "as myApexPluginCall");
   });
 
@@ -228,7 +229,7 @@ Deno.test("MermaidGenerator", async (t) => {
       color: UmlSkinColor.ORANGE,
     };
     result = systemUnderTest.toUmlString(node);
-    assertStringIncludes(result, 'state "📝 <b>Assignment</b>');
+    assertStringIncludes(result, "<b>Assignment</b> 📝");
     assertStringIncludes(result, "as myAssignment");
     assertStringIncludes(result, "class myAssignment orange");
   });
@@ -260,7 +261,7 @@ Deno.test("MermaidGenerator", async (t) => {
       ],
     };
     result = systemUnderTest.toUmlString(node);
-    assertStringIncludes(result, 'state "🔹 <b>Decision</b>');
+    assertStringIncludes(result, "<b>Decision</b> 🔹");
     assertStringIncludes(result, "<b>Rule</b>");
     assertStringIncludes(result, "as myDecision");
     assertStringIncludes(result, "class myDecision orange");
@@ -278,7 +279,7 @@ Deno.test("MermaidGenerator", async (t) => {
     result = systemUnderTest.toUmlString(node);
     assertStringIncludes(
       result,
-      "<span style='background-color:#FFFFFF;'> ➕</span>"
+      "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"green\"><b>+</b></font></span>"
     );
     assertStringIncludes(result, "class myNode pink");
   });
