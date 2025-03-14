@@ -21,7 +21,6 @@ jobs:
 
       - name: Run Action
         run: |
-          git diff --name-only HEAD^1 HEAD
           deno run \
             --allow-read \
             --allow-write \
