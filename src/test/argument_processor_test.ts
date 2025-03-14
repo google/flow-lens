@@ -18,6 +18,7 @@ import {
   ArgumentProcessor,
   DiagramTool,
   ERROR_MESSAGES,
+  Mode,
   RuntimeConfig,
 } from "../main/argument_processor.ts";
 import { assertEquals, assertThrows } from "@std/assert";
@@ -33,14 +34,15 @@ export function getTestConfig(): RuntimeConfig {
     gitDiffToHash: "HEAD",
     outputDirectory: "/",
     outputFileName: "test",
+    mode: Mode.JSON,
   };
 }
 
 const INVALID_DIAGRAM_TOOL = "unsupported";
 const INVALID_FILE_PATH = "invalid/file/path/which/does/not/exist";
-const INVALID_GENERATION_TYPE = "unsupported";
 const INVALID_OUTPUT_FILE_NAME = "unsupported.file.name";
 const INVALID_OUTPUT_DIRECTORY = "invalid/directory/path";
+const INVALID_MODE = "unsupported";
 
 function setupTest(
   configModifications: (config: RuntimeConfig) => void = () => {}
@@ -79,6 +81,69 @@ Deno.test(
 );
 
 Deno.test(
+  "ArgumentProcessor should throw an exception when the mode is not supported",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest(
+          (config) => (config.mode = INVALID_MODE as Mode)
+        );
+        argumentProcessor.getConfig();
+      },
+      Error,
+      ERROR_MESSAGES.unsupportedMode(INVALID_MODE)
+    );
+  }
+);
+
+Deno.test(
+  "ArgumentProcessor should validate when mode is GITHUB_ACTION and outputDirectory/outputFileName are not provided",
+  () => {
+    const { argumentProcessor, config } = setupTest((config) => {
+      config.mode = Mode.GITHUB_ACTION;
+      config.outputDirectory = undefined;
+      config.outputFileName = undefined;
+    });
+    const result = argumentProcessor.getConfig();
+    assertEquals(result, config);
+  }
+);
+
+Deno.test(
+  "ArgumentProcessor should throw an exception when outputDirectory is not provided in JSON mode",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest((config) => {
+          config.mode = Mode.JSON;
+          config.outputDirectory = undefined;
+        });
+        argumentProcessor.getConfig();
+      },
+      Error,
+      ERROR_MESSAGES.outputDirectoryRequired
+    );
+  }
+);
+
+Deno.test(
+  "ArgumentProcessor should throw an exception when outputFileName is not provided in JSON mode",
+  () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest((config) => {
+          config.mode = Mode.JSON;
+          config.outputFileName = undefined;
+        });
+        argumentProcessor.getConfig();
+      },
+      Error,
+      ERROR_MESSAGES.outputFileNameRequired
+    );
+  }
+);
+
+Deno.test(
   "ArgumentProcessor should throw an exception when the file path is not valid",
   () => {
     assertThrows(
@@ -97,7 +162,7 @@ Deno.test(
 );
 
 Deno.test(
-  "ArgumentProcessor should throw an exception when the output file name is not populated",
+  "ArgumentProcessor should throw an exception when the output file name is not populated in JSON mode",
   () => {
     assertThrows(
       () => {
@@ -113,7 +178,7 @@ Deno.test(
 );
 
 Deno.test(
-  "ArgumentProcessor should throw an exception when the output file name is not supported",
+  "ArgumentProcessor should throw an exception when the output file name is not supported in JSON mode",
   () => {
     assertThrows(
       () => {
@@ -129,7 +194,7 @@ Deno.test(
 );
 
 Deno.test(
-  "ArgumentProcessor should throw an exception when the output directory is not valid",
+  "ArgumentProcessor should throw an exception when the output directory is not valid in JSON mode",
   () => {
     assertThrows(
       () => {
@@ -145,7 +210,7 @@ Deno.test(
 );
 
 Deno.test(
-  "ArgumentProcessor should throw an exception when the output directory is not specified",
+  "ArgumentProcessor should throw an exception when the output directory is not specified in JSON mode",
   () => {
     assertThrows(
       () => {

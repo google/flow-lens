@@ -20,7 +20,7 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { Configuration } from "./argument_processor.ts";
+import { Configuration, Mode } from "./argument_processor.ts";
 import { FlowDifference } from "./flow_to_uml_transformer.ts";
 
 const FILE_EXTENSION = ".json";
@@ -38,13 +38,27 @@ export class UmlWriter {
    */
   writeUmlDiagrams() {
     const fileBody = getFormatter().format(this.filePathToFlowDifference);
-    fs.writeFileSync(
-      path.join(
-        Configuration.getInstance().outputDirectory,
-        `${Configuration.getInstance().outputFileName}${FILE_EXTENSION}`
-      ),
-      JSON.stringify(fileBody, null, 2)
-    );
+    const config = Configuration.getInstance();
+
+    // Only write to file if in JSON mode
+    if (config.mode === Mode.JSON) {
+      if (!config.outputDirectory || !config.outputFileName) {
+        throw new Error(
+          "outputDirectory and outputFileName are required for JSON mode"
+        );
+      }
+
+      fs.writeFileSync(
+        path.join(
+          config.outputDirectory,
+          `${config.outputFileName}${FILE_EXTENSION}`
+        ),
+        JSON.stringify(fileBody, null, 2)
+      );
+    } else if (config.mode === Mode.GITHUB_ACTION) {
+      // For GITHUB_ACTION mode, output to console
+      console.log(JSON.stringify(fileBody, null, 2));
+    }
   }
 }
 

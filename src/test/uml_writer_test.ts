@@ -20,6 +20,7 @@ import * as path from "node:path";
 import {
   Configuration,
   DiagramTool,
+  Mode,
   RuntimeConfig,
 } from "../main/argument_processor.ts";
 import { FlowDifference } from "../main/flow_to_uml_transformer.ts";
@@ -73,6 +74,7 @@ function getRuntimeConfig(
     diagramTool,
     outputDirectory: TEST_UNDECLARED_OUTPUTS_DIR,
     outputFileName: OUTPUT_FILE_NAME,
+    mode: Mode.JSON,
   };
 }
 
