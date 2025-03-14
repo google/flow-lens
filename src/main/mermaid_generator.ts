@@ -59,14 +59,24 @@ export class MermaidGenerator extends UmlGenerator {
     [Icon.NONE]: "",
   };
 
-  // Static mapping from DiffStatus to prefix
-  private static readonly DIFF_STATUS_PREFIX_MAP: Record<
+  // Static mapping from DiffStatus to prefix symbol
+  private static readonly DIFF_STATUS_SYMBOL_MAP: Record<
     flowTypes.DiffStatus,
     string
   > = {
-    [flowTypes.DiffStatus.ADDED]: "➕",
-    [flowTypes.DiffStatus.DELETED]: "❌",
-    [flowTypes.DiffStatus.MODIFIED]: "✏️",
+    [flowTypes.DiffStatus.ADDED]: "+",
+    [flowTypes.DiffStatus.DELETED]: "-",
+    [flowTypes.DiffStatus.MODIFIED]: "Δ",
+  };
+
+  // Static mapping from DiffStatus to color
+  private static readonly DIFF_STATUS_COLOR_MAP: Record<
+    flowTypes.DiffStatus,
+    string
+  > = {
+    [flowTypes.DiffStatus.ADDED]: "green",
+    [flowTypes.DiffStatus.DELETED]: "red",
+    [flowTypes.DiffStatus.MODIFIED]: "#DD7A00",
   };
 
   getHeader(label: string): string {
@@ -132,13 +142,18 @@ export class MermaidGenerator extends UmlGenerator {
 
   private getNodeLabel(node: DiagramNode): string {
     const icon = MermaidGenerator.ICON_MAP[node.icon] || "";
-    const diffStatus = node.diffStatus
-      ? `<span style='background-color:#FFFFFF;'> ${
-          MermaidGenerator.DIFF_STATUS_PREFIX_MAP[node.diffStatus]
-        }</span> `
-      : "";
+
+    // Create diff status indicator that matches GraphVizGenerator
+    let diffStatus = "";
+    if (node.diffStatus) {
+      const symbol = MermaidGenerator.DIFF_STATUS_SYMBOL_MAP[node.diffStatus];
+      const color = MermaidGenerator.DIFF_STATUS_COLOR_MAP[node.diffStatus];
+      // Add more horizontal padding around the diff indicator
+      diffStatus = `<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="${color}"><b>${symbol}</b></font></span>`;
+    }
+
     const sanitizedLabel = this.sanitizeLabel(node.label);
-    return `${diffStatus}${icon} <b>${node.type}</b> <br> <u>${sanitizedLabel}</u>`;
+    return `${diffStatus}<b>${node.type}</b> ${icon}<br> <u>${sanitizedLabel}</u>`;
   }
 
   private formatInnerNodeLabel(node: InnerNode): string {
