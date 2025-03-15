@@ -19,8 +19,8 @@
  * write comments to a pull request.
  */
 
-import { Octokit } from "npm:@octokit/core";
-import { context as githubContext } from "npm:@actions/github";
+import { Octokit } from "@octokit/core";
+import { context as githubContext } from "@actions/github";
 
 export type GithubComment = {
   commit_id: string;

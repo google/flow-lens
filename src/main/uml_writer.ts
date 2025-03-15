@@ -110,7 +110,7 @@ function getFormatter(): Formatter {
 
 function getBody(flowDifference: FlowDifference) {
   const oldDiagram = flowDifference.old
-    ? `Previous:
+    ? `Old Version:
 ${MERMAID_OPEN_TAG}
 ${flowDifference.old}
 ${MERMAID_CLOSE_TAG}
@@ -118,7 +118,7 @@ ${MERMAID_CLOSE_TAG}
   `
     : "";
 
-  const newDiagram = `Current:
+  const newDiagram = `New Version:
 ${MERMAID_OPEN_TAG}
 ${flowDifference.new}
 ${MERMAID_CLOSE_TAG}
