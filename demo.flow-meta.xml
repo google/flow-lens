@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Flow xmlns="http://soap.sforce.com/2006/04/metadata">
     <apiVersion>58.0</apiVersion>
+    <actionCalls>
+        <name>Log_Error</name>
+        <label>Log Error</label>
+        <locationX>440</locationX>
+        <locationY>458</locationY>
+        <actionName>Demo</actionName>
+        <actionType>apex</actionType>
+        <flowTransactionModel>CurrentTransaction</flowTransactionModel>
+        <nameSegment>Demo</nameSegment>
+        <offset>0</offset>
+        <versionSegment>1</versionSegment>
+    </actionCalls>
     <decisions>
         <processMetadataValues>
             <name>index</name>
@@ -29,21 +41,6 @@
                 <targetReference>CustomerPath</targetReference>
             </connector>
             <label>Is Customer</label>
-        </rules>
-        <rules>
-            <name>IsPartner</name>
-            <conditionLogic>and</conditionLogic>
-            <conditions>
-                <leftValueReference>$Record.Type</leftValueReference>
-                <operator>EqualTo</operator>
-                <rightValue>
-                    <stringValue>Partner</stringValue>
-                </rightValue>
-            </conditions>
-            <connector>
-                <targetReference>PartnerPath</targetReference>
-            </connector>
-            <label>Is Partner</label>
         </rules>
     </decisions>
     <description>Example Flow with a Decision Node based on Account Type.</description>
@@ -103,19 +100,6 @@
         <processMetadataValues>
             <name>index</name>
             <value>
-                <numberValue>3.0</numberValue>
-            </value>
-        </processMetadataValues>
-        <name>PartnerPath</name>
-        <label>Partner Path</label>
-        <locationX>308</locationX>
-        <locationY>398</locationY>
-        <flowName>Subflow_PartnerPath</flowName>
-    </subflows>
-    <subflows>
-        <processMetadataValues>
-            <name>index</name>
-            <value>
                 <numberValue>4.0</numberValue>
             </value>
         </processMetadataValues>
@@ -124,5 +108,8 @@
         <locationX>566</locationX>
         <locationY>398</locationY>
         <flowName>Subflow_DefaultPath</flowName>
+        <connector>
+            <targetReference>Log_Error</targetReference>
+        </connector>
     </subflows>
 </Flow>
