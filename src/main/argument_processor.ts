@@ -32,10 +32,12 @@ const flags = parseArgs(Deno.args, {
     "gitDiffToHash",
     "outputDirectory",
     "outputFileName",
+    "mode",
   ],
   default: {
     diagramTool: "graphviz",
     filePath: null,
+    mode: "json",
   },
   alias: {
     diagramTool: "d",
@@ -45,6 +47,7 @@ const flags = parseArgs(Deno.args, {
     gitDiffToHash: "to",
     outputDirectory: "o",
     outputFileName: "n",
+    mode: "m",
   },
   collect: ["filePath"],
 });
@@ -56,6 +59,14 @@ export enum DiagramTool {
   PLANTUML = "plantuml",
   GRAPH_VIZ = "graphviz",
   MERMAID = "mermaid",
+}
+
+/**
+ * The mode that determines the output format.
+ */
+export enum Mode {
+  JSON = "json",
+  GITHUB_ACTION = "github_action",
 }
 
 /**
@@ -78,8 +89,12 @@ export const ERROR_MESSAGES = {
     "filePath and (gitDiffFrom and gitDiffToHash) are mutually exclusive",
   gitDiffFromAndToHashMustBeSpecifiedTogether:
     "gitDiffFromHash and gitDiffToHash must be specified together",
-  outputFileNameRequired: "outputFileName is required",
-  outputDirectoryRequired: "outputDirectory is required",
+  outputFileNameRequired: "outputFileName is required for JSON mode",
+  outputDirectoryRequired: "outputDirectory is required for JSON mode",
+  unsupportedMode: (mode: string) =>
+    `Unsupported mode: ${mode}. Valid options are: ${Object.values(Mode).join(
+      ", "
+    )}`,
   header: "The following errors were encountered:",
 };
 
@@ -93,8 +108,9 @@ export interface RuntimeConfig {
   gitRepo?: string;
   gitDiffFromHash?: string;
   gitDiffToHash?: string;
-  outputDirectory: string;
-  outputFileName: string;
+  outputDirectory?: string;
+  outputFileName?: string;
+  mode: Mode;
 }
 
 /**
@@ -133,9 +149,14 @@ export class ArgumentProcessor {
 
   private validateArguments() {
     this.validateDiagramTool();
+    this.validateMode();
     this.validateFilePath();
-    this.validateOutputDirectory();
-    this.validateOutputFileName();
+
+    // Only validate output directory and filename if mode is JSON
+    if (this.config.mode?.toLowerCase() === Mode.JSON) {
+      this.validateOutputDirectory();
+      this.validateOutputFileName();
+    }
 
     this.validateRequiredArguments();
     this.validateMutuallyExclusiveArguments();
@@ -150,6 +171,18 @@ export class ArgumentProcessor {
     ) {
       this.errorsEncountered.push(
         ERROR_MESSAGES.unsupportedDiagramTool(this.config.diagramTool)
+      );
+    }
+  }
+
+  private validateMode() {
+    const lowerCaseMode = this.config.mode?.toLowerCase();
+    if (
+      !this.config.mode ||
+      !Object.values(Mode).includes(lowerCaseMode as Mode)
+    ) {
+      this.errorsEncountered.push(
+        ERROR_MESSAGES.unsupportedMode(this.config.mode)
       );
     }
   }

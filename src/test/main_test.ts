@@ -19,6 +19,7 @@ import * as path from "node:path";
 import {
   Configuration,
   DiagramTool,
+  Mode,
   RuntimeConfig,
 } from "../main/argument_processor.ts";
 import { Runner } from "../main/main.ts";
@@ -31,6 +32,7 @@ const validConfiguration: RuntimeConfig = {
   filePath: [SAMPLE_FLOW_FILE_PATH],
   outputDirectory: TEST_UNDECLARED_OUTPUTS_DIR,
   outputFileName: "test",
+  mode: Mode.JSON,
 };
 
 Deno.test(

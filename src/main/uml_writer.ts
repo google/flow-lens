@@ -20,31 +20,57 @@
  */
 import * as fs from "node:fs";
 import * as path from "node:path";
-import { Configuration } from "./argument_processor.ts";
+import { Configuration, Mode, RuntimeConfig } from "./argument_processor.ts";
 import { FlowDifference } from "./flow_to_uml_transformer.ts";
+import { GithubClient, GithubComment } from "./github_client.ts";
 
 const FILE_EXTENSION = ".json";
+const HIDDEN_COMMENT_PREFIX = "<!--flow-lens-hidden-comment-->";
+const MERMAID_OPEN_TAG = "```mermaid";
+const MERMAID_CLOSE_TAG = "```";
 
 /**
  * This class is used to write the generated UML diagrams to a file.
  */
 export class UmlWriter {
   constructor(
-    private readonly filePathToFlowDifference: Map<string, FlowDifference>
+    private readonly filePathToFlowDifference: Map<string, FlowDifference>,
+    private readonly githubClient = new GithubClient(
+      Deno.env.get("GITHUB_TOKEN") || ""
+    )
   ) {}
 
   /**
    * Writes the UML diagrams to a file.
    */
   writeUmlDiagrams() {
+    const config = Configuration.getInstance();
+    if (config.mode === Mode.JSON) {
+      this.writeJsonFile(config);
+    } else if (config.mode === Mode.GITHUB_ACTION) {
+      this.writeGithubComment(config);
+    }
+  }
+
+  private writeJsonFile(config: RuntimeConfig) {
     const fileBody = getFormatter().format(this.filePathToFlowDifference);
     fs.writeFileSync(
       path.join(
-        Configuration.getInstance().outputDirectory,
-        `${Configuration.getInstance().outputFileName}${FILE_EXTENSION}`
+        config.outputDirectory!,
+        `${config.outputFileName!}${FILE_EXTENSION}`
       ),
       JSON.stringify(fileBody, null, 2)
     );
+  }
+
+  private writeGithubComment(config: RuntimeConfig) {
+    this.filePathToFlowDifference.forEach((flowDifference, filePath) => {
+      const comment = this.githubClient.translateToComment(
+        getBody(flowDifference),
+        filePath
+      );
+      this.githubClient.writeComment(comment);
+    });
   }
 }
 
@@ -80,4 +106,25 @@ class DefaultFormatter implements Formatter {
 
 function getFormatter(): Formatter {
   return new DefaultFormatter();
+}
+
+function getBody(flowDifference: FlowDifference) {
+  const oldDiagram = flowDifference.old
+    ? `Old Version:
+${MERMAID_OPEN_TAG}
+${flowDifference.old}
+${MERMAID_CLOSE_TAG}
+
+  `
+    : "";
+
+  const newDiagram = `New Version:
+${MERMAID_OPEN_TAG}
+${flowDifference.new}
+${MERMAID_CLOSE_TAG}
+  `;
+
+  return `${HIDDEN_COMMENT_PREFIX}
+${oldDiagram}
+${newDiagram}`;
 }

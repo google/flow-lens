@@ -21,6 +21,7 @@ for the
   Graphviz, and Mermaid.
 - **Handles Git diffs:** Can process changes between two Git commits,
   highlighting added, modified, and deleted elements in the resulting diagram.
+- **GitHub Action integration:** Automatically posts flow diagrams as comments on pull requests.
 
 ## Usage
 
@@ -29,21 +30,30 @@ available:
 
 | Option              | Description                                                                                            | Type     | Default    | Required                            |
 | ------------------- | ------------------------------------------------------------------------------------------------------ | -------- | ---------- | ----------------------------------- |
+| `--mode`            | The output mode ('json' or 'github_action').                                                           | string   | `json`     | No                                  |
 | `--diagramTool`     | The diagram tool to use ('plantuml', 'graphviz', or 'mermaid').                                        | string   | `graphviz` | No                                  |
 | `--filePath`        | Path(s) to the Salesforce Flow XML file(s). Specify multiple files using space separated values.       | string[] |            | No (Git diff or file path required) |
 | `--gitDiffFromHash` | The starting commit hash for the Git diff.                                                             | string   |            | No (Only with Git diff)             |
 | `--gitDiffToHash`   | The ending commit hash for the Git diff.                                                               | string   |            | No (Only with Git diff)             |
 | `--gitRepo`         | Path to the Git repository (required when using Git diff and the script isn't run from the repo root). | string   |            | No                                  |
-| `--outputDirectory` | The directory to save the output file.                                                                 | string   |            | Yes                                 |
-| `--outputFileName`  | The name of the output file (without extension).                                                       | string   |            | Yes                                 |
+| `--outputDirectory` | The directory to save the output file.                                                                 | string   |            | Yes (Only in json mode)             |
+| `--outputFileName`  | The name of the output file (without extension).                                                       | string   |            | Yes (Only in json mode)             |
 
-**Example using file path:**
+### Output Modes
+
+Flow Lens supports two output modes:
+
+1. **json mode (default):** Generates a JSON file containing the UML diagram(s) that can be used for further processing.
+2. **github_action mode:** Automatically posts comments with flow diagrams on pull requests when used in a GitHub Actions workflow. When using this mode, you must specify `mermaid` as the diagram tool.
+
+**Example using file path (json mode):**
 
 ```shell
 deno run \
   --allow-read \
   --allow-write \
   jsr:@goog/flow-lens \
+  --mode="json" \
   --diagramTool="graphviz" \
   --filePath="/some/path/force-app/main/default/flows/ArticleSubmissionStatus.flow-meta.xml" \
   --filePath="/some/path/force-app/main/default/flows/LeadConversionScreen.flow-meta.xml" \
@@ -52,13 +62,14 @@ deno run \
   --outputFileName="test"
 ```
 
-**Example using Git diff:**
+**Example using Git diff (json mode):**
 
 ```shell
 deno run \
   --allow-read \
   --allow-write \
   jsr:@goog/flow-lens \
+  --mode="json" \
   --diagramTool="graphviz" \
   --gitDiffFromHash="HEAD~1" \
   --gitDiffToHash="HEAD" \
@@ -67,9 +78,55 @@ deno run \
   --outputFileName="test"
 ```
 
+### Setting up a GitHub Action
+
+You can set up a GitHub Action to automatically generate and post flow diagrams as comments on pull requests. Here's an example workflow configuration:
+
+```yaml
+name: Generate Flow Preview
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  generate_preview:
+    permissions: write-all
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 2
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: latest
+
+      - name: Generate flow diagrams
+        run: |
+          deno run \
+            --allow-read \
+            --allow-write \
+            --allow-env \
+            --allow-net \
+            --allow-run \
+            jsr:@goog/flow-lens \
+            --mode="github_action" \
+            --diagramTool="mermaid" \
+            --gitDiffFromHash="HEAD^1" \
+            --gitDiffToHash="HEAD"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+```
+
+When using the GitHub Action mode, Flow Lens will automatically post a comment on the pull request with the old (if applicable) and new versions of the flow whenever a pull request is created or updated. This makes it easy to visualize flow changes directly in the pull request review process.
+
 ## Output
 
-The output is a JSON file containing the generated UML diagram(s). The structure
+When using the json mode, the output is a JSON file containing the generated UML diagram(s). The structure
 will contain the file paths and their associated old (if applicable) and new UML
 strings.
 
@@ -110,15 +167,6 @@ project was available for commercial use. The key differentiator is that Flow
 Lens represents flow differences structurally, making it ideal for assistance
 with code reviews. This structural diff visualization is not available in other
 flow visualization tools.
-
-### What is the future of this project?
-
-We have two main goals for the future of Flow Lens:
-
-1. Migrate from a standalone Deno executable to a `sf` CLI plugin to better
-   integrate with the Salesforce development ecosystem
-2. Create a GitHub Action that automatically generates and displays diagram
-   diffs directly in pull requests, streamlining the code review process
 
 ## Example
 
