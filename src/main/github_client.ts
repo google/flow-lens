@@ -51,4 +51,20 @@ export class GithubClient {
     const endpoint = `POST /repos/${this.context.repo.owner}/${this.context.repo.repo}/pulls/${pullRequestNumber}/comments`;
     await this.octokit.request(endpoint, comment);
   }
+
+  translateToComment(body: string, filePath: string): GithubComment {
+    if (!this.context.payload.pull_request) {
+      throw new Error("Cannot write comment: Not in a pull request context");
+    }
+    const sha = this.context.payload.pull_request.head.sha;
+    if (!sha) {
+      throw new Error("Cannot write comment: Pull request head SHA is missing");
+    }
+    return {
+      commit_id: sha,
+      path: filePath,
+      subject_type: "file",
+      body: body,
+    };
+  }
 }

@@ -14,7 +14,8 @@
  * limitations under the License.
  */
 
-import { assertEquals, assertExists, assertStringIncludes } from "@std/assert";
+import { assertEquals, assertExists } from "@std/assert";
+import { spy, assertSpyCalls } from "@std/testing/mock";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
@@ -25,6 +26,7 @@ import {
 } from "../main/argument_processor.ts";
 import { FlowDifference } from "../main/flow_to_uml_transformer.ts";
 import { UmlWriter } from "../main/uml_writer.ts";
+import { GithubClient, GithubComment } from "../main/github_client.ts";
 
 const TEST_UNDECLARED_OUTPUTS_DIR = "./";
 
@@ -44,7 +46,6 @@ const FLOW_DIFFERENCE_2: FlowDifference = {
 };
 const ENCODING = "utf8";
 const OUTPUT_FILE_NAME = "output_file_name";
-const SAMPLE_PLACER_PATH = "sample/placer/path";
 
 const FILE_PATH_TO_FLOW_DIFFERENCE = new Map<string, FlowDifference>([
   [FILE_PATH_1, FLOW_DIFFERENCE_1],
@@ -68,13 +69,14 @@ const expectedFilePath = path.join(
 );
 
 function getRuntimeConfig(
-  diagramTool: DiagramTool = DiagramTool.PLANTUML
+  diagramTool: DiagramTool = DiagramTool.PLANTUML,
+  mode: Mode = Mode.JSON
 ): RuntimeConfig {
   return {
     diagramTool,
     outputDirectory: TEST_UNDECLARED_OUTPUTS_DIR,
     outputFileName: OUTPUT_FILE_NAME,
-    mode: Mode.JSON,
+    mode,
   };
 }
 
@@ -93,5 +95,63 @@ Deno.test("UmlWriter", async (t) => {
     assertEquals(fileContent, JSON.stringify(EXPECTED_DEFAULT_FORMAT, null, 2));
 
     Deno.remove(expectedFilePath);
+  });
+
+  await t.step("should write UML diagrams as GitHub comments", () => {
+    Configuration.getInstance = () =>
+      getRuntimeConfig(DiagramTool.PLANTUML, Mode.GITHUB_ACTION);
+
+    // Create a mock GithubClient with spy methods
+    const mockGithubClient = {
+      writeComment: spy(async (_comment: GithubComment) => Promise.resolve()),
+      translateToComment: spy(
+        (_body: string, filePath: string): GithubComment => ({
+          commit_id: "mock_sha",
+          path: filePath,
+          subject_type: "file",
+          body: _body,
+        })
+      ),
+    };
+
+    // Set up environment variable for GITHUB_TOKEN
+    const originalEnvGet = Deno.env.get;
+    try {
+      // @ts-ignore: Mocking Deno.env.get for testing
+      Deno.env.get = (key: string): string | undefined =>
+        key === "GITHUB_TOKEN" ? "mock-token" : undefined;
+
+      writer = new UmlWriter(
+        FILE_PATH_TO_FLOW_DIFFERENCE,
+        mockGithubClient as unknown as GithubClient
+      );
+      writer.writeUmlDiagrams();
+
+      // Verify that the methods were called the expected number of times
+      assertSpyCalls(
+        mockGithubClient.translateToComment,
+        FILE_PATH_TO_FLOW_DIFFERENCE.size
+      );
+      assertSpyCalls(
+        mockGithubClient.writeComment,
+        FILE_PATH_TO_FLOW_DIFFERENCE.size
+      );
+
+      // Verify the content of the calls
+      for (let i = 0; i < FILE_PATH_TO_FLOW_DIFFERENCE.size; i++) {
+        // Check that translateToComment was called with the right file path
+        const translateCall = mockGithubClient.translateToComment.calls[i];
+        const filePath = translateCall.args[1];
+
+        // Check that writeComment was called with a comment that has the right path
+        const writeCall = mockGithubClient.writeComment.calls[i];
+        const comment = writeCall.args[0];
+
+        assertEquals(comment.path, filePath);
+      }
+    } finally {
+      // Restore original env.get
+      Deno.env.get = originalEnvGet;
+    }
   });
 });

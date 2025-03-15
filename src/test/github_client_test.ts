@@ -27,7 +27,12 @@ class MockOctokit {
 // Mock GitHub Actions context
 const mockContext = {
   payload: {
-    pull_request: { number: 42 },
+    pull_request: {
+      number: 42,
+      head: {
+        sha: "mock-head-sha",
+      },
+    },
   },
   repo: {
     owner: "mock-owner",
@@ -122,5 +127,24 @@ Deno.test(
       Error,
       "Cannot write comment: Not in a pull request context"
     );
+  }
+);
+
+Deno.test(
+  "GithubClient.translateToComment should create a properly formatted comment",
+  () => {
+    const githubClient = new GithubClient("fake-token", mockContext);
+
+    const body = "Test comment body";
+    const filePath = "src/test/file.ts";
+
+    const comment = githubClient.translateToComment(body, filePath);
+
+    assertEquals(comment, {
+      commit_id: "mock-head-sha",
+      path: filePath,
+      subject_type: "file",
+      body: body,
+    });
   }
 );
