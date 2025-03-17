@@ -161,8 +161,9 @@ export class MermaidGenerator extends UmlGenerator {
     const sanitizedContent = node.content.map((item) =>
       this.sanitizeLabel(item)
     );
-    return `<b>${
-      node.type
-    }</b> <br ><u>${sanitizedLabel}</u> <br>${sanitizedContent.join("<br>")}`;
+    const nodeType = node.type ? `<b>${node.type}</b><br>` : "";
+    const nodeLabel = node.label ? `<u>${sanitizedLabel}</u><br>` : "";
+    const nodeContent = sanitizedContent.join("<br>");
+    return `${nodeType}${nodeLabel}${nodeContent}`;
   }
 }

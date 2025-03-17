@@ -48,12 +48,15 @@ const UML_REPRESENTATIONS = {
   apexPluginCall: (name: string) => `state Apex Plugin Call ${name}`,
   assignment: (name: string) => `state Assignment ${name}`,
   collectionProcessor: (name: string) => `state Collection Processor ${name}`,
-  decision: (name: string) => `state Decision ${name}`,
+  decision: (name: string) => `state Decision ${name}${EOL}`,
   loop: (name: string) => `state Loop ${name}`,
-  orchestratedStage: (name: string) => `state Orchestrated Stage ${name}`,
+  orchestratedStage: (name: string) => `state Orchestrated Stage ${name}${EOL}`,
   recordCreate: (name: string) => `state Record Create ${name}`,
   recordDelete: (name: string) => `state Record Delete ${name}`,
-  recordLookup: (name: string) => `state Record Lookup ${name}`,
+  recordLookup: (name: string) => `state Record Lookup ${name}
+  Fields Queried: all
+  Filter Logic: None
+  Limit: All Records`,
   recordRollback: (name: string) => `state Record Rollback ${name}`,
   recordUpdate: (name: string) => `state Record Update ${name}`,
   screen: (name: string) => `state Screen ${name}`,
@@ -144,7 +147,15 @@ Deno.test("UmlGenerator", async (t) => {
         return label;
       }
       toUmlString(node: DiagramNode): string {
-        return `state ${node.type} ${node.id}`;
+        let result = `state ${node.type} ${node.id}`;
+        if (node.innerNodes) {
+          const innerContent = node.innerNodes
+            .flatMap((innerNode) => innerNode.content)
+            .map((content) => `  ${content}`)
+            .join(EOL);
+          result += EOL + innerContent;
+        }
+        return result;
       }
       getTransition(transition: Transition): string {
         return UML_REPRESENTATIONS.transition(transition.from, transition.to);
@@ -231,4 +242,91 @@ Deno.test("UmlGenerator", async (t) => {
 
     assertEquals(uml.includes(TRANSITION_ARROW), false);
   });
+
+  await t.step(
+    "should generate proper inner node content for FlowRecordLookup",
+    () => {
+      // Setup test data
+      const lookupNode: flowTypes.FlowRecordLookup = {
+        name: "testLookup",
+        label: "Test Lookup",
+        object: "Account",
+        queriedFields: ["Name", "Industry"],
+        filters: [
+          {
+            field: "Name",
+            operator: flowTypes.FlowRecordFilterOperator.EQUAL_TO,
+            value: { stringValue: "Test Account" },
+          },
+          {
+            field: "Industry",
+            operator: flowTypes.FlowRecordFilterOperator.NOT_EQUAL_TO,
+            value: { stringValue: "Technology" },
+          },
+        ],
+        filterLogic: "1 AND 2",
+        getFirstRecordOnly: true,
+        elementSubtype: "RecordLookup",
+        locationX: 0,
+        locationY: 0,
+        description: "Test lookup node",
+      };
+
+      mockParsedFlow.recordLookups = [lookupNode];
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Fields Queried:",
+        "Name, Industry",
+        "Filter Logic: 1 AND 2",
+        "1. Name EqualTo Test Account",
+        "2. Industry NotEqualTo Technology",
+        "Limit: First Record Only",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`
+        );
+      });
+    }
+  );
+
+  await t.step(
+    "should handle FlowRecordLookup with minimal configuration",
+    () => {
+      const minimalLookupNode: flowTypes.FlowRecordLookup = {
+        name: "minimalLookup",
+        label: "Minimal Lookup",
+        object: "Contact",
+        queriedFields: [],
+        filters: [],
+        filterLogic: "",
+        getFirstRecordOnly: false,
+        elementSubtype: "RecordLookup",
+        locationX: 0,
+        locationY: 0,
+        description: "",
+      };
+
+      mockParsedFlow.recordLookups = [minimalLookupNode];
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Fields Queried: all",
+        "Filter Logic: None",
+        "Limit: All Records",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`
+        );
+      });
+    }
+  );
 });
