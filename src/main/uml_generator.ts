@@ -318,7 +318,64 @@ export abstract class UmlGenerator {
       type: "Record Lookup",
       color: SkinColor.PINK,
       icon: Icon.LOOKUP,
+      innerNodes: this.getFlowRecordLookupInnerNodes(node),
     });
+  }
+
+  private getFlowRecordLookupInnerNodes(
+    node: flowTypes.FlowRecordLookup
+  ): InnerNode[] {
+    const innerNodeContent: string[] = [];
+    innerNodeContent.push(...this.getFieldsQueried(node));
+    innerNodeContent.push(...this.getFilterCriteria(node));
+    const limit = this.getLimit(node);
+    if (limit) {
+      innerNodeContent.push(limit);
+    }
+
+    let innerNode = {
+      id: `${node.name}__LookupDetails`,
+      type: `sObject: ${node.object}`,
+      label: "",
+      content: innerNodeContent,
+    };
+    return [innerNode];
+  }
+
+  private getFieldsQueried(node: flowTypes.FlowRecordLookup): string[] {
+    const result: string[] = [];
+    if (node.queriedFields && node.queriedFields.length > 0) {
+      result.push("Fields Queried:");
+      result.push(node.queriedFields.join(", "));
+    } else {
+      result.push("Fields Queried: all");
+    }
+    return result;
+  }
+
+  private getFilterCriteria(node: flowTypes.FlowRecordLookup): string[] {
+    const result: string[] = [
+      `Filter Logic: ${node.filterLogic ? node.filterLogic : "None"}`,
+    ];
+    const filters = node.filters?.map((filter, index) => {
+      return `${index + 1}. ${filter.field} ${filter.operator} ${toString(
+        filter.value
+      )}`;
+    });
+    if (filters) {
+      result.push(...filters);
+    }
+    return result;
+  }
+
+  private getLimit(node: flowTypes.FlowRecordLookup): string {
+    if (node.getFirstRecordOnly) {
+      return "Limit: First Record Only";
+    }
+    if (node.limit) {
+      return `Limit: ${node.limit}`;
+    }
+    return "Limit: All Records";
   }
 
   private getFlowRecordRollback(node: flowTypes.FlowRecordRollback): string {

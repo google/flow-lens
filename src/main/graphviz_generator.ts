@@ -115,25 +115,19 @@ node [shape=box, style=filled]`;
       GraphVizGenerator.SKIN_COLOR_MAP[node.color] || SkinColor.NONE;
     const graphvizIcon = GraphVizGenerator.ICON_MAP[node.icon] || Icon.NONE;
 
-    // Handle nodes with inner nodes
-    if (node.innerNodes) {
-      return getNodeBody(
-        node,
-        node.type,
-        graphvizIcon,
-        graphvizSkinColor,
-        this.generateInnerNodeBodyFromInnerNodes(node, node.innerNodes)
-      );
-    }
-
-    // Handle regular nodes
-    return getNodeBody(node, node.type, graphvizIcon, graphvizSkinColor);
+    return getNodeBody(
+      node,
+      node.type,
+      graphvizIcon,
+      graphvizSkinColor,
+      this.generateInnerNodeBodyFromInnerNodes(node, node.innerNodes)
+    );
   }
 
   // Helper method to generate inner node body from DiagramNode's innerNodes
   generateInnerNodeBodyFromInnerNodes(
     parentNode: DiagramNode,
-    innerNodes: InnerNode[]
+    innerNodes?: InnerNode[]
   ): string {
     if (!innerNodes || innerNodes.length === 0) {
       return "";
@@ -145,6 +139,7 @@ node [shape=box, style=filled]`;
       const innerNodeBody = getInnerNodeBody(
         parentNode,
         FontColor.WHITE,
+        getLabel(innerNode.type),
         getLabel(innerNode.label),
         innerNode.content
       );
@@ -192,14 +187,16 @@ ${TABLE_END}`;
 function getInnerNodeBody(
   parentNode: DiagramNode,
   color: FontColor,
+  type: string,
   label: string,
   content: string[]
 ) {
+  const formattedLabel = getLabel([type, label].join(" "));
   return `  <TR>
     <TD${getColSpan(
       parentNode
     )} BORDER="1" COLOR="${color}" ALIGN="LEFT" CELLPADDING="6">
-      <B>${getLabel(label)}</B>
+      <B>${formattedLabel}</B>
       ${content.map((content) => `<BR ALIGN="LEFT"/>${content}`).join("")}
     </TD>
   </TR>`;

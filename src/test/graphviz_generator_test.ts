@@ -312,7 +312,7 @@ Deno.test("GraphViz", async (t) => {
         Icon.DECISION,
         SkinColor.ORANGE,
         FontColor.WHITE,
-        generateInnerNodeCell(FontColor.WHITE, "myDecisionRule", [
+        generateInnerNodeCell(FontColor.WHITE, "Rule myDecisionRule", [
           "1. foo EqualTo true",
         ])
       )
@@ -351,8 +351,8 @@ Deno.test("GraphViz", async (t) => {
         SkinColor.NAVY,
         FontColor.WHITE,
         generateInnerNodeCells([
-          generateInnerNodeCell(FontColor.WHITE, "1. step1", []),
-          generateInnerNodeCell(FontColor.WHITE, "2. step2", []),
+          generateInnerNodeCell(FontColor.WHITE, "Stage Step 1. step1", []),
+          generateInnerNodeCell(FontColor.WHITE, "Stage Step 2. step2", []),
         ])
       )
     );
