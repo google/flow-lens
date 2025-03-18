@@ -5,7 +5,7 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-  generate_preview:
+  run_tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -25,4 +25,5 @@ jobs:
             --allow-read \
             --allow-write \
             --allow-env \
-            --allow-run
+            --allow-run \
+            --trace-leaks
