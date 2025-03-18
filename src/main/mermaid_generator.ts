@@ -80,9 +80,10 @@ export class MermaidGenerator extends UmlGenerator {
   };
 
   getHeader(label: string): string {
+    const sanitizedTitle = this.sanitizeLabel(label);
     return [
       "---",
-      `title: ${label}`,
+      `title: "${sanitizedTitle}"`,
       "---",
       "stateDiagram-v2",
       "",

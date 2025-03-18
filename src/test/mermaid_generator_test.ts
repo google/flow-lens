@@ -204,7 +204,7 @@ Deno.test("MermaidGenerator", async (t) => {
     assertStringIncludes(result, "classDef orange fill:#DD7A00, color:white");
     assertStringIncludes(result, "classDef navy fill:#344568, color:white");
     assertStringIncludes(result, "classDef blue fill:#1B96FF, color:white");
-    assertStringIncludes(result, `title: ${label}`);
+    assertStringIncludes(result, `title: "${label}"`);
   });
 
   await t.step("should generate apex plugin call node", () => {
