@@ -1,0 +1,28 @@
+name: Run Tests
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  generate_preview:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.ref }}
+          fetch-depth: 2
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: latest
+
+      - name: Run Tests
+        run: |
+          deno test \
+            --allow-read \
+            --allow-write \
+            --allow-env \
+            --allow-run
