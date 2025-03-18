@@ -146,7 +146,7 @@ export class FlowParser {
     this.beingParsed.recordCreates = ensureArray(flow.recordCreates);
     this.beingParsed.recordDeletes = ensureArray(flow.recordDeletes);
     this.beingParsed.recordLookups = ensureArray(flow.recordLookups);
-    setRecordLookups(flow.recordLookups);
+    setRecordLookups(this.beingParsed.recordLookups);
     this.beingParsed.recordRollbacks = ensureArray(flow.recordRollbacks);
     this.beingParsed.recordUpdates = ensureArray(flow.recordUpdates);
     this.beingParsed.screens = ensureArray(flow.screens);
