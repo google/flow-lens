@@ -146,6 +146,7 @@ export class FlowParser {
     this.beingParsed.recordCreates = ensureArray(flow.recordCreates);
     this.beingParsed.recordDeletes = ensureArray(flow.recordDeletes);
     this.beingParsed.recordLookups = ensureArray(flow.recordLookups);
+    setRecordLookups(this.beingParsed.recordLookups);
     this.beingParsed.recordRollbacks = ensureArray(flow.recordRollbacks);
     this.beingParsed.recordUpdates = ensureArray(flow.recordUpdates);
     this.beingParsed.screens = ensureArray(flow.screens);
@@ -480,6 +481,29 @@ function setRuleConditions(rules: flowTypes.FlowRule[] | undefined) {
       return;
     }
     rule.conditions = ensureArray(rule.conditions) as flowTypes.FlowCondition[];
+  });
+}
+
+/**
+ * Set Record Lookups
+ *
+ * Record Lookup filters and queried fields are nested properties which also
+ * need to be converted to an array.
+ */
+function setRecordLookups(
+  recordLookups: flowTypes.FlowRecordLookup[] | undefined
+) {
+  recordLookups?.forEach((recordLookup) => {
+    if (recordLookup.filters) {
+      recordLookup.filters = ensureArray(
+        recordLookup.filters
+      ) as flowTypes.FlowRecordFilter[];
+    }
+    if (recordLookup.queriedFields) {
+      recordLookup.queriedFields = ensureArray(
+        recordLookup.queriedFields
+      ) as string[];
+    }
   });
 }
 
