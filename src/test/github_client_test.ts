@@ -16,10 +16,61 @@
 
 import { GithubClient, GithubComment } from "../main/github_client.ts";
 import { assertEquals, assertRejects } from "@std/assert";
+import { ERROR_MESSAGES } from "../main/github_client.ts";
 
 // Mock Octokit
 class MockOctokit {
-  async request(endpoint: string, data: unknown) {
+  async request(endpoint: string, data?: unknown) {
+    // Mock response for review comments endpoint
+    if (endpoint.includes("/pulls/") && endpoint.includes("/comments")) {
+      return {
+        data: [
+          {
+            url: "https://api.github.com/repos/mock-owner/mock-repo/pulls/comments/1",
+            pull_request_review_id: 42,
+            id: 1,
+            node_id: "mock-node-id",
+            diff_hunk: "@@ -16,33 +16,40 @@ public class Test",
+            path: "test/file.ts",
+            position: 1,
+            original_position: 1,
+            commit_id: "mock-commit-id",
+            original_commit_id: "mock-original-commit-id",
+            user: {
+              login: "mock-user",
+              id: 1,
+              node_id: "mock-user-node-id",
+              avatar_url: "https://mock-avatar.com",
+              gravatar_id: "",
+              url: "https://api.github.com/users/mock-user",
+              html_url: "https://github.com/mock-user",
+              type: "User",
+              site_admin: false,
+            },
+            body: "Test review comment",
+            created_at: "2024-03-18T00:00:00Z",
+            updated_at: "2024-03-18T00:00:00Z",
+            html_url:
+              "https://github.com/mock-owner/mock-repo/pull/42#discussion-1",
+            pull_request_url:
+              "https://api.github.com/repos/mock-owner/mock-repo/pulls/42",
+            author_association: "CONTRIBUTOR",
+            _links: {
+              self: {
+                href: "https://api.github.com/repos/mock-owner/mock-repo/pulls/comments/1",
+              },
+              html: {
+                href: "https://github.com/mock-owner/mock-repo/pull/42#discussion-1",
+              },
+              pull_request: {
+                href: "https://api.github.com/repos/mock-owner/mock-repo/pulls/42",
+              },
+            },
+          },
+        ],
+      };
+    }
+    // For other endpoints, return the original mock response
     return { endpoint, data };
   }
 }
@@ -113,7 +164,7 @@ Deno.test(
   async () => {
     const mockOctokit = new MockOctokit();
     const githubClient = new GithubClient("fake-token", invalidContext) as any;
-    githubClient.octokit = mockOctokit; // Inject mock Octokit
+    githubClient.octokit = mockOctokit;
 
     const comment: GithubComment = {
       commit_id: "mock-commit",
@@ -125,7 +176,7 @@ Deno.test(
     await assertRejects(
       () => githubClient.writeComment(comment),
       Error,
-      "Cannot write comment: Not in a pull request context"
+      ERROR_MESSAGES.NOT_PR_CONTEXT
     );
   }
 );
@@ -146,5 +197,58 @@ Deno.test(
       subject_type: "file",
       body: body,
     });
+  }
+);
+
+Deno.test(
+  "GithubClient.getAllCommentsForPullRequest should return review comments when in PR context",
+  async () => {
+    const mockOctokit = new MockOctokit();
+    const githubClient = new GithubClient("fake-token", mockContext) as any;
+    githubClient.octokit = mockOctokit;
+
+    const comments = await githubClient.getAllCommentsForPullRequest();
+
+    assertEquals(comments.length, 1);
+    assertEquals(comments[0].id, 1);
+    assertEquals(comments[0].body, "Test review comment");
+    assertEquals(comments[0].path, "test/file.ts");
+    assertEquals(comments[0].pull_request_review_id, 42);
+  }
+);
+
+Deno.test(
+  "GithubClient.getAllCommentsForPullRequest should throw error when not in PR context",
+  async () => {
+    const mockOctokit = new MockOctokit();
+    const githubClient = new GithubClient("fake-token", invalidContext) as any;
+    githubClient.octokit = mockOctokit;
+
+    await assertRejects(
+      () => githubClient.getAllCommentsForPullRequest(),
+      Error,
+      ERROR_MESSAGES.NOT_PR_CONTEXT
+    );
+  }
+);
+
+Deno.test(
+  "GithubClient.getAllCommentsForPullRequest should handle API errors",
+  async () => {
+    const mockOctokit = new MockOctokit();
+    const githubClient = new GithubClient("fake-token", mockContext) as any;
+
+    // Override the request method to throw an error
+    mockOctokit.request = async () => {
+      throw new Error("API error");
+    };
+
+    githubClient.octokit = mockOctokit;
+
+    await assertRejects(
+      () => githubClient.getAllCommentsForPullRequest(),
+      Error,
+      ERROR_MESSAGES.FETCH_COMMENTS_FAILED("API error")
+    );
   }
 );
