@@ -137,7 +137,7 @@ ${MERMAID_CLOSE_TAG}
 `
     : "";
 
-  const newDiagram = `<details open>
+  const newDiagram = `<details>
 <summary>New Version</summary>
 
 ${MERMAID_OPEN_TAG}
