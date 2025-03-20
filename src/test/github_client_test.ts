@@ -252,3 +252,58 @@ Deno.test(
     );
   }
 );
+
+Deno.test(
+  "GithubClient.deleteReviewComment should successfully delete a review comment",
+  async () => {
+    const mockOctokit = new MockOctokit();
+    const githubClient = new GithubClient("fake-token", mockContext) as any;
+    githubClient.octokit = mockOctokit;
+
+    let errorCaught = false;
+    try {
+      await githubClient.deleteReviewComment(123);
+    } catch (error) {
+      console.error("Unexpected error:", error);
+      errorCaught = true;
+    }
+
+    assertEquals(errorCaught, false);
+  }
+);
+
+Deno.test(
+  "GithubClient.deleteReviewComment should throw error when not in PR context",
+  async () => {
+    const mockOctokit = new MockOctokit();
+    const githubClient = new GithubClient("fake-token", invalidContext) as any;
+    githubClient.octokit = mockOctokit;
+
+    await assertRejects(
+      () => githubClient.deleteReviewComment(123),
+      Error,
+      ERROR_MESSAGES.NOT_PR_CONTEXT
+    );
+  }
+);
+
+Deno.test(
+  "GithubClient.deleteReviewComment should handle API errors",
+  async () => {
+    const mockOctokit = new MockOctokit();
+    const githubClient = new GithubClient("fake-token", mockContext) as any;
+
+    // Override the request method to throw an error
+    mockOctokit.request = async () => {
+      throw new Error("API error");
+    };
+
+    githubClient.octokit = mockOctokit;
+
+    await assertRejects(
+      () => githubClient.deleteReviewComment(123),
+      Error,
+      ERROR_MESSAGES.DELETE_COMMENT_FAILED(123, "API error")
+    );
+  }
+);

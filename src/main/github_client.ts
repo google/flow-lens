@@ -28,7 +28,9 @@ export const ERROR_MESSAGES = {
   MISSING_PR_SHA: "Cannot write comment: Pull request head SHA is missing",
   FETCH_COMMENTS_FAILED: (error: string) =>
     `Failed to fetch pull request review comments: ${error}`,
-};
+  DELETE_COMMENT_FAILED: (commentId: number, error: string) =>
+    `Failed to delete review comment ${commentId}: ${error}`,
+} as const;
 
 export type GithubComment = {
   commit_id: string;
@@ -92,6 +94,13 @@ export class GithubClient {
     this.context = context;
   }
 
+  /**
+   * Writes a new review comment on a pull request.
+   *
+   * @param comment The comment data to write, including the file path, commit ID, and body
+   * @throws Error if not running in a pull request context
+   * @throws Error if pull request number is missing
+   */
   async writeComment(comment: GithubComment) {
     if (!this.context.payload.pull_request) {
       throw new Error(ERROR_MESSAGES.NOT_PR_CONTEXT);
@@ -106,6 +115,13 @@ export class GithubClient {
     await this.octokit.request(endpoint, comment);
   }
 
+  /**
+   * Translates a comment body and file path into a GithubComment object.
+   *
+   * @param body The comment body to write
+   * @param filePath The path to the file being commented on
+   * @returns A GithubComment object containing the comment data
+   */
   translateToComment(body: string, filePath: string): GithubComment {
     if (!this.context.payload.pull_request) {
       throw new Error(ERROR_MESSAGES.NOT_PR_CONTEXT);
@@ -148,6 +164,34 @@ export class GithubClient {
     } catch (error) {
       throw new Error(
         ERROR_MESSAGES.FETCH_COMMENTS_FAILED(
+          error instanceof Error ? error.message : "Unknown error"
+        )
+      );
+    }
+  }
+
+  /**
+   * Deletes a review comment from a pull request.
+   *
+   * @param commentId The unique identifier of the comment to delete
+   * @throws Error if not running in a pull request context or if deletion fails
+   */
+  public async deleteReviewComment(commentId: number): Promise<void> {
+    if (!this.context.payload.pull_request) {
+      throw new Error(ERROR_MESSAGES.NOT_PR_CONTEXT);
+    }
+
+    const owner = this.context.repo.owner;
+    const repo = this.context.repo.repo;
+
+    try {
+      await this.octokit.request(
+        `DELETE /repos/${owner}/${repo}/pulls/comments/${commentId}`
+      );
+    } catch (error) {
+      throw new Error(
+        ERROR_MESSAGES.DELETE_COMMENT_FAILED(
+          commentId,
           error instanceof Error ? error.message : "Unknown error"
         )
       );
