@@ -133,177 +133,173 @@ const invalidContext = {
   },
 };
 
-Deno.test(
-  "GithubClient.writeComment should call Octokit with correct parameters",
-  async () => {
-    const mockOctokit = new MockOctokit();
-    const githubClient = new GithubClient("fake-token", mockContext) as any;
-    githubClient.octokit = mockOctokit; // Inject mock Octokit
+Deno.test("GithubClient", async (t) => {
+  // Write Comment Tests
+  await t.step("writeComment", async (t) => {
+    await t.step("should call Octokit with correct parameters", async () => {
+      const mockOctokit = new MockOctokit();
+      const githubClient = new GithubClient("fake-token", mockContext) as any;
+      githubClient.octokit = mockOctokit;
 
-    const comment: GithubComment = {
-      commit_id: "mock-commit",
-      path: "src/index.ts",
-      subject_type: "file",
-      body: "This is a test comment",
-    };
+      const comment: GithubComment = {
+        commit_id: "mock-commit",
+        path: "src/index.ts",
+        subject_type: "file",
+        body: "This is a test comment",
+      };
 
-    let errorCaught = false;
-    try {
-      await githubClient.writeComment(comment);
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      errorCaught = true;
-    }
+      let errorCaught = false;
+      try {
+        await githubClient.writeComment(comment);
+      } catch (error) {
+        console.error("Unexpected error:", error);
+        errorCaught = true;
+      }
 
-    assertEquals(errorCaught, false);
-  }
-);
-
-Deno.test(
-  "GithubClient.writeComment should throw an error if not in a PR context",
-  async () => {
-    const mockOctokit = new MockOctokit();
-    const githubClient = new GithubClient("fake-token", invalidContext) as any;
-    githubClient.octokit = mockOctokit;
-
-    const comment: GithubComment = {
-      commit_id: "mock-commit",
-      path: "src/index.ts",
-      subject_type: "file",
-      body: "This is a test comment",
-    };
-
-    await assertRejects(
-      () => githubClient.writeComment(comment),
-      Error,
-      ERROR_MESSAGES.NOT_PR_CONTEXT
-    );
-  }
-);
-
-Deno.test(
-  "GithubClient.translateToComment should create a properly formatted comment",
-  () => {
-    const githubClient = new GithubClient("fake-token", mockContext);
-
-    const body = "Test comment body";
-    const filePath = "src/test/file.ts";
-
-    const comment = githubClient.translateToComment(body, filePath);
-
-    assertEquals(comment, {
-      commit_id: "mock-head-sha",
-      path: filePath,
-      subject_type: "file",
-      body: body,
+      assertEquals(errorCaught, false);
     });
-  }
-);
 
-Deno.test(
-  "GithubClient.getAllCommentsForPullRequest should return review comments when in PR context",
-  async () => {
-    const mockOctokit = new MockOctokit();
-    const githubClient = new GithubClient("fake-token", mockContext) as any;
-    githubClient.octokit = mockOctokit;
+    await t.step("should throw an error if not in a PR context", async () => {
+      const mockOctokit = new MockOctokit();
+      const githubClient = new GithubClient(
+        "fake-token",
+        invalidContext
+      ) as any;
+      githubClient.octokit = mockOctokit;
 
-    const comments = await githubClient.getAllCommentsForPullRequest();
+      const comment: GithubComment = {
+        commit_id: "mock-commit",
+        path: "src/index.ts",
+        subject_type: "file",
+        body: "This is a test comment",
+      };
 
-    assertEquals(comments.length, 1);
-    assertEquals(comments[0].id, 1);
-    assertEquals(comments[0].body, "Test review comment");
-    assertEquals(comments[0].path, "test/file.ts");
-    assertEquals(comments[0].pull_request_review_id, 42);
-  }
-);
+      await assertRejects(
+        () => githubClient.writeComment(comment),
+        Error,
+        ERROR_MESSAGES.NOT_PR_CONTEXT
+      );
+    });
+  });
 
-Deno.test(
-  "GithubClient.getAllCommentsForPullRequest should throw error when not in PR context",
-  async () => {
-    const mockOctokit = new MockOctokit();
-    const githubClient = new GithubClient("fake-token", invalidContext) as any;
-    githubClient.octokit = mockOctokit;
+  // Translate Comment Tests
+  await t.step("translateToComment", async (t) => {
+    await t.step("should create a properly formatted comment", () => {
+      const githubClient = new GithubClient("fake-token", mockContext);
+      const body = "Test comment body";
+      const filePath = "src/test/file.ts";
 
-    await assertRejects(
-      () => githubClient.getAllCommentsForPullRequest(),
-      Error,
-      ERROR_MESSAGES.NOT_PR_CONTEXT
+      const comment = githubClient.translateToComment(body, filePath);
+
+      assertEquals(comment, {
+        commit_id: "mock-head-sha",
+        path: filePath,
+        subject_type: "file",
+        body: body,
+      });
+    });
+  });
+
+  // Get All Comments Tests
+  await t.step("getAllCommentsForPullRequest", async (t) => {
+    await t.step(
+      "should return review comments when in PR context",
+      async () => {
+        const mockOctokit = new MockOctokit();
+        const githubClient = new GithubClient("fake-token", mockContext) as any;
+        githubClient.octokit = mockOctokit;
+
+        const comments = await githubClient.getAllCommentsForPullRequest();
+
+        assertEquals(comments.length, 1);
+        assertEquals(comments[0].id, 1);
+        assertEquals(comments[0].body, "Test review comment");
+        assertEquals(comments[0].path, "test/file.ts");
+        assertEquals(comments[0].pull_request_review_id, 42);
+      }
     );
-  }
-);
 
-Deno.test(
-  "GithubClient.getAllCommentsForPullRequest should handle API errors",
-  async () => {
-    const mockOctokit = new MockOctokit();
-    const githubClient = new GithubClient("fake-token", mockContext) as any;
+    await t.step("should throw error when not in PR context", async () => {
+      const mockOctokit = new MockOctokit();
+      const githubClient = new GithubClient(
+        "fake-token",
+        invalidContext
+      ) as any;
+      githubClient.octokit = mockOctokit;
 
-    // Override the request method to throw an error
-    mockOctokit.request = async () => {
-      throw new Error("API error");
-    };
+      await assertRejects(
+        () => githubClient.getAllCommentsForPullRequest(),
+        Error,
+        ERROR_MESSAGES.NOT_PR_CONTEXT
+      );
+    });
 
-    githubClient.octokit = mockOctokit;
+    await t.step("should handle API errors", async () => {
+      const mockOctokit = new MockOctokit();
+      const githubClient = new GithubClient("fake-token", mockContext) as any;
 
-    await assertRejects(
-      () => githubClient.getAllCommentsForPullRequest(),
-      Error,
-      ERROR_MESSAGES.FETCH_COMMENTS_FAILED("API error")
-    );
-  }
-);
+      mockOctokit.request = async () => {
+        throw new Error("API error");
+      };
 
-Deno.test(
-  "GithubClient.deleteReviewComment should successfully delete a review comment",
-  async () => {
-    const mockOctokit = new MockOctokit();
-    const githubClient = new GithubClient("fake-token", mockContext) as any;
-    githubClient.octokit = mockOctokit;
+      githubClient.octokit = mockOctokit;
 
-    let errorCaught = false;
-    try {
-      await githubClient.deleteReviewComment(123);
-    } catch (error) {
-      console.error("Unexpected error:", error);
-      errorCaught = true;
-    }
+      await assertRejects(
+        () => githubClient.getAllCommentsForPullRequest(),
+        Error,
+        ERROR_MESSAGES.FETCH_COMMENTS_FAILED("API error")
+      );
+    });
+  });
 
-    assertEquals(errorCaught, false);
-  }
-);
+  // Delete Review Comment Tests
+  await t.step("deleteReviewComment", async (t) => {
+    await t.step("should successfully delete a review comment", async () => {
+      const mockOctokit = new MockOctokit();
+      const githubClient = new GithubClient("fake-token", mockContext) as any;
+      githubClient.octokit = mockOctokit;
 
-Deno.test(
-  "GithubClient.deleteReviewComment should throw error when not in PR context",
-  async () => {
-    const mockOctokit = new MockOctokit();
-    const githubClient = new GithubClient("fake-token", invalidContext) as any;
-    githubClient.octokit = mockOctokit;
+      let errorCaught = false;
+      try {
+        await githubClient.deleteReviewComment(123);
+      } catch (error) {
+        console.error("Unexpected error:", error);
+        errorCaught = true;
+      }
 
-    await assertRejects(
-      () => githubClient.deleteReviewComment(123),
-      Error,
-      ERROR_MESSAGES.NOT_PR_CONTEXT
-    );
-  }
-);
+      assertEquals(errorCaught, false);
+    });
 
-Deno.test(
-  "GithubClient.deleteReviewComment should handle API errors",
-  async () => {
-    const mockOctokit = new MockOctokit();
-    const githubClient = new GithubClient("fake-token", mockContext) as any;
+    await t.step("should throw error when not in PR context", async () => {
+      const mockOctokit = new MockOctokit();
+      const githubClient = new GithubClient(
+        "fake-token",
+        invalidContext
+      ) as any;
+      githubClient.octokit = mockOctokit;
 
-    // Override the request method to throw an error
-    mockOctokit.request = async () => {
-      throw new Error("API error");
-    };
+      await assertRejects(
+        () => githubClient.deleteReviewComment(123),
+        Error,
+        ERROR_MESSAGES.NOT_PR_CONTEXT
+      );
+    });
 
-    githubClient.octokit = mockOctokit;
+    await t.step("should handle API errors", async () => {
+      const mockOctokit = new MockOctokit();
+      const githubClient = new GithubClient("fake-token", mockContext) as any;
 
-    await assertRejects(
-      () => githubClient.deleteReviewComment(123),
-      Error,
-      ERROR_MESSAGES.DELETE_COMMENT_FAILED(123, "API error")
-    );
-  }
-);
+      mockOctokit.request = async () => {
+        throw new Error("API error");
+      };
+
+      githubClient.octokit = mockOctokit;
+
+      await assertRejects(
+        () => githubClient.deleteReviewComment(123),
+        Error,
+        ERROR_MESSAGES.DELETE_COMMENT_FAILED(123, "API error")
+      );
+    });
+  });
+});
