@@ -22,12 +22,16 @@ import * as fs from "node:fs";
 import * as path from "node:path";
 import { Configuration, Mode, RuntimeConfig } from "./argument_processor.ts";
 import { FlowDifference } from "./flow_to_uml_transformer.ts";
-import { GithubClient, GithubComment } from "./github_client.ts";
+import { GithubClient } from "./github_client.ts";
 
 const FILE_EXTENSION = ".json";
 const HIDDEN_COMMENT_PREFIX = "<!--flow-lens-hidden-comment-->";
 const MERMAID_OPEN_TAG = "```mermaid";
 const MERMAID_CLOSE_TAG = "```";
+
+const getGithubCommentSummary = (version: "old" | "new"): string => {
+  return `<summary>Click here to view a preview of the ${version} version of this flow</summary>`;
+};
 
 /**
  * This class is used to write the generated UML diagrams to a file.
@@ -43,12 +47,12 @@ export class UmlWriter {
   /**
    * Writes the UML diagrams to a file.
    */
-  writeUmlDiagrams() {
+  async writeUmlDiagrams() {
     const config = Configuration.getInstance();
     if (config.mode === Mode.JSON) {
       this.writeJsonFile(config);
     } else if (config.mode === Mode.GITHUB_ACTION) {
-      this.writeGithubComment(config);
+      await this.writeGithubComment(config);
     }
   }
 
@@ -63,14 +67,30 @@ export class UmlWriter {
     );
   }
 
-  private writeGithubComment(config: RuntimeConfig) {
-    this.filePathToFlowDifference.forEach((flowDifference, filePath) => {
-      const comment = this.githubClient.translateToComment(
-        getBody(flowDifference),
-        filePath
+  private async writeGithubComment(config: RuntimeConfig) {
+    try {
+      const existingComments =
+        await this.githubClient.getAllCommentsForPullRequest();
+
+      const flowLensComments = existingComments.filter((comment) =>
+        comment.body.includes(HIDDEN_COMMENT_PREFIX)
       );
-      this.githubClient.writeComment(comment);
-    });
+
+      for (const comment of flowLensComments) {
+        await this.githubClient.deleteReviewComment(comment.id);
+      }
+
+      for (const [filePath, flowDifference] of this.filePathToFlowDifference) {
+        const comment = this.githubClient.translateToComment(
+          getBody(flowDifference),
+          filePath
+        );
+        await this.githubClient.writeComment(comment);
+      }
+    } catch (error) {
+      console.error("Failed to update GitHub comments:", error);
+      throw error;
+    }
   }
 }
 
@@ -110,21 +130,25 @@ function getFormatter(): Formatter {
 
 function getBody(flowDifference: FlowDifference) {
   const oldDiagram = flowDifference.old
-    ? `Old Version:
+    ? `<details>
+${getGithubCommentSummary("old")}
+
 ${MERMAID_OPEN_TAG}
 ${flowDifference.old}
 ${MERMAID_CLOSE_TAG}
+</details>
 
-  `
+`
     : "";
 
-  const newDiagram = `New Version:
+  const newDiagram = `<details>
+${getGithubCommentSummary("new")}
+
 ${MERMAID_OPEN_TAG}
 ${flowDifference.new}
 ${MERMAID_CLOSE_TAG}
-  `;
+</details>`;
 
   return `${HIDDEN_COMMENT_PREFIX}
-${oldDiagram}
-${newDiagram}`;
+${oldDiagram}${newDiagram}`;
 }

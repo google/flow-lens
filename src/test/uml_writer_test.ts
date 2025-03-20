@@ -97,7 +97,7 @@ Deno.test("UmlWriter", async (t) => {
     Deno.remove(expectedFilePath);
   });
 
-  await t.step("should write UML diagrams as GitHub comments", () => {
+  await t.step("should write UML diagrams as GitHub comments", async () => {
     Configuration.getInstance = () =>
       getRuntimeConfig(DiagramTool.PLANTUML, Mode.GITHUB_ACTION);
 
@@ -112,6 +112,20 @@ Deno.test("UmlWriter", async (t) => {
           body: _body,
         })
       ),
+      // Add the new methods
+      getAllCommentsForPullRequest: spy(async () => {
+        return [
+          {
+            id: 1,
+            body: "<!--flow-lens-hidden-comment--> Old comment",
+          },
+          {
+            id: 2,
+            body: "Regular comment",
+          },
+        ];
+      }),
+      deleteReviewComment: spy(async (_commentId: number) => Promise.resolve()),
     };
 
     // Set up environment variable for GITHUB_TOKEN
@@ -125,7 +139,14 @@ Deno.test("UmlWriter", async (t) => {
         FILE_PATH_TO_FLOW_DIFFERENCE,
         mockGithubClient as unknown as GithubClient
       );
-      writer.writeUmlDiagrams();
+      await writer.writeUmlDiagrams(); // Make this await the async operation
+
+      // Verify that getAllCommentsForPullRequest was called
+      assertSpyCalls(mockGithubClient.getAllCommentsForPullRequest, 1);
+
+      // Verify that deleteReviewComment was called for the Flow Lens comment
+      assertSpyCalls(mockGithubClient.deleteReviewComment, 1);
+      assertEquals(mockGithubClient.deleteReviewComment.calls[0].args[0], 1);
 
       // Verify that the methods were called the expected number of times
       assertSpyCalls(
