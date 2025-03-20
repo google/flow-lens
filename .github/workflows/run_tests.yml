@@ -6,6 +6,7 @@ on:
 
 jobs:
   run_tests:
+    permissions: write-all
     runs-on: ubuntu-latest
 
     steps:
@@ -27,3 +28,19 @@ jobs:
             --allow-env \
             --allow-run \
             --trace-leaks
+
+      - name: Generate flow diagrams
+        run: |
+          deno run \
+            --allow-read \
+            --allow-write \
+            --allow-env \
+            --allow-net \
+            --allow-run \
+            src/main/main.ts \
+            --mode="github_action" \
+            --diagramTool="mermaid" \
+            --gitDiffFromHash="HEAD^1" \
+            --gitDiffToHash="HEAD"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
