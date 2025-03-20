@@ -29,6 +29,10 @@ const HIDDEN_COMMENT_PREFIX = "<!--flow-lens-hidden-comment-->";
 const MERMAID_OPEN_TAG = "```mermaid";
 const MERMAID_CLOSE_TAG = "```";
 
+const getGithubCommentSummary = (version: "old" | "new"): string => {
+  return `<summary>Click here to view a preview of the ${version} version of this flow</summary>`;
+};
+
 /**
  * This class is used to write the generated UML diagrams to a file.
  */
@@ -127,7 +131,7 @@ function getFormatter(): Formatter {
 function getBody(flowDifference: FlowDifference) {
   const oldDiagram = flowDifference.old
     ? `<details>
-<summary>Old Version</summary>
+${getGithubCommentSummary("old")}
 
 ${MERMAID_OPEN_TAG}
 ${flowDifference.old}
@@ -137,8 +141,8 @@ ${MERMAID_CLOSE_TAG}
 `
     : "";
 
-  const newDiagram = `<details open>
-<summary>New Version</summary>
+  const newDiagram = `<details>
+${getGithubCommentSummary("new")}
 
 ${MERMAID_OPEN_TAG}
 ${flowDifference.new}
