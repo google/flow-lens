@@ -110,21 +110,25 @@ function getFormatter(): Formatter {
 
 function getBody(flowDifference: FlowDifference) {
   const oldDiagram = flowDifference.old
-    ? `Old Version:
+    ? `<details>
+<summary>Old Version</summary>
+
 ${MERMAID_OPEN_TAG}
 ${flowDifference.old}
 ${MERMAID_CLOSE_TAG}
+</details>
 
-  `
+`
     : "";
 
-  const newDiagram = `New Version:
+  const newDiagram = `<details open>
+<summary>New Version</summary>
+
 ${MERMAID_OPEN_TAG}
 ${flowDifference.new}
 ${MERMAID_CLOSE_TAG}
-  `;
+</details>`;
 
   return `${HIDDEN_COMMENT_PREFIX}
-${oldDiagram}
-${newDiagram}`;
+${oldDiagram}${newDiagram}`;
 }
