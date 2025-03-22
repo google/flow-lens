@@ -54,11 +54,14 @@ const UML_REPRESENTATIONS = {
   recordCreate: (name: string) => `state Record Create ${name}`,
   recordDelete: (name: string) => `state Record Delete ${name}`,
   recordLookup: (name: string) => `state Record Lookup ${name}
+  sObject: Account
   Fields Queried: all
   Filter Logic: None
   Limit: All Records`,
   recordRollback: (name: string) => `state Record Rollback ${name}`,
-  recordUpdate: (name: string) => `state Record Update ${name}`,
+  recordUpdate: (name: string) => `state Record Update ${name}
+  Direct Update: sObject: Account
+`,
   screen: (name: string) => `state Screen ${name}`,
   step: (name: string) => `state Step ${name}`,
   subflow: (name: string) => `state Subflow ${name}`,
@@ -132,7 +135,60 @@ function generateMockFlow() {
 }
 
 function getFlowNodes(name: string): flowTypes.FlowNode[] {
-  return [{ name: name }] as flowTypes.FlowNode[];
+  const baseNode = {
+    name: name,
+    label: name,
+    locationX: 0,
+    locationY: 0,
+    description: "",
+  };
+
+  // Add specific properties based on node name
+  if (name === NODE_NAMES.recordUpdate) {
+    return [
+      {
+        ...baseNode,
+        object: "Account",
+        inputAssignments: [],
+        inputReference: "",
+        elementSubtype: "RecordUpdate",
+        filters: [],
+      },
+    ] as flowTypes.FlowRecordUpdate[];
+  }
+
+  if (name === NODE_NAMES.recordLookup) {
+    return [
+      {
+        ...baseNode,
+        object: "Account",
+        elementSubtype: "RecordLookup",
+      },
+    ] as flowTypes.FlowRecordLookup[];
+  }
+
+  if (name === NODE_NAMES.recordCreate) {
+    return [
+      {
+        ...baseNode,
+        object: "Account",
+        elementSubtype: "RecordCreate",
+      },
+    ] as flowTypes.FlowRecordCreate[];
+  }
+
+  if (name === NODE_NAMES.recordDelete) {
+    return [
+      {
+        ...baseNode,
+        object: "Account",
+        elementSubtype: "RecordDelete",
+      },
+    ] as flowTypes.FlowRecordDelete[];
+  }
+
+  // Return basic node for other types
+  return [baseNode] as flowTypes.FlowNode[];
 }
 
 Deno.test("UmlGenerator", async (t) => {
@@ -150,8 +206,17 @@ Deno.test("UmlGenerator", async (t) => {
         let result = `state ${node.type} ${node.id}`;
         if (node.innerNodes) {
           const innerContent = node.innerNodes
-            .flatMap((innerNode) => innerNode.content)
-            .map((content) => `  ${content}`)
+            .map((innerNode) => {
+              const header = [innerNode.type, innerNode.label]
+                .filter(Boolean)
+                .join(": ");
+
+              const content = innerNode.content
+                .map((line) => `  ${line}`)
+                .join(EOL);
+
+              return header ? `  ${header}${EOL}${content}` : content;
+            })
             .join(EOL);
           result += EOL + innerContent;
         }
@@ -319,6 +384,99 @@ Deno.test("UmlGenerator", async (t) => {
         "Filter Logic: None",
         "Limit: All Records",
       ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`
+        );
+      });
+    }
+  );
+
+  await t.step(
+    "should generate proper inner node content for FlowRecordUpdate",
+    () => {
+      // Setup test data
+      const updateNode: flowTypes.FlowRecordUpdate = {
+        name: "testUpdate",
+        label: "Test Update",
+        object: "Account",
+        filters: [
+          {
+            field: "Name",
+            operator: flowTypes.FlowRecordFilterOperator.EQUAL_TO,
+            value: { stringValue: "Test Account" },
+          },
+          {
+            field: "Industry",
+            operator: flowTypes.FlowRecordFilterOperator.NOT_EQUAL_TO,
+            value: { stringValue: "Technology" },
+          },
+        ],
+        inputReference: "AccountRecord",
+        inputAssignments: [
+          {
+            field: "Description",
+            value: { stringValue: "Updated via Flow" },
+            processMetadataValues: [],
+          },
+          {
+            field: "Rating",
+            value: { stringValue: "Hot" },
+            processMetadataValues: [],
+          },
+        ],
+        elementSubtype: "RecordUpdate",
+        locationX: 0,
+        locationY: 0,
+        description: "Test update node",
+      };
+
+      mockParsedFlow.recordUpdates = [updateNode];
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Filter Criteria:",
+        "1. Name EqualTo Test Account",
+        "2. Industry NotEqualTo Technology",
+        "Reference Update: AccountRecord",
+        "Field Updates:",
+        "Description = Updated via Flow",
+        "Rating = Hot",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`
+        );
+      });
+    }
+  );
+
+  await t.step(
+    "should handle FlowRecordUpdate with minimal configuration",
+    () => {
+      const minimalUpdateNode: flowTypes.FlowRecordUpdate = {
+        name: "minimalUpdate",
+        label: "Minimal Update",
+        object: "Contact",
+        filters: [],
+        inputAssignments: [],
+        inputReference: "toUpdate",
+        elementSubtype: "RecordUpdate",
+        locationX: 0,
+        locationY: 0,
+        description: "",
+      };
+
+      mockParsedFlow.recordUpdates = [minimalUpdateNode];
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = ["toUpdate"];
 
       expectedContent.forEach((content) => {
         assertEquals(
