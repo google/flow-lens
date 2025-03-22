@@ -149,6 +149,7 @@ export class FlowParser {
     setRecordLookups(this.beingParsed.recordLookups);
     this.beingParsed.recordRollbacks = ensureArray(flow.recordRollbacks);
     this.beingParsed.recordUpdates = ensureArray(flow.recordUpdates);
+    setRecordUpdates(this.beingParsed.recordUpdates);
     this.beingParsed.screens = ensureArray(flow.screens);
     this.beingParsed.steps = ensureArray(flow.steps);
     this.beingParsed.subflows = ensureArray(flow.subflows);
@@ -505,6 +506,26 @@ function setRecordLookups(
       ) as string[];
     }
   });
+}
+
+/**
+ * Ensures that filters and inputAssignments are arrays in record update nodes
+ */
+function setRecordUpdates(
+  recordUpdates: flowTypes.FlowRecordUpdate[] | undefined
+) {
+  if (!recordUpdates) {
+    return;
+  }
+  for (const recordUpdate of recordUpdates) {
+    recordUpdate.filters = ensureArray(
+      recordUpdate.filters ?? []
+    ) as flowTypes.FlowRecordFilter[];
+
+    recordUpdate.inputAssignments = ensureArray(
+      recordUpdate.inputAssignments ?? []
+    ) as flowTypes.FlowInputFieldAssignment[];
+  }
 }
 
 /**

@@ -397,7 +397,48 @@ export abstract class UmlGenerator {
       type: "Record Update",
       color: SkinColor.PINK,
       icon: Icon.UPDATE,
+      innerNodes: this.getFlowRecordUpdateInnerNodes(node),
     });
+  }
+
+  private getFlowRecordUpdateInnerNodes(
+    node: flowTypes.FlowRecordUpdate
+  ): InnerNode[] {
+    const innerNodeContent: string[] = [];
+
+    if (node.filters && node.filters.length > 0) {
+      innerNodeContent.push("Filter Criteria:");
+      node.filters.forEach((filter, index) => {
+        innerNodeContent.push(
+          `${index + 1}. ${filter.field} ${filter.operator} ${toString(
+            filter.value
+          )}`
+        );
+      });
+    }
+
+    if (node.inputAssignments && node.inputAssignments.length > 0) {
+      innerNodeContent.push("Field Updates:");
+      node.inputAssignments.forEach((assignment) => {
+        innerNodeContent.push(
+          `${assignment.field} = ${toString(assignment.value)}`
+        );
+      });
+    }
+
+    const type = node.inputReference ? "Reference Update" : "Direct Update";
+    const label = node.inputReference
+      ? node.inputReference
+      : `sObject: ${node.object}`;
+
+    return [
+      {
+        id: `${node.name}__UpdateDetails`,
+        type: type,
+        label: label,
+        content: innerNodeContent,
+      },
+    ];
   }
 
   private getFlowScreen(node: flowTypes.FlowScreen): string {
