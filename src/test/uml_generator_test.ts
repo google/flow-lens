@@ -487,4 +487,56 @@ Deno.test("UmlGenerator", async (t) => {
       });
     }
   );
+
+  await t.step(
+    "should generate proper inner node content for FlowCustomError",
+    () => {
+      // Setup test data
+      const customErrorNode: flowTypes.FlowCustomError = {
+        name: "testError",
+        label: "Test Error",
+        description: "Test custom error description",
+        elementSubtype: "CustomError",
+        locationX: 0,
+        locationY: 0,
+        connector: {
+          targetReference: "nextNode",
+          isGoTo: false,
+        },
+        customErrorMessages: [
+          {
+            name: "error1",
+            errorMessage: "Invalid input",
+            isFieldError: true,
+            fieldSelection: "Name",
+            description: "Invalid input",
+          },
+          {
+            name: "error2",
+            errorMessage: "Record not found",
+            isFieldError: false,
+            description: "Record not found",
+          },
+        ],
+      };
+
+      mockParsedFlow.customErrors = [customErrorNode];
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Custom Error testError",
+        "Test custom error description: Error Messages:", // type: label format
+        "1. Invalid input (Field: Name)",
+        "2. Record not found",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`
+        );
+      });
+    }
+  );
 });

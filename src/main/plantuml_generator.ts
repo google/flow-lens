@@ -48,6 +48,7 @@ enum Icon {
   MENU = " <&menu>",
   NONE = "",
   PENCIL = " <&pencil>",
+  BAN = " <&ban>",
 }
 
 /**
@@ -79,6 +80,7 @@ export class PlantUmlGenerator extends UmlGenerator {
     [UmlIcon.STAGE_STEP]: Icon.JUSTIFY_CENTER,
     [UmlIcon.UPDATE]: Icon.PENCIL,
     [UmlIcon.WAIT]: Icon.NONE,
+    [UmlIcon.ERROR]: Icon.BAN,
   };
 
   // Static mapping from flowTypes.DiffStatus to DiffIcon

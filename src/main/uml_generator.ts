@@ -52,6 +52,7 @@ export enum Icon {
   STAGE_STEP,
   UPDATE,
   WAIT,
+  ERROR,
 }
 
 /**
@@ -158,6 +159,10 @@ export abstract class UmlGenerator {
       this.processFlowElements<flowTypes.FlowActionCall>(
         this.parsedFlow.actionCalls,
         (node) => this.getFlowActionCall(node)
+      ),
+      this.processFlowElements<flowTypes.FlowCustomError>(
+        this.parsedFlow.customErrors,
+        (node) => this.getFlowCustomError(node)
       ),
       this.processTransitions(this.parsedFlow.transitions),
       this.getFooter(),
@@ -505,6 +510,44 @@ export abstract class UmlGenerator {
       color: SkinColor.NAVY,
       icon: Icon.CODE,
     });
+  }
+
+  private getFlowCustomError(node: flowTypes.FlowCustomError): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      diffStatus: node.diffStatus,
+      type: "Custom Error",
+      color: SkinColor.NAVY,
+      icon: Icon.ERROR,
+      innerNodes: this.getFlowCustomErrorInnerNodes(node),
+    });
+  }
+
+  private getFlowCustomErrorInnerNodes(
+    node: flowTypes.FlowCustomError
+  ): InnerNode[] {
+    const innerNodeContent: string[] = [];
+
+    if (node.customErrorMessages && node.customErrorMessages.length > 0) {
+      node.customErrorMessages.forEach((message, index) => {
+        const fieldInfo = message.fieldSelection
+          ? ` (Field: ${message.fieldSelection})`
+          : "";
+        innerNodeContent.push(
+          `${index + 1}. ${message.errorMessage}${fieldInfo}`
+        );
+      });
+    }
+
+    return [
+      {
+        id: `${node.name}__ErrorDetails`,
+        type: node.description || "Custom Error Details",
+        label: "Error Messages:",
+        content: innerNodeContent,
+      },
+    ];
   }
 
   private processFlowElements<T extends flowTypes.FlowNode>(
