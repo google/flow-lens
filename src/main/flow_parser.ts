@@ -140,6 +140,7 @@ export class FlowParser {
       flow.collectionProcessors
     );
     this.beingParsed.customErrors = ensureArray(flow.customErrors);
+    setCustomErrorMessages(this.beingParsed.customErrors);
     this.beingParsed.decisions = ensureArray(flow.decisions);
     setDecisionRules(this.beingParsed.decisions);
     this.beingParsed.loops = ensureArray(flow.loops);
@@ -530,6 +531,25 @@ function setRecordUpdates(
     recordUpdate.inputAssignments = ensureArray(
       recordUpdate.inputAssignments ?? []
     ) as flowTypes.FlowInputFieldAssignment[];
+  }
+}
+
+/**
+ * Set Custom Error Messages
+ *
+ * Custom Error Messages are nested properties which also need to be converted to
+ * an array.
+ */
+function setCustomErrorMessages(
+  customErrors: flowTypes.FlowCustomError[] | undefined
+) {
+  if (!customErrors) {
+    return;
+  }
+  for (const customError of customErrors) {
+    customError.customErrorMessages = ensureArray(
+      customError.customErrorMessages
+    ) as flowTypes.FlowCustomErrorMessage[];
   }
 }
 
