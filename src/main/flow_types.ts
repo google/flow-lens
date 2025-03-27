@@ -24,261 +24,261 @@
 // tslint:disable:enforce-comments-on-exported-symbols
 
 export enum FlowAssignmentOperator {
-  ADD = 'Add',
-  ADD_AT_START = 'AddAtStart',
-  ADD_ITEM = 'AddItem',
-  ASSIGN = 'Assign',
-  ASSIGN_COUNT = 'AssignCount',
-  REMOVE_AFTER_FIRST = 'RemoveAfterFirst',
-  REMOVE_ALL = 'RemoveAll',
-  REMOVE_BEFORE_FIRST = 'RemoveBeforeFirst',
-  REMOVE_FIRST = 'RemoveFirst',
-  REMOVE_POSITION = 'RemovePosition',
-  REMOVE_UNCOMMON = 'RemoveUncommon',
-  SUBTRACT = 'Subtract',
+  ADD = "Add",
+  ADD_AT_START = "AddAtStart",
+  ADD_ITEM = "AddItem",
+  ASSIGN = "Assign",
+  ASSIGN_COUNT = "AssignCount",
+  REMOVE_AFTER_FIRST = "RemoveAfterFirst",
+  REMOVE_ALL = "RemoveAll",
+  REMOVE_BEFORE_FIRST = "RemoveBeforeFirst",
+  REMOVE_FIRST = "RemoveFirst",
+  REMOVE_POSITION = "RemovePosition",
+  REMOVE_UNCOMMON = "RemoveUncommon",
+  SUBTRACT = "Subtract",
 }
 
 export enum FlowCollectionProcessorType {
-  SORT_COLLECTION_PROCESSOR = 'SortCollectionProcessor',
-  RECOMMENDATION_MAP_COLLECTION_PROCESSOR = 'RecommendationMapCollectionProcessor',
-  FILTER_COLLECTION_PROCESSOR = 'FilterCollectionProcessor',
+  SORT_COLLECTION_PROCESSOR = "SortCollectionProcessor",
+  RECOMMENDATION_MAP_COLLECTION_PROCESSOR = "RecommendationMapCollectionProcessor",
+  FILTER_COLLECTION_PROCESSOR = "FilterCollectionProcessor",
 }
 
 export enum IterationOrder {
-  ASC = 'Asc',
-  DESC = 'Desc',
+  ASC = "Asc",
+  DESC = "Desc",
 }
 
 export enum FlowEnvironment {
-  DEFAULT = 'Default',
-  SLACK = 'Slack',
+  DEFAULT = "Default",
+  SLACK = "Slack",
 }
 
 export enum FlowStageStepAssigneeType {
-  GROUP = 'Group',
-  QUEUE = 'Queue',
-  USER = 'User',
+  GROUP = "Group",
+  QUEUE = "Queue",
+  USER = "User",
 }
 
 export enum FlowStageStepActionType {
-  STEP_BACKGROUND = 'stepBackground',
-  STEP_INTERACTIVE = 'stepInteractive',
-  STEP_MULESOFT = 'stepMuleSoft',
+  STEP_BACKGROUND = "stepBackground",
+  STEP_INTERACTIVE = "stepInteractive",
+  STEP_MULESOFT = "stepMuleSoft",
 }
 
 export enum FlowProcessType {
-  ACTION_CADENCE_AUTOLAUNCHED_FLOW = 'ActionCadenceAutolaunchedFlow',
-  ACTION_CADENCE_STEP_FLOW = 'ActionCadenceStepFlow',
-  APPOINTMENTS = 'Appointments',
-  AUTOLAUNCHED_FLOW = 'AutoLaunchedFlow',
-  CHECKOUT_FLOW = 'CheckoutFlow',
-  CONTACT_REQUEST_FLOW = 'ContactRequestFlow',
-  CUSTOMER_LIFECYCLE = 'CustomerLifecycle',
-  CUSTOM_EVENT = 'CustomEvent',
-  EVALUATION_FLOW = 'EvaluationFlow',
-  FIELD_SERVICE_MOBILE = 'FieldServiceMobile',
-  FIELD_SERVICE_WEB = 'FieldServiceWeb',
-  FLOW = 'Flow',
-  FSC_LENDING = 'FSCLending',
-  INDICATOR_RESULT_FLOW = 'IndicatorResultFlow',
-  INDIVIDUAL_OBJECT_LINKING_FLOW = 'IndividualObjectLinkingFlow',
-  INVOCABLE_PROCESS = 'InvocableProcess',
-  JOURNEY = 'Journey',
-  LOGIN_FLOW = 'LoginFlow',
-  LOYALTY_MANAGEMENT_FLOW = 'LoyaltyManagementFlow',
-  ORCHESTRATOR = 'Orchestrator',
-  PROMPT_FLOW = 'PromptFlow',
-  RECOMMENDATION_STRATEGY = 'RecommendationStrategy',
-  ROUTING_FLOW = 'RoutingFlow',
-  SURVEY = 'Survey',
-  SURVEY_ENRICH = 'SurveyEnrich',
-  WORKFLOW = 'Workflow',
+  ACTION_CADENCE_AUTOLAUNCHED_FLOW = "ActionCadenceAutolaunchedFlow",
+  ACTION_CADENCE_STEP_FLOW = "ActionCadenceStepFlow",
+  APPOINTMENTS = "Appointments",
+  AUTOLAUNCHED_FLOW = "AutoLaunchedFlow",
+  CHECKOUT_FLOW = "CheckoutFlow",
+  CONTACT_REQUEST_FLOW = "ContactRequestFlow",
+  CUSTOMER_LIFECYCLE = "CustomerLifecycle",
+  CUSTOM_EVENT = "CustomEvent",
+  EVALUATION_FLOW = "EvaluationFlow",
+  FIELD_SERVICE_MOBILE = "FieldServiceMobile",
+  FIELD_SERVICE_WEB = "FieldServiceWeb",
+  FLOW = "Flow",
+  FSC_LENDING = "FSCLending",
+  INDICATOR_RESULT_FLOW = "IndicatorResultFlow",
+  INDIVIDUAL_OBJECT_LINKING_FLOW = "IndividualObjectLinkingFlow",
+  INVOCABLE_PROCESS = "InvocableProcess",
+  JOURNEY = "Journey",
+  LOGIN_FLOW = "LoginFlow",
+  LOYALTY_MANAGEMENT_FLOW = "LoyaltyManagementFlow",
+  ORCHESTRATOR = "Orchestrator",
+  PROMPT_FLOW = "PromptFlow",
+  RECOMMENDATION_STRATEGY = "RecommendationStrategy",
+  ROUTING_FLOW = "RoutingFlow",
+  SURVEY = "Survey",
+  SURVEY_ENRICH = "SurveyEnrich",
+  WORKFLOW = "Workflow",
   // Reserved values (not to be used)
-  ACTION_CADENCE_FLOW = 'ActionCadenceFlow',
-  ACTION_PLAN = 'ActionPlan',
-  APP_PROCESS = 'AppProcess',
-  CART_ASYNC_FLOW = 'CartAsyncFlow',
-  DIGITAL_FORM = 'DigitalForm',
-  JOURNEY_BUILDER_INTEGRATION = 'JourneyBuilderIntegration',
-  MANAGED_CONTENT_FLOW = 'ManagedContentFlow',
-  ORCHESTRATION_FLOW = 'OrchestrationFlow',
-  SALES_ENTRY_EXPERIENCE_FLOW = 'SalesEntryExperienceFlow',
-  TRANSACTION_SECURITY_FLOW = 'TransactionSecurityFlow',
-  USER_PROVISIONING_FLOW = 'UserProvisioningFlow',
+  ACTION_CADENCE_FLOW = "ActionCadenceFlow",
+  ACTION_PLAN = "ActionPlan",
+  APP_PROCESS = "AppProcess",
+  CART_ASYNC_FLOW = "CartAsyncFlow",
+  DIGITAL_FORM = "DigitalForm",
+  JOURNEY_BUILDER_INTEGRATION = "JourneyBuilderIntegration",
+  MANAGED_CONTENT_FLOW = "ManagedContentFlow",
+  ORCHESTRATION_FLOW = "OrchestrationFlow",
+  SALES_ENTRY_EXPERIENCE_FLOW = "SalesEntryExperienceFlow",
+  TRANSACTION_SECURITY_FLOW = "TransactionSecurityFlow",
+  USER_PROVISIONING_FLOW = "UserProvisioningFlow",
 }
 export enum SortOrder {
-  ASC = 'Asc',
-  DESC = 'Desc',
+  ASC = "Asc",
+  DESC = "Desc",
 }
 
 export enum FlowRunInMode {
-  DEFAULT_MODE = 'DefaultMode',
-  SYSTEM_MODE_WITH_SHARING = 'SystemModeWithSharing',
-  SYSTEM_MODE_WITHOUT_SHARING = 'SystemModeWithoutSharing',
+  DEFAULT_MODE = "DefaultMode",
+  SYSTEM_MODE_WITH_SHARING = "SystemModeWithSharing",
+  SYSTEM_MODE_WITHOUT_SHARING = "SystemModeWithoutSharing",
 }
 export enum FlowScreenFieldType {
-  DISPLAY_TEXT = 'DisplayText',
-  INPUT_FIELD = 'InputField',
-  LARGE_TEXT_AREA = 'LargeTextArea',
-  PASSWORD_FIELD = 'PasswordField',
-  RADIO_BUTTONS = 'RadioButtons',
-  DROPDOWN_BOX = 'DropdownBox',
-  MULTI_SELECT_CHECKBOXES = 'MultiSelectCheckboxes',
-  MULTI_SELECT_PICKLIST = 'MultiSelectPicklist',
-  COMPONENT_INSTANCE = 'ComponentInstance',
-  COMPONENT_CHOICE = 'ComponentChoice',
-  COMPONENT_INPUT = 'ComponentInput',
-  REGION = 'Region',
-  REGION_CONTAINER = 'RegionContainer',
-  OBJECT_PROVIDED = 'ObjectProvided',
+  DISPLAY_TEXT = "DisplayText",
+  INPUT_FIELD = "InputField",
+  LARGE_TEXT_AREA = "LargeTextArea",
+  PASSWORD_FIELD = "PasswordField",
+  RADIO_BUTTONS = "RadioButtons",
+  DROPDOWN_BOX = "DropdownBox",
+  MULTI_SELECT_CHECKBOXES = "MultiSelectCheckboxes",
+  MULTI_SELECT_PICKLIST = "MultiSelectPicklist",
+  COMPONENT_INSTANCE = "ComponentInstance",
+  COMPONENT_CHOICE = "ComponentChoice",
+  COMPONENT_INPUT = "ComponentInput",
+  REGION = "Region",
+  REGION_CONTAINER = "RegionContainer",
+  OBJECT_PROVIDED = "ObjectProvided",
 }
 
 export enum FlowScreenFieldInputsRevisited {
-  USE_STORED_VALUES = 'UseStoredValues',
-  RESET_VALUES = 'ResetValues',
+  USE_STORED_VALUES = "UseStoredValues",
+  RESET_VALUES = "ResetValues",
 }
 
 export enum FlowRegionContainerType {
-  SECTION_WITH_HEADER = 'SectionWithHeader',
-  SECTION_WITHOUT_HEADER = 'SectionWithoutHeader',
+  SECTION_WITH_HEADER = "SectionWithHeader",
+  SECTION_WITHOUT_HEADER = "SectionWithoutHeader",
 }
 export enum FlowStartFrequency {
-  ONCE = 'Once',
-  DAILY = 'Daily',
-  WEEKLY = 'Weekly',
-  ON_ACTIVATE = 'OnActivate',
+  ONCE = "Once",
+  DAILY = "Daily",
+  WEEKLY = "Weekly",
+  ON_ACTIVATE = "OnActivate",
 }
 
 export enum FlowScheduledPathType {
-  ASYNC_AFTER_COMMIT = 'AsyncAfterCommit',
+  ASYNC_AFTER_COMMIT = "AsyncAfterCommit",
 }
 
 export enum FlowScheduledPathTimeSource {
-  RECORD_FIELD = 'RecordField',
-  RECORD_TRIGGER_EVENT = 'RecordTriggerEvent',
+  RECORD_FIELD = "RecordField",
+  RECORD_TRIGGER_EVENT = "RecordTriggerEvent",
 }
 
 export enum FlowEntryType {
-  AFTER_COMPLETION = 'AfterCompletion',
-  ALWAYS = 'Always',
+  AFTER_COMPLETION = "AfterCompletion",
+  ALWAYS = "Always",
 }
 
 export enum FlowTriggerType {
-  CAPABILITY = 'Capability',
-  DATA_CLOUD_DATA_CHANGE = 'DataCloudDataChange',
-  EVENT_DRIVEN_JOURNEY = 'EventDrivenJourney',
-  PLATFORM_EVENT = 'PlatformEvent',
-  RECORD_AFTER_SAVE = 'RecordAfterSave',
-  RECORD_BEFORE_DELETE = 'RecordBeforeDelete',
-  RECORD_BEFORE_SAVE = 'RecordBeforeSave',
-  SCHEDULED = 'Scheduled',
-  SCHEDULED_JOURNEY = 'ScheduledJourney',
-  SEGMENT = 'Segment',
+  CAPABILITY = "Capability",
+  DATA_CLOUD_DATA_CHANGE = "DataCloudDataChange",
+  EVENT_DRIVEN_JOURNEY = "EventDrivenJourney",
+  PLATFORM_EVENT = "PlatformEvent",
+  RECORD_AFTER_SAVE = "RecordAfterSave",
+  RECORD_BEFORE_DELETE = "RecordBeforeDelete",
+  RECORD_BEFORE_SAVE = "RecordBeforeSave",
+  SCHEDULED = "Scheduled",
+  SCHEDULED_JOURNEY = "ScheduledJourney",
+  SEGMENT = "Segment",
 }
 
 export enum FlowVersionStatus {
-  ACTIVE = 'Active',
-  DRAFT = 'Draft',
-  OBSOLETE = 'Obsolete',
-  INVALID_DRAFT = 'InvalidDraft',
+  ACTIVE = "Active",
+  DRAFT = "Draft",
+  OBSOLETE = "Obsolete",
+  INVALID_DRAFT = "InvalidDraft",
 }
 
 export enum FlowTransformValueActionType {
-  COUNT = 'Count',
-  INNER_JOIN = 'InnerJoin',
-  MAP = 'Map',
-  SUM = 'Sum',
+  COUNT = "Count",
+  INNER_JOIN = "InnerJoin",
+  MAP = "Map",
+  SUM = "Sum",
 }
 
 export enum FlowTransformValueActionInputParameterName {
-  AGGREGATION_FIELD = 'aggregationField',
-  AGGREGATION_VALUES = 'aggregationValues',
+  AGGREGATION_FIELD = "aggregationField",
+  AGGREGATION_VALUES = "aggregationValues",
 }
 
 export enum FlowDataType {
-  APEX = 'Apex',
-  BOOLEAN = 'Boolean',
-  CURRENCY = 'Currency',
-  DATE = 'Date',
-  DATE_TIME = 'DateTime',
-  NUMBER = 'Number',
-  MULTIPICKLIST = 'Multipicklist',
-  PICKLIST = 'Picklist',
-  STRING = 'String',
-  SOBJECT = 'sObject',
+  APEX = "Apex",
+  BOOLEAN = "Boolean",
+  CURRENCY = "Currency",
+  DATE = "Date",
+  DATE_TIME = "DateTime",
+  NUMBER = "Number",
+  MULTIPICKLIST = "Multipicklist",
+  PICKLIST = "Picklist",
+  STRING = "String",
+  SOBJECT = "sObject",
 }
 
 export enum FlowTransactionModel {
-  AUTOMATIC = 'Automatic',
-  CURRENT_TRANSACTION = 'CurrentTransaction',
-  NEW_TRANSACTION = 'NewTransaction',
+  AUTOMATIC = "Automatic",
+  CURRENT_TRANSACTION = "CurrentTransaction",
+  NEW_TRANSACTION = "NewTransaction",
 }
 
 export enum FormulaDataType {
-  APEX = 'Apex',
-  BOOLEAN = 'Boolean',
-  CURRENCY = 'Currency',
-  DATE = 'Date',
-  DATE_TIME = 'DateTime',
-  NUMBER = 'Number',
-  STRING = 'String',
-  SOBJECT = 'sObject',
+  APEX = "Apex",
+  BOOLEAN = "Boolean",
+  CURRENCY = "Currency",
+  DATE = "Date",
+  DATE_TIME = "DateTime",
+  NUMBER = "Number",
+  STRING = "String",
+  SOBJECT = "sObject",
 }
 
 export enum WaitEventType {
-  ALARM_EVENT = 'AlarmEvent',
-  DATE_REF_ALARM_EVENT = 'DateRefAlarmEvent',
+  ALARM_EVENT = "AlarmEvent",
+  DATE_REF_ALARM_EVENT = "DateRefAlarmEvent",
 }
 
 export enum FlowRecordFilterOperator {
-  EQUAL_TO = 'EqualTo',
-  NOT_EQUAL_TO = 'NotEqualTo',
-  GREATER_THAN = 'GreaterThan',
-  LESS_THAN = 'LessThan',
-  GREATER_THAN_OR_EQUAL_TO = 'GreaterThanOrEqualTo',
-  LESS_THAN_OR_EQUAL_TO = 'LessThanOrEqualTo',
-  STARTS_WITH = 'StartsWith',
-  ENDS_WITH = 'EndsWith',
-  CONTAINS = 'Contains',
-  IS_NULL = 'IsNull',
+  EQUAL_TO = "EqualTo",
+  NOT_EQUAL_TO = "NotEqualTo",
+  GREATER_THAN = "GreaterThan",
+  LESS_THAN = "LessThan",
+  GREATER_THAN_OR_EQUAL_TO = "GreaterThanOrEqualTo",
+  LESS_THAN_OR_EQUAL_TO = "LessThanOrEqualTo",
+  STARTS_WITH = "StartsWith",
+  ENDS_WITH = "EndsWith",
+  CONTAINS = "Contains",
+  IS_NULL = "IsNull",
 }
 
 export enum FlowScheduledPathOffsetUnit {
-  MONTHS = 'Months',
-  DAYS = 'Days',
-  HOURS = 'Hours',
-  MINUTES = 'Minutes',
+  MONTHS = "Months",
+  DAYS = "Days",
+  HOURS = "Hours",
+  MINUTES = "Minutes",
 }
 
 export enum RecordTriggerType {
-  CREATE = 'Create',
-  DELETE = 'Delete',
-  UPDATE = 'Update',
-  NONE = 'None',
-  CREATE_AND_UPDATE = 'CreateAndUpdate',
+  CREATE = "Create",
+  DELETE = "Delete",
+  UPDATE = "Update",
+  NONE = "None",
+  CREATE_AND_UPDATE = "CreateAndUpdate",
 }
 
 export enum FlowWaitConditionType {
-  ENTRY_CONDITION = 'EntryCondition',
-  EXIT_CONDITION = 'ExitCondition',
+  ENTRY_CONDITION = "EntryCondition",
+  EXIT_CONDITION = "ExitCondition",
 }
 
 export enum FlowComparisonOperator {
-  CONTAINS = 'Contains',
-  ENDS_WITH = 'EndsWith',
-  EQUAL_TO = 'EqualTo',
-  GREATER_THAN = 'GreaterThan',
-  GREATER_THAN_OR_EQUAL_TO = 'GreaterThanOrEqualTo',
-  IN = 'In',
-  IS_BLANK = 'IsBlank',
-  IS_CHANGED = 'IsChanged',
-  IS_EMPTY = 'IsEmpty',
+  CONTAINS = "Contains",
+  ENDS_WITH = "EndsWith",
+  EQUAL_TO = "EqualTo",
+  GREATER_THAN = "GreaterThan",
+  GREATER_THAN_OR_EQUAL_TO = "GreaterThanOrEqualTo",
+  IN = "In",
+  IS_BLANK = "IsBlank",
+  IS_CHANGED = "IsChanged",
+  IS_EMPTY = "IsEmpty",
 }
 
 export enum DiffStatus {
-  ADDED = 'Added',
-  DELETED = 'Deleted',
-  MODIFIED = 'Modified',
+  ADDED = "Added",
+  DELETED = "Deleted",
+  MODIFIED = "Modified",
 }
 
 export interface FlowDefinition {
@@ -295,6 +295,7 @@ export interface Flow {
   choices?: FlowChoice[];
   collectionProcessors?: FlowCollectionProcessor[];
   constants?: FlowConstant[];
+  customErrors?: FlowCustomError[];
   decisions?: FlowDecision[];
   description?: string;
   dynamicChoiceSets?: FlowDynamicChoiceSet[];
@@ -418,6 +419,18 @@ export interface FlowConstant extends FlowElement {
   value: FlowElementReferenceOrValue;
 }
 
+export interface FlowCustomError extends FlowElement {
+  description: string;
+  connector: FlowConnector;
+  customErrorMessages: FlowCustomErrorMessage[];
+}
+
+export interface FlowCustomErrorMessage extends FlowElement {
+  errorMessage: string;
+  fieldSelection?: string;
+  isFieldError: boolean;
+}
+
 export interface FlowDecision extends FlowNode {
   defaultConnector?: FlowConnector;
   defaultConnectorLabel?: string;
@@ -511,7 +524,7 @@ export interface FlowStageStepEntryActionInputParameter
 export interface FlowStageStepEntryActionOutputParameter
   extends FlowBaseElement {
   assignToReference?: string; // Reserved for future use
-  name: 'isOrchestrationConditionMet';
+  name: "isOrchestrationConditionMet";
 }
 
 export interface FlowStageStepExitActionInputParameter extends FlowBaseElement {
@@ -522,7 +535,7 @@ export interface FlowStageStepExitActionInputParameter extends FlowBaseElement {
 export interface FlowStageStepExitActionOutputParameter
   extends FlowBaseElement {
   assignToReference?: string; // Reserved for future use
-  name: 'isOrchestrationConditionMet'; // Only possible value
+  name: "isOrchestrationConditionMet"; // Only possible value
 }
 
 export interface FlowStageStepInputParameter extends FlowBaseElement {
@@ -686,7 +699,7 @@ export interface FlowCapability extends FlowElement {
 
 export interface FlowCapabilityInput extends FlowElement {
   capabilityInputName: string;
-  dataType: 'sObject'; // Only valid type is sObject for now
+  dataType: "sObject"; // Only valid type is sObject for now
   isCollection: boolean;
 }
 
