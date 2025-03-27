@@ -159,6 +159,10 @@ export abstract class UmlGenerator {
         this.parsedFlow.actionCalls,
         (node) => this.getFlowActionCall(node)
       ),
+      this.processFlowElements<flowTypes.FlowCustomError>(
+        this.parsedFlow.customErrors,
+        (node) => this.getFlowCustomError(node)
+      ),
       this.processTransitions(this.parsedFlow.transitions),
       this.getFooter(),
     ].filter((element) => element !== "");
@@ -505,6 +509,46 @@ export abstract class UmlGenerator {
       color: SkinColor.NAVY,
       icon: Icon.CODE,
     });
+  }
+
+  private getFlowCustomError(node: flowTypes.FlowCustomError): string {
+    return this.toUmlString({
+      id: node.name,
+      label: node.label,
+      diffStatus: node.diffStatus,
+      type: "Custom Error",
+      color: SkinColor.NONE,
+      icon: Icon.NONE,
+      innerNodes: this.getFlowCustomErrorInnerNodes(node),
+    });
+  }
+
+  private getFlowCustomErrorInnerNodes(
+    node: flowTypes.FlowCustomError
+  ): InnerNode[] {
+    const innerNodeContent: string[] = [];
+
+    // Add error messages
+    if (node.customErrorMessages && node.customErrorMessages.length > 0) {
+      innerNodeContent.push("Error Messages:");
+      node.customErrorMessages.forEach((message, index) => {
+        const fieldInfo = message.isFieldError
+          ? ` (Field: ${message.fieldSelection})`
+          : "";
+        innerNodeContent.push(
+          `${index + 1}. ${message.errorMessage}${fieldInfo}`
+        );
+      });
+    }
+
+    return [
+      {
+        id: `${node.name}__ErrorDetails`,
+        type: "Error Details",
+        label: node.description || "Custom Error",
+        content: innerNodeContent,
+      },
+    ];
   }
 
   private processFlowElements<T extends flowTypes.FlowNode>(
