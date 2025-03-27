@@ -71,6 +71,7 @@ export interface ParsedFlow {
   apexPluginCalls?: flowTypes.FlowApexPluginCall[];
   assignments?: flowTypes.FlowAssignment[];
   collectionProcessors?: flowTypes.FlowCollectionProcessor[];
+  customErrors?: flowTypes.FlowCustomError[];
   decisions?: flowTypes.FlowDecision[];
   loops?: flowTypes.FlowLoop[];
   orchestratedStages?: flowTypes.FlowOrchestratedStage[];
@@ -138,6 +139,7 @@ export class FlowParser {
     this.beingParsed.collectionProcessors = ensureArray(
       flow.collectionProcessors
     );
+    this.beingParsed.customErrors = ensureArray(flow.customErrors);
     this.beingParsed.decisions = ensureArray(flow.decisions);
     setDecisionRules(this.beingParsed.decisions);
     this.beingParsed.loops = ensureArray(flow.loops);
@@ -174,6 +176,7 @@ export class FlowParser {
       this.beingParsed.apexPluginCalls,
       this.beingParsed.assignments,
       this.beingParsed.collectionProcessors,
+      this.beingParsed.customErrors,
       this.beingParsed.decisions,
       this.beingParsed.loops,
       this.beingParsed.orchestratedStages,
@@ -275,7 +278,8 @@ export class FlowParser {
       isScreen(node) ||
       isSubflow(node) ||
       isTransform(node) ||
-      isRecordRollback(node)
+      isRecordRollback(node) ||
+      isCustomError(node)
     ) {
       transitions.push(...this.getTransitionsFromConnector(node));
     }
@@ -391,6 +395,7 @@ export class FlowParser {
       | flowTypes.FlowSubflow
       | flowTypes.FlowRecordRollback
       | flowTypes.FlowTransform
+      | flowTypes.FlowCustomError
   ): Transition[] {
     const result: Transition[] = [];
     if (node.connector) {
@@ -617,4 +622,10 @@ function isFlowActionCall(
   node: flowTypes.FlowNode
 ): node is flowTypes.FlowActionCall {
   return (node as flowTypes.FlowActionCall).actionName !== undefined;
+}
+
+function isCustomError(
+  node: flowTypes.FlowNode
+): node is flowTypes.FlowCustomError {
+  return (node as flowTypes.FlowCustomError).customErrorMessages !== undefined;
 }

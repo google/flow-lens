@@ -419,7 +419,7 @@ export interface FlowConstant extends FlowElement {
   value: FlowElementReferenceOrValue;
 }
 
-export interface FlowCustomError extends FlowElement {
+export interface FlowCustomError extends FlowNode {
   description: string;
   connector: FlowConnector;
   customErrorMessages: FlowCustomErrorMessage[];
