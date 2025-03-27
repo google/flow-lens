@@ -524,8 +524,8 @@ Deno.test("UmlGenerator", async (t) => {
       const uml = systemUnderTest.generateUml();
 
       const expectedContent = [
-        "Error Details: Test custom error description",
-        "Error Messages:",
+        "Custom Error testError",
+        "Test custom error description: Error Messages:", // type: label format
         "1. Invalid input (Field: Name)",
         "2. Record not found",
       ];

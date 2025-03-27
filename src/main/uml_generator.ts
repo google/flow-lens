@@ -518,7 +518,7 @@ export abstract class UmlGenerator {
       label: node.label,
       diffStatus: node.diffStatus,
       type: "Custom Error",
-      color: SkinColor.NONE,
+      color: SkinColor.NAVY,
       icon: Icon.ERROR,
       innerNodes: this.getFlowCustomErrorInnerNodes(node),
     });
@@ -529,11 +529,9 @@ export abstract class UmlGenerator {
   ): InnerNode[] {
     const innerNodeContent: string[] = [];
 
-    // Add error messages
     if (node.customErrorMessages && node.customErrorMessages.length > 0) {
-      innerNodeContent.push("Error Messages:");
       node.customErrorMessages.forEach((message, index) => {
-        const fieldInfo = message.isFieldError
+        const fieldInfo = message.fieldSelection
           ? ` (Field: ${message.fieldSelection})`
           : "";
         innerNodeContent.push(
@@ -545,8 +543,8 @@ export abstract class UmlGenerator {
     return [
       {
         id: `${node.name}__ErrorDetails`,
-        type: "Error Details",
-        label: node.description || "Custom Error",
+        type: node.description || "Custom Error Details",
+        label: "Error Messages:",
         content: innerNodeContent,
       },
     ];
