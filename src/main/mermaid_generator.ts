@@ -57,6 +57,7 @@ export class MermaidGenerator extends UmlGenerator {
     [Icon.UPDATE]: "✏️",
     [Icon.WAIT]: "⏳",
     [Icon.NONE]: "",
+    [Icon.ERROR]: "🚫",
   };
 
   // Static mapping from DiffStatus to prefix symbol

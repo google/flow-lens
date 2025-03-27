@@ -52,6 +52,7 @@ export enum Icon {
   STAGE_STEP,
   UPDATE,
   WAIT,
+  ERROR,
 }
 
 /**
@@ -518,7 +519,7 @@ export abstract class UmlGenerator {
       diffStatus: node.diffStatus,
       type: "Custom Error",
       color: SkinColor.NONE,
-      icon: Icon.NONE,
+      icon: Icon.ERROR,
       innerNodes: this.getFlowCustomErrorInnerNodes(node),
     });
   }

@@ -62,6 +62,7 @@ export enum Icon {
   STAGE_STEP = " 🔃",
   UPDATE = " ✏️",
   WAIT = " ⏲️",
+  ERROR = " 🚫",
 }
 
 /**
@@ -100,6 +101,7 @@ export class GraphVizGenerator extends UmlGenerator {
     [UmlIcon.STAGE_STEP]: Icon.STAGE_STEP,
     [UmlIcon.UPDATE]: Icon.UPDATE,
     [UmlIcon.WAIT]: Icon.WAIT,
+    [UmlIcon.ERROR]: Icon.ERROR,
   };
 
   getHeader(label: string): string {
