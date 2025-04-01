@@ -15,11 +15,11 @@
  */
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { ParsedFlow } from "../main/flow_parser.ts";
+import type { ParsedFlow } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import { PlantUmlGenerator } from "../main/plantuml_generator.ts";
 import {
-  DiagramNode,
+  type DiagramNode,
   Icon as UmlIcon,
   SkinColor as UmlSkinColor,
 } from "../main/uml_generator.ts";
@@ -230,10 +230,12 @@ Deno.test("PlantUml", async (t) => {
     result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
-      `state "**Orchestrated Stage** <&chevron-right> \\n myOrchestratedStage" as myOrchestratedStage {
-state "**Stage Step** \\n step1" as myOrchestratedStage_step1Action
-state "**Stage Step** \\n step2" as myOrchestratedStage_step2Action
-}`
+      'state "**Orchestrated Stage** <&chevron-right> \\n myOrchestratedStage" as myOrchestratedStage\n' +
+        "myOrchestratedStage: **Stage Step**\n" +
+        "myOrchestratedStage: __step1__\n" +
+        "myOrchestratedStage: ---\n" +
+        "myOrchestratedStage: **Stage Step**\n" +
+        "myOrchestratedStage: __step2__"
     );
   });
 
@@ -249,7 +251,7 @@ state "**Stage Step** \\n step2" as myOrchestratedStage_step2Action
     result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
-      'state "**<&plus{scale=2}>** **Record Create** <&medical-cross> \\n myNode" as myNode <<Pink>>'
+      'state "**<&plus{scale=2}>** **Record Create** <&medical-cross> \\n myNode" as myNode <<Pink>> <<Added>>'
     );
   });
 

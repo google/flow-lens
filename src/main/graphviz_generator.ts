@@ -18,19 +18,19 @@
  * @fileoverview A Graphviz generator for Salesforce flows.
  */
 
-import { Transition } from "./flow_parser.ts";
+import type { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 import {
   UmlGenerator,
-  DiagramNode,
-  InnerNode,
+  type DiagramNode,
+  type InnerNode,
   SkinColor as UmlSkinColor,
   Icon as UmlIcon,
 } from "./uml_generator.ts";
 
 const EOL = "\n";
 const TABLE_BEGIN = `<
-<TABLE CELLSPACING="0" CELLPADDING="0">`;
+<TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CELLBORDER="0">`;
 const TABLE_END = `</TABLE>
 >`;
 
@@ -73,6 +73,18 @@ export enum FontColor {
   WHITE = "white",
 }
 
+const DIFF_STATUS_TO_STYLE: Record<flowTypes.DiffStatus, string> = {
+  [flowTypes.DiffStatus.ADDED]: `
+  color="green",
+  penwidth=5,`,
+  [flowTypes.DiffStatus.DELETED]: `
+  color="red",
+  penwidth=5,`,
+  [flowTypes.DiffStatus.MODIFIED]: `
+  color="orange",
+  penwidth=5,`,
+};
+
 /**
  * A GraphViz generator for Salesforce flows.
  */
@@ -109,7 +121,7 @@ export class GraphVizGenerator extends UmlGenerator {
 label=<<B>${getLabel(label)}</B>>
 title = "${label}";
 labelloc = "t";
-node [shape=box, style=filled]`;
+node [shape=box, style="filled, rounded"]`;
   }
 
   toUmlString(node: DiagramNode): string {
@@ -176,12 +188,16 @@ function getNodeBody(
     : "";
   const fontColor =
     skinColor === SkinColor.NONE ? FontColor.BLACK : FontColor.WHITE;
+  const diffStyle = node.diffStatus
+    ? DIFF_STATUS_TO_STYLE[node.diffStatus]
+    : "";
   const htmlLabel = `${TABLE_BEGIN}
 ${getTableHeader(type, icon, node)}${formattedInnerNodeBody}
 ${TABLE_END}`;
   return `${node.id} [
   label=${htmlLabel}
-  color="${skinColor}"
+  style="filled, rounded",
+  fillcolor="${skinColor}",${diffStyle}
   fontcolor="${fontColor}"
 ];`;
 }

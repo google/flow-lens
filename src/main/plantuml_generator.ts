@@ -18,15 +18,14 @@
  * @fileoverview A PlantUML generator for Salesforce flows.
  */
 
-import { Transition } from "./flow_parser.ts";
+import type { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 import {
   UmlGenerator,
-  DiagramNode,
-  InnerNode,
+  type DiagramNode,
   Icon as UmlIcon,
 } from "./uml_generator.ts";
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+const EOL = "\n";
 
 enum SkinColor {
   NONE = "",
@@ -90,6 +89,12 @@ export class PlantUmlGenerator extends UmlGenerator {
     [flowTypes.DiffStatus.MODIFIED]: DiffIcon.MODIFIED,
   };
 
+  private static readonly DIFF_TO_STYLE_CLASS: Record<string, string> = {
+    [flowTypes.DiffStatus.ADDED]: " <<Added>>",
+    [flowTypes.DiffStatus.DELETED]: " <<Deleted>>",
+    [flowTypes.DiffStatus.MODIFIED]: " <<Modified>>",
+  };
+
   getHeader(label: string): string {
     return `skinparam State {
   BackgroundColor<<Pink>> #F9548A
@@ -103,6 +108,15 @@ export class PlantUmlGenerator extends UmlGenerator {
 
   BackgroundColor<<Blue>> #1B96FF
   FontColor<<Blue>> white
+
+  BorderColor<<Deleted>> red
+  BorderThickness<<Deleted>> 5
+
+  BorderColor<<Added>> green
+  BorderThickness<<Added>> 5
+
+  BorderColor<<Modified>> orange
+  BorderThickness<<Modified>> 5
 }
 
 title ${label}`;
@@ -123,6 +137,9 @@ title ${label}`;
     const diffIcon = node.diffStatus
       ? PlantUmlGenerator.DIFF_ICON_MAP[node.diffStatus]
       : DiffIcon.NONE;
+    const diffStyleClass = node.diffStatus
+      ? PlantUmlGenerator.DIFF_TO_STYLE_CLASS[node.diffStatus]
+      : "";
 
     let result = generateNode(
       node.label,
@@ -130,14 +147,13 @@ title ${label}`;
       node.type,
       plantUmlIcon,
       plantUmlSkinColor,
-      diffIcon
+      diffIcon,
+      diffStyleClass
     );
 
     // Handle inner nodes if they exist
     if (node.innerNodes && node.innerNodes.length > 0) {
-      result += ` {
-${this.generateInnerNodesString(node)}
-}`;
+      result += `${EOL}${this.generateInnerNodesString(node)}`;
     }
 
     return result;
@@ -148,24 +164,16 @@ ${this.generateInnerNodesString(node)}
 
     const result: string[] = [];
     parentNode.innerNodes.forEach((innerNode) => {
-      result.push(
-        generateNode(
-          innerNode.label,
-          innerNode.id,
-          innerNode.type,
-          Icon.NONE,
-          SkinColor.NONE
-        )
-      );
+      const prefix = `${parentNode.id}: `;
+      const bold = innerNode.type ? `${prefix}**${innerNode.type}**` : "";
+      const label = innerNode.label ? `${prefix}__${innerNode.label}__` : "";
+      const content = innerNode.content
+        .map((content) => `${prefix}${content}`)
+        .join(EOL);
+      result.push([bold, label, content].filter(Boolean).join(EOL));
     });
 
-    parentNode.innerNodes.forEach((innerNode) => {
-      innerNode.content.forEach((content) => {
-        result.push(`${innerNode.id}: ${content}`);
-      });
-    });
-
-    return result.join(EOL);
+    return result.join(`${EOL}${parentNode.id}: ---${EOL}`);
   }
 
   getTransition(transition: Transition): string {
@@ -187,11 +195,12 @@ function generateNode(
   type: string,
   icon: Icon,
   skinColor: SkinColor,
-  diffIcon: DiffIcon = DiffIcon.NONE
+  diffIcon: DiffIcon = DiffIcon.NONE,
+  diffStyleClass: string = ""
 ): string {
   return `state "${diffIcon}**${type}**${icon} \\n ${getLabel(
     label
-  )}" as ${name}${skinColor}`;
+  )}" as ${name}${skinColor}${diffStyleClass}`;
 }
 
 function getLabel(label: string) {

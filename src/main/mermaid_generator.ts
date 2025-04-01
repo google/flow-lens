@@ -20,13 +20,13 @@
  */
 
 import {
-  DiagramNode,
+  type DiagramNode,
   Icon,
-  InnerNode,
+  type InnerNode,
   SkinColor,
   UmlGenerator,
 } from "./uml_generator.ts";
-import { Transition } from "./flow_parser.ts";
+import type { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 
 /**
@@ -34,7 +34,7 @@ import * as flowTypes from "./flow_types.ts";
  */
 export class MermaidGenerator extends UmlGenerator {
   // Static mapping from SkinColor to Mermaid class names
-  private static readonly STYLE_CLASS_MAP: Record<SkinColor, string> = {
+  private static readonly COLOR_TO_STYLE_CLASS: Record<SkinColor, string> = {
     [SkinColor.PINK]: "pink",
     [SkinColor.ORANGE]: "orange",
     [SkinColor.NAVY]: "navy",
@@ -43,7 +43,7 @@ export class MermaidGenerator extends UmlGenerator {
   };
 
   // Static mapping from Icon to emoji
-  private static readonly ICON_MAP: Record<Icon, string> = {
+  private static readonly ICON_TO_ICON: Record<Icon, string> = {
     [Icon.ASSIGNMENT]: "📝",
     [Icon.CODE]: "⚡",
     [Icon.CREATE_RECORD]: "➕",
@@ -61,7 +61,7 @@ export class MermaidGenerator extends UmlGenerator {
   };
 
   // Static mapping from DiffStatus to prefix symbol
-  private static readonly DIFF_STATUS_SYMBOL_MAP: Record<
+  private static readonly DIFF_STATUS_TO_SYMBOL: Record<
     flowTypes.DiffStatus,
     string
   > = {
@@ -71,13 +71,22 @@ export class MermaidGenerator extends UmlGenerator {
   };
 
   // Static mapping from DiffStatus to color
-  private static readonly DIFF_STATUS_COLOR_MAP: Record<
+  private static readonly DIFF_STATUS_TO_COLOR: Record<
     flowTypes.DiffStatus,
     string
   > = {
     [flowTypes.DiffStatus.ADDED]: "green",
     [flowTypes.DiffStatus.DELETED]: "red",
     [flowTypes.DiffStatus.MODIFIED]: "#DD7A00",
+  };
+
+  private static readonly DIFF_STATUS_TO_CLASS: Record<
+    flowTypes.DiffStatus,
+    string
+  > = {
+    [flowTypes.DiffStatus.ADDED]: "added",
+    [flowTypes.DiffStatus.DELETED]: "deleted",
+    [flowTypes.DiffStatus.MODIFIED]: "modified",
   };
 
   getHeader(label: string): string {
@@ -92,6 +101,9 @@ export class MermaidGenerator extends UmlGenerator {
       "  classDef orange fill:#DD7A00, color:white",
       "  classDef navy fill:#344568, color:white",
       "  classDef blue fill:#1B96FF, color:white",
+      "  classDef modified stroke-width: 5px, stroke: orange",
+      "  classDef added stroke-width: 5px, stroke: green",
+      "  classDef deleted stroke-width: 5px, stroke: red",
       "",
     ].join("\n");
   }
@@ -99,13 +111,13 @@ export class MermaidGenerator extends UmlGenerator {
   toUmlString(node: DiagramNode): string {
     const nodeId = this.sanitizeId(node.id);
     const nodeLabel = this.getNodeLabel(node);
-    const styleClass = MermaidGenerator.STYLE_CLASS_MAP[node.color];
+    const styleClass = this.getStyleClass(node);
     const lines: string[] = [];
 
     if (node.innerNodes && node.innerNodes.length > 0) {
       const content: string[] = [];
       content.push(nodeLabel);
-      node.innerNodes.forEach((innerNode, index) => {
+      node.innerNodes.forEach((innerNode) => {
         content.push(this.formatInnerNodeLabel(innerNode));
       });
       lines.push(`  state "${content.join("<hr>")}" as ${nodeId}`);
@@ -123,7 +135,7 @@ export class MermaidGenerator extends UmlGenerator {
     const fromId = this.sanitizeId(transition.from);
     const toId = this.sanitizeId(transition.to);
     const faultIndicator = transition.fault ? "❌" : "";
-    let label = transition.label
+    const label = transition.label
       ? ` : ${faultIndicator} ${transition.label} ${faultIndicator}`
       : "";
 
@@ -143,13 +155,13 @@ export class MermaidGenerator extends UmlGenerator {
   }
 
   private getNodeLabel(node: DiagramNode): string {
-    const icon = MermaidGenerator.ICON_MAP[node.icon] || "";
+    const icon = MermaidGenerator.ICON_TO_ICON[node.icon] || "";
 
     // Create diff status indicator that matches GraphVizGenerator
     let diffStatus = "";
     if (node.diffStatus) {
-      const symbol = MermaidGenerator.DIFF_STATUS_SYMBOL_MAP[node.diffStatus];
-      const color = MermaidGenerator.DIFF_STATUS_COLOR_MAP[node.diffStatus];
+      const symbol = MermaidGenerator.DIFF_STATUS_TO_SYMBOL[node.diffStatus];
+      const color = MermaidGenerator.DIFF_STATUS_TO_COLOR[node.diffStatus];
       // Add more horizontal padding around the diff indicator
       diffStatus = `<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="${color}"><b>${symbol}</b></font></span>`;
     }
@@ -167,5 +179,14 @@ export class MermaidGenerator extends UmlGenerator {
     const nodeLabel = node.label ? `<u>${sanitizedLabel}</u><br>` : "";
     const nodeContent = sanitizedContent.join("<br>");
     return `${nodeType}${nodeLabel}${nodeContent}`;
+  }
+
+  private getStyleClass(node: DiagramNode): string {
+    const baseStyle = MermaidGenerator.COLOR_TO_STYLE_CLASS[node.color];
+    const diffStyle = node.diffStatus
+      ? MermaidGenerator.DIFF_STATUS_TO_CLASS[node.diffStatus]
+      : "";
+
+    return [baseStyle, diffStyle].filter(Boolean).join(" ");
   }
 }
