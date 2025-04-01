@@ -18,12 +18,11 @@
  * @fileoverview A PlantUML generator for Salesforce flows.
  */
 
-import { Transition } from "./flow_parser.ts";
+import type { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 import {
   UmlGenerator,
-  DiagramNode,
-  InnerNode,
+  type DiagramNode,
   Icon as UmlIcon,
 } from "./uml_generator.ts";
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
@@ -135,9 +134,7 @@ title ${label}`;
 
     // Handle inner nodes if they exist
     if (node.innerNodes && node.innerNodes.length > 0) {
-      result += ` {
-${this.generateInnerNodesString(node)}
-}`;
+      result += `${EOL}${this.generateInnerNodesString(node)}`;
     }
 
     return result;
@@ -148,24 +145,16 @@ ${this.generateInnerNodesString(node)}
 
     const result: string[] = [];
     parentNode.innerNodes.forEach((innerNode) => {
-      result.push(
-        generateNode(
-          innerNode.label,
-          innerNode.id,
-          innerNode.type,
-          Icon.NONE,
-          SkinColor.NONE
-        )
-      );
+      const prefix = `${parentNode.id}: `;
+      const bold = innerNode.type ? `${prefix}**${innerNode.type}**` : "";
+      const label = innerNode.label ? `${prefix}__${innerNode.label}__` : "";
+      const content = innerNode.content
+        .map((content) => `${prefix}${content}`)
+        .join(EOL);
+      result.push([bold, label, content].filter(Boolean).join(EOL));
     });
 
-    parentNode.innerNodes.forEach((innerNode) => {
-      innerNode.content.forEach((content) => {
-        result.push(`${innerNode.id}: ${content}`);
-      });
-    });
-
-    return result.join(EOL);
+    return result.join(`${parentNode.id}: ---`);
   }
 
   getTransition(transition: Transition): string {
