@@ -25,7 +25,7 @@ import {
   type DiagramNode,
   Icon as UmlIcon,
 } from "./uml_generator.ts";
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+const EOL = "\n";
 
 enum SkinColor {
   NONE = "",

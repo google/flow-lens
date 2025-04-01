@@ -101,9 +101,9 @@ export class MermaidGenerator extends UmlGenerator {
       "  classDef orange fill:#DD7A00, color:white",
       "  classDef navy fill:#344568, color:white",
       "  classDef blue fill:#1B96FF, color:white",
-      "  classDef modified stroke-width: 8px, stroke: orange",
-      "  classDef added stroke-width: 8px, stroke: green",
-      "  classDef deleted stroke-width: 8px, stroke: red",
+      "  classDef modified stroke-width: 5px, stroke: orange",
+      "  classDef added stroke-width: 5px, stroke: green",
+      "  classDef deleted stroke-width: 5px, stroke: red",
       "",
     ].join("\n");
   }
