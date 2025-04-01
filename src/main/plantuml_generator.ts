@@ -89,6 +89,12 @@ export class PlantUmlGenerator extends UmlGenerator {
     [flowTypes.DiffStatus.MODIFIED]: DiffIcon.MODIFIED,
   };
 
+  private static readonly DIFF_TO_STYLE_CLASS: Record<string, string> = {
+    [flowTypes.DiffStatus.ADDED]: " <<Added>>",
+    [flowTypes.DiffStatus.DELETED]: " <<Deleted>>",
+    [flowTypes.DiffStatus.MODIFIED]: " <<Modified>>",
+  };
+
   getHeader(label: string): string {
     return `skinparam State {
   BackgroundColor<<Pink>> #F9548A
@@ -102,6 +108,15 @@ export class PlantUmlGenerator extends UmlGenerator {
 
   BackgroundColor<<Blue>> #1B96FF
   FontColor<<Blue>> white
+
+  BorderColor<<Deleted>> red
+  BorderThickness<<Deleted>> 5
+
+  BorderColor<<Added>> green
+  BorderThickness<<Added>> 5
+
+  BorderColor<<Modified>> orange
+  BorderThickness<<Modified>> 5
 }
 
 title ${label}`;
@@ -122,6 +137,9 @@ title ${label}`;
     const diffIcon = node.diffStatus
       ? PlantUmlGenerator.DIFF_ICON_MAP[node.diffStatus]
       : DiffIcon.NONE;
+    const diffStyleClass = node.diffStatus
+      ? PlantUmlGenerator.DIFF_TO_STYLE_CLASS[node.diffStatus]
+      : "";
 
     let result = generateNode(
       node.label,
@@ -129,7 +147,8 @@ title ${label}`;
       node.type,
       plantUmlIcon,
       plantUmlSkinColor,
-      diffIcon
+      diffIcon,
+      diffStyleClass
     );
 
     // Handle inner nodes if they exist
@@ -154,7 +173,7 @@ title ${label}`;
       result.push([bold, label, content].filter(Boolean).join(EOL));
     });
 
-    return result.join(`${parentNode.id}: ---`);
+    return result.join(`${EOL}${parentNode.id}: ---${EOL}`);
   }
 
   getTransition(transition: Transition): string {
@@ -176,11 +195,12 @@ function generateNode(
   type: string,
   icon: Icon,
   skinColor: SkinColor,
-  diffIcon: DiffIcon = DiffIcon.NONE
+  diffIcon: DiffIcon = DiffIcon.NONE,
+  diffStyleClass: string = ""
 ): string {
   return `state "${diffIcon}**${type}**${icon} \\n ${getLabel(
     label
-  )}" as ${name}${skinColor}`;
+  )}" as ${name}${skinColor}${diffStyleClass}`;
 }
 
 function getLabel(label: string) {
