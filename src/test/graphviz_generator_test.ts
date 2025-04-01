@@ -191,7 +191,7 @@ function generateTable(
     : "";
   return `${nodeName} [
   label=<
-<TABLE CELLSPACING="0" CELLPADDING="0">
+<TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CELLBORDER="0">
   <TR>
     <TD>
       <B>${type}${icon}</B>
@@ -202,7 +202,8 @@ function generateTable(
   </TR>${formattedInnerNodeBody}
 </TABLE>
 >
-  color="${skinColor}"
+  style="filled, rounded",
+  fillcolor="${skinColor}",
   fontcolor="${fontColor}"
 ];`;
 }
@@ -242,7 +243,7 @@ Deno.test("GraphViz", async (t) => {
     assertStringIncludes(result, "label=<<B>foo</B>>");
     assertStringIncludes(result, 'title = "foo"');
     assertStringIncludes(result, 'labelloc = "t"');
-    assertStringIncludes(result, "node [shape=box, style=filled]");
+    assertStringIncludes(result, 'node [shape=box, style="filled, rounded"]');
   });
 
   await t.step("should generate apex plugin call node", () => {
