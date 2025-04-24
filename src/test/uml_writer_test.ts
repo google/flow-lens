@@ -84,7 +84,7 @@ Deno.test("UmlWriter", async (t) => {
   let writer: UmlWriter;
   let fileContent: string;
 
-  await t.step("should write UML diagrams to a file", () => {
+  await t.step("should write UML diagrams to a file", async () => {
     Configuration.getInstance = () => getRuntimeConfig();
     writer = new UmlWriter(FILE_PATH_TO_FLOW_DIFFERENCE);
 
@@ -94,7 +94,7 @@ Deno.test("UmlWriter", async (t) => {
     fileContent = fs.readFileSync(expectedFilePath, ENCODING).toString();
     assertEquals(fileContent, JSON.stringify(EXPECTED_DEFAULT_FORMAT, null, 2));
 
-    Deno.remove(expectedFilePath);
+    await Deno.remove(expectedFilePath);
   });
 
   await t.step("should write UML diagrams as GitHub comments", async () => {

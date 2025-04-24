@@ -566,7 +566,10 @@ export abstract class UmlGenerator {
   }
 }
 
-function toString(element: flowTypes.FlowElementReferenceOrValue) {
+function toString(element: flowTypes.FlowElementReferenceOrValue | undefined) {
+  if (!element) {
+    return '';
+  }
   if (
     element.apexValue ||
     element.elementReference ||
