@@ -17,7 +17,7 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { Buffer } from "node:buffer";
 import { Configuration } from "../main/argument_processor.ts";
-import { getTestConfig } from "./argument_processor_test.ts";
+import { getTestConfig } from "./test_utils.ts";
 import {
   ERROR_MESSAGES,
   FLOW_FILE_EXTENSION,
@@ -54,7 +54,7 @@ Deno.test("FlowFileChangeDetector", async (t) => {
       const flowFiles = detector.getFlowFiles();
 
       assertEquals(flowFiles, [FLOW_FILE_PATH]);
-    }
+    },
   );
 
   await t.step("should throw error if git is not installed", () => {
@@ -67,7 +67,7 @@ Deno.test("FlowFileChangeDetector", async (t) => {
     assertThrows(
       () => detector.getFlowFiles(),
       Error,
-      ERROR_MESSAGES.gitIsNotInstalledError
+      ERROR_MESSAGES.gitIsNotInstalledError,
     );
   });
 
@@ -81,7 +81,7 @@ Deno.test("FlowFileChangeDetector", async (t) => {
     assertThrows(
       () => detector.getFlowFiles(),
       Error,
-      ERROR_MESSAGES.notInGitRepoError
+      ERROR_MESSAGES.notInGitRepoError,
     );
   });
 
@@ -95,7 +95,7 @@ Deno.test("FlowFileChangeDetector", async (t) => {
     assertThrows(
       () => detector.getFlowFiles(),
       Error,
-      ERROR_MESSAGES.diffError(new Error("Diff error"))
+      ERROR_MESSAGES.diffError(new Error("Diff error")),
     );
   });
 
@@ -125,8 +125,8 @@ Deno.test("FlowFileChangeDetector", async (t) => {
       Error,
       ERROR_MESSAGES.unableToGetFileContent(
         FLOW_FILE_PATH,
-        new Error("Get file content error")
-      )
+        new Error("Get file content error"),
+      ),
     );
   });
 });

@@ -117,7 +117,7 @@ export class FlowParser {
           } else {
             resolve(result);
           }
-        }
+        },
       );
     });
   }
@@ -137,7 +137,7 @@ export class FlowParser {
     this.beingParsed.apexPluginCalls = ensureArray(flow.apexPluginCalls);
     this.beingParsed.assignments = ensureArray(flow.assignments);
     this.beingParsed.collectionProcessors = ensureArray(
-      flow.collectionProcessors
+      flow.collectionProcessors,
     );
     this.beingParsed.customErrors = ensureArray(flow.customErrors);
     setCustomErrorMessages(this.beingParsed.customErrors);
@@ -291,14 +291,14 @@ export class FlowParser {
     from: flowTypes.FlowNode,
     connection: flowTypes.FlowConnector,
     isFault: boolean,
-    transitionLabel?: string
+    transitionLabel?: string,
   ): Transition {
     const connectedNode = this.beingParsed.nameToNode?.get(
-      connection.targetReference
+      connection.targetReference,
     );
     if (!connectedNode) {
       throw new Error(
-        ERROR_MESSAGES.couldNotFindConnectedNode(connection.targetReference)
+        ERROR_MESSAGES.couldNotFindConnectedNode(connection.targetReference),
       );
     }
     return {
@@ -310,7 +310,7 @@ export class FlowParser {
   }
 
   private getTransitionsFromDecision(
-    node: flowTypes.FlowDecision
+    node: flowTypes.FlowDecision,
   ): Transition[] {
     const result: Transition[] = [];
     if (node.defaultConnector) {
@@ -319,15 +319,15 @@ export class FlowParser {
           node,
           node.defaultConnector,
           false,
-          node.defaultConnectorLabel
-        )
+          node.defaultConnectorLabel,
+        ),
       );
     }
     if (node.rules) {
       for (const rule of node.rules) {
         if (rule && rule.connector) {
           result.push(
-            this.createTransition(node, rule.connector, false, rule.label)
+            this.createTransition(node, rule.connector, false, rule.label),
           );
         }
       }
@@ -352,17 +352,17 @@ export class FlowParser {
       | flowTypes.FlowRecordLookup
       | flowTypes.FlowRecordUpdate
       | flowTypes.FlowApexPluginCall
-      | flowTypes.FlowActionCall
+      | flowTypes.FlowActionCall,
   ): Transition[] {
     const result: Transition[] = [];
     if (node.connector) {
       result.push(
-        this.createTransition(node, node.connector, false, undefined)
+        this.createTransition(node, node.connector, false, undefined),
       );
     }
     if (node.faultConnector) {
       result.push(
-        this.createTransition(node, node.faultConnector, true, FAULT)
+        this.createTransition(node, node.faultConnector, true, FAULT),
       );
     }
     return result;
@@ -372,7 +372,7 @@ export class FlowParser {
     const result: Transition[] = [];
     if (node.nextValueConnector) {
       result.push(
-        this.createTransition(node, node.nextValueConnector, false, "for each")
+        this.createTransition(node, node.nextValueConnector, false, "for each"),
       );
     }
     if (node.noMoreValuesConnector) {
@@ -381,8 +381,8 @@ export class FlowParser {
           node,
           node.noMoreValuesConnector,
           false,
-          "after all"
-        )
+          "after all",
+        ),
       );
     }
     return result;
@@ -396,13 +396,15 @@ export class FlowParser {
       | flowTypes.FlowSubflow
       | flowTypes.FlowRecordRollback
       | flowTypes.FlowTransform
-      | flowTypes.FlowCustomError
+      | flowTypes.FlowCustomError,
   ): Transition[] {
     const result: Transition[] = [];
     if (node.connector) {
-      for (const connector of Array.isArray(node.connector)
-        ? node.connector
-        : [node.connector]) {
+      for (
+        const connector of Array.isArray(node.connector)
+          ? node.connector
+          : [node.connector]
+      ) {
         result.push(this.createTransition(node, connector, false, undefined));
       }
     }
@@ -417,13 +419,13 @@ export class FlowParser {
           node,
           node.defaultConnector,
           false,
-          node.defaultConnectorLabel
-        )
+          node.defaultConnectorLabel,
+        ),
       );
     }
     if (node.faultConnector) {
       result.push(
-        this.createTransition(node, node.faultConnector, true, FAULT)
+        this.createTransition(node, node.faultConnector, true, FAULT),
       );
     }
     return result;
@@ -448,14 +450,14 @@ function ensureArray<T>(input: T[] | undefined): T[] | undefined {
  * array.
  */
 function setOrchestratedStageSteps(
-  orchestratedStages: flowTypes.FlowOrchestratedStage[] | undefined
+  orchestratedStages: flowTypes.FlowOrchestratedStage[] | undefined,
 ) {
   orchestratedStages?.forEach((stage) => {
     if (!stage.stageSteps) {
       return;
     }
     stage.stageSteps = ensureArray(
-      stage.stageSteps
+      stage.stageSteps,
     ) as flowTypes.FlowStageStep[];
   });
 }
@@ -498,17 +500,17 @@ function setRuleConditions(rules: flowTypes.FlowRule[] | undefined) {
  * need to be converted to an array.
  */
 function setRecordLookups(
-  recordLookups: flowTypes.FlowRecordLookup[] | undefined
+  recordLookups: flowTypes.FlowRecordLookup[] | undefined,
 ) {
   recordLookups?.forEach((recordLookup) => {
     if (recordLookup.filters) {
       recordLookup.filters = ensureArray(
-        recordLookup.filters
+        recordLookup.filters,
       ) as flowTypes.FlowRecordFilter[];
     }
     if (recordLookup.queriedFields) {
       recordLookup.queriedFields = ensureArray(
-        recordLookup.queriedFields
+        recordLookup.queriedFields,
       ) as string[];
     }
   });
@@ -518,18 +520,18 @@ function setRecordLookups(
  * Ensures that filters and inputAssignments are arrays in record update nodes
  */
 function setRecordUpdates(
-  recordUpdates: flowTypes.FlowRecordUpdate[] | undefined
+  recordUpdates: flowTypes.FlowRecordUpdate[] | undefined,
 ) {
   if (!recordUpdates) {
     return;
   }
   for (const recordUpdate of recordUpdates) {
     recordUpdate.filters = ensureArray(
-      recordUpdate.filters ?? []
+      recordUpdate.filters ?? [],
     ) as flowTypes.FlowRecordFilter[];
 
     recordUpdate.inputAssignments = ensureArray(
-      recordUpdate.inputAssignments ?? []
+      recordUpdate.inputAssignments ?? [],
     ) as flowTypes.FlowInputFieldAssignment[];
   }
 }
@@ -541,14 +543,14 @@ function setRecordUpdates(
  * an array.
  */
 function setCustomErrorMessages(
-  customErrors: flowTypes.FlowCustomError[] | undefined
+  customErrors: flowTypes.FlowCustomError[] | undefined,
 ) {
   if (!customErrors) {
     return;
   }
   for (const customError of customErrors) {
     customError.customErrorMessages = ensureArray(
-      customError.customErrorMessages
+      customError.customErrorMessages,
     ) as flowTypes.FlowCustomErrorMessage[];
   }
 }
@@ -558,17 +560,17 @@ function setCustomErrorMessages(
  * of node.
  */
 function isAssignment(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowAssignment {
   return (node as flowTypes.FlowAssignment).assignmentItems !== undefined;
 }
 
 function isCollectionProcessor(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowCollectionProcessor {
   return (
     (node as flowTypes.FlowCollectionProcessor).collectionProcessorType !==
-    undefined
+      undefined
   );
 }
 
@@ -581,7 +583,7 @@ function isSubflow(node: flowTypes.FlowNode): node is flowTypes.FlowSubflow {
 }
 
 function isTransform(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowTransform {
   return (node as flowTypes.FlowTransform).dataType !== undefined;
 }
@@ -603,49 +605,49 @@ function isLoop(node: flowTypes.FlowNode): node is flowTypes.FlowLoop {
 }
 
 function isRecordCreate(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowRecordCreate {
   return (node as flowTypes.FlowRecordCreate).inputReference !== undefined;
 }
 
 function isRecordDelete(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowRecordDelete {
   return (node as flowTypes.FlowRecordDelete).inputReference !== undefined;
 }
 
 function isRecordLookup(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowRecordLookup {
   return (node as flowTypes.FlowRecordLookup).filters !== undefined;
 }
 
 function isRecordUpdate(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowRecordUpdate {
   return (node as flowTypes.FlowRecordUpdate).inputReference !== undefined;
 }
 
 function isRecordRollback(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowRecordRollback {
   return (node as flowTypes.FlowRecordRollback).connector !== undefined;
 }
 
 function isApexPluginCall(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowApexPluginCall {
   return (node as flowTypes.FlowApexPluginCall).apexClass !== undefined;
 }
 
 function isFlowActionCall(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowActionCall {
   return (node as flowTypes.FlowActionCall).actionName !== undefined;
 }
 
 function isCustomError(
-  node: flowTypes.FlowNode
+  node: flowTypes.FlowNode,
 ): node is flowTypes.FlowCustomError {
   return (node as flowTypes.FlowCustomError).customErrorMessages !== undefined;
 }

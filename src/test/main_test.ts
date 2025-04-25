@@ -56,6 +56,6 @@ Deno.test(
     assert(runner.filePathToFlowDifference.has(SAMPLE_FLOW_FILE_PATH));
     assertExists(runner.filePathToFlowDifference.get(SAMPLE_FLOW_FILE_PATH));
 
-    Deno.remove(path.join(TEST_UNDECLARED_OUTPUTS_DIR, "test.json"));
-  }
+    await Deno.remove(path.join(TEST_UNDECLARED_OUTPUTS_DIR, "test.json"));
+  },
 );

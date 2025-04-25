@@ -33,11 +33,11 @@ const TEST_FILES = {
   noStartNode: path.join(GOLDENS_PATH, "no_start_node.flow-meta.xml"),
   missingTransitionNode: path.join(
     GOLDENS_PATH,
-    "missing_transition_node.flow-meta.xml"
+    "missing_transition_node.flow-meta.xml",
   ),
   circularTransition: path.join(
     GOLDENS_PATH,
-    "circular_transition.flow-meta.xml"
+    "circular_transition.flow-meta.xml",
   ),
   rollback: path.join(GOLDENS_PATH, "rollback.flow-meta.xml"),
 };
@@ -69,7 +69,7 @@ Deno.test("FlowParser", async (t) => {
 
   await t.step("should parse valid XML into a flow object", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.sample, ENCODING)
+      fs.readFileSync(TEST_FILES.sample, ENCODING),
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -118,7 +118,7 @@ Deno.test("FlowParser", async (t) => {
 
   await t.step("should handle circular transitions", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.circularTransition, ENCODING)
+      fs.readFileSync(TEST_FILES.circularTransition, ENCODING),
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -145,7 +145,7 @@ Deno.test("FlowParser", async (t) => {
     "should ensure multiple node definitions are represented as arrays",
     async () => {
       systemUnderTest = new FlowParser(
-        fs.readFileSync(TEST_FILES.multipleElements, ENCODING)
+        fs.readFileSync(TEST_FILES.multipleElements, ENCODING),
       );
 
       parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -155,80 +155,80 @@ Deno.test("FlowParser", async (t) => {
       // Compare actual parsedFlow nodes to expected based on the file
       assertEquals(
         parsedFlow.apexPluginCalls?.map((n) => n.name),
-        [NODE_NAMES.apexPluginCall, `${NODE_NAMES.apexPluginCall}2`]
+        [NODE_NAMES.apexPluginCall, `${NODE_NAMES.apexPluginCall}2`],
       );
       assertEquals(
         parsedFlow.assignments?.map((n) => n.name),
-        [NODE_NAMES.assignment, `${NODE_NAMES.assignment}2`]
+        [NODE_NAMES.assignment, `${NODE_NAMES.assignment}2`],
       );
       assertEquals(
         parsedFlow.collectionProcessors?.map((n) => n.name),
-        [NODE_NAMES.collectionProcessor, `${NODE_NAMES.collectionProcessor}2`]
+        [NODE_NAMES.collectionProcessor, `${NODE_NAMES.collectionProcessor}2`],
       );
       assertEquals(
         parsedFlow.decisions?.map((n) => n.name),
-        [NODE_NAMES.decision, `${NODE_NAMES.decision}2`]
+        [NODE_NAMES.decision, `${NODE_NAMES.decision}2`],
       );
       assertEquals(
         parsedFlow.loops?.map((n) => n.name),
-        [NODE_NAMES.loop, `${NODE_NAMES.loop}2`]
+        [NODE_NAMES.loop, `${NODE_NAMES.loop}2`],
       );
       assertEquals(
         parsedFlow.orchestratedStages?.map((n) => n.name),
-        [NODE_NAMES.orchestratedStage, `${NODE_NAMES.orchestratedStage}2`]
+        [NODE_NAMES.orchestratedStage, `${NODE_NAMES.orchestratedStage}2`],
       );
       assertEquals(
         parsedFlow.recordCreates?.map((n) => n.name),
-        [NODE_NAMES.recordCreate, `${NODE_NAMES.recordCreate}2`]
+        [NODE_NAMES.recordCreate, `${NODE_NAMES.recordCreate}2`],
       );
       assertEquals(
         parsedFlow.recordDeletes?.map((n) => n.name),
-        [NODE_NAMES.recordDelete, `${NODE_NAMES.recordDelete}2`]
+        [NODE_NAMES.recordDelete, `${NODE_NAMES.recordDelete}2`],
       );
       assertEquals(
         parsedFlow.recordLookups?.map((n) => n.name),
-        [NODE_NAMES.recordLookup, `${NODE_NAMES.recordLookup}2`]
+        [NODE_NAMES.recordLookup, `${NODE_NAMES.recordLookup}2`],
       );
       assertEquals(
         parsedFlow.recordRollbacks?.map((n) => n.name),
-        [NODE_NAMES.recordRollback, `${NODE_NAMES.recordRollback}2`]
+        [NODE_NAMES.recordRollback, `${NODE_NAMES.recordRollback}2`],
       );
       assertEquals(
         parsedFlow.recordUpdates?.map((n) => n.name),
-        [NODE_NAMES.recordUpdate, `${NODE_NAMES.recordUpdate}2`]
+        [NODE_NAMES.recordUpdate, `${NODE_NAMES.recordUpdate}2`],
       );
       assertEquals(
         parsedFlow.screens?.map((n) => n.name),
-        [NODE_NAMES.screen, `${NODE_NAMES.screen}2`]
+        [NODE_NAMES.screen, `${NODE_NAMES.screen}2`],
       );
       assertEquals(
         parsedFlow.steps?.map((n) => n.name),
-        [NODE_NAMES.step, `${NODE_NAMES.step}2`]
+        [NODE_NAMES.step, `${NODE_NAMES.step}2`],
       );
       assertEquals(
         parsedFlow.subflows?.map((n) => n.name),
-        [NODE_NAMES.subflow, `${NODE_NAMES.subflow}2`]
+        [NODE_NAMES.subflow, `${NODE_NAMES.subflow}2`],
       );
       assertEquals(
         parsedFlow.transforms?.map((n) => n.name),
-        [NODE_NAMES.transform, `${NODE_NAMES.transform}2`]
+        [NODE_NAMES.transform, `${NODE_NAMES.transform}2`],
       );
       assertEquals(
         parsedFlow.waits?.map((n) => n.name),
-        [NODE_NAMES.wait, `${NODE_NAMES.wait}2`]
+        [NODE_NAMES.wait, `${NODE_NAMES.wait}2`],
       );
       assertEquals(
         parsedFlow.actionCalls?.map((n) => n.name),
-        [NODE_NAMES.actionCall, `${NODE_NAMES.actionCall}2`]
+        [NODE_NAMES.actionCall, `${NODE_NAMES.actionCall}2`],
       );
-    }
+    },
   );
 
   await t.step(
     "should ensure single node definitions are represented as arrays",
     async () => {
       systemUnderTest = new FlowParser(
-        fs.readFileSync(TEST_FILES.singleElements, ENCODING)
+        fs.readFileSync(TEST_FILES.singleElements, ENCODING),
       );
 
       parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -237,78 +237,78 @@ Deno.test("FlowParser", async (t) => {
       // Compare actual parsedFlow nodes to expected based on the file
       assertEquals(
         parsedFlow.apexPluginCalls?.map((n) => n.name),
-        [NODE_NAMES.apexPluginCall]
+        [NODE_NAMES.apexPluginCall],
       );
       assertEquals(
         parsedFlow.assignments?.map((n) => n.name),
-        [NODE_NAMES.assignment]
+        [NODE_NAMES.assignment],
       );
       assertEquals(
         parsedFlow.collectionProcessors?.map((n) => n.name),
-        [NODE_NAMES.collectionProcessor]
+        [NODE_NAMES.collectionProcessor],
       );
       assertEquals(
         parsedFlow.decisions?.map((n) => n.name),
-        [NODE_NAMES.decision]
+        [NODE_NAMES.decision],
       );
       assertEquals(
         parsedFlow.loops?.map((n) => n.name),
-        [NODE_NAMES.loop]
+        [NODE_NAMES.loop],
       );
       assertEquals(
         parsedFlow.orchestratedStages?.map((n) => n.name),
-        [NODE_NAMES.orchestratedStage]
+        [NODE_NAMES.orchestratedStage],
       );
       assertEquals(
         parsedFlow.recordCreates?.map((n) => n.name),
-        [NODE_NAMES.recordCreate]
+        [NODE_NAMES.recordCreate],
       );
       assertEquals(
         parsedFlow.recordDeletes?.map((n) => n.name),
-        [NODE_NAMES.recordDelete]
+        [NODE_NAMES.recordDelete],
       );
       assertEquals(
         parsedFlow.recordLookups?.map((n) => n.name),
-        [NODE_NAMES.recordLookup]
+        [NODE_NAMES.recordLookup],
       );
       assertEquals(
         parsedFlow.recordRollbacks?.map((n) => n.name),
-        [NODE_NAMES.recordRollback]
+        [NODE_NAMES.recordRollback],
       );
       assertEquals(
         parsedFlow.recordUpdates?.map((n) => n.name),
-        [NODE_NAMES.recordUpdate]
+        [NODE_NAMES.recordUpdate],
       );
       assertEquals(
         parsedFlow.screens?.map((n) => n.name),
-        [NODE_NAMES.screen]
+        [NODE_NAMES.screen],
       );
       assertEquals(
         parsedFlow.steps?.map((n) => n.name),
-        [NODE_NAMES.step]
+        [NODE_NAMES.step],
       );
       assertEquals(
         parsedFlow.subflows?.map((n) => n.name),
-        [NODE_NAMES.subflow]
+        [NODE_NAMES.subflow],
       );
       assertEquals(
         parsedFlow.transforms?.map((n) => n.name),
-        [NODE_NAMES.transform]
+        [NODE_NAMES.transform],
       );
       assertEquals(
         parsedFlow.waits?.map((n) => n.name),
-        [NODE_NAMES.wait]
+        [NODE_NAMES.wait],
       );
       assertEquals(
         parsedFlow.actionCalls?.map((n) => n.name),
-        [NODE_NAMES.actionCall]
+        [NODE_NAMES.actionCall],
       );
-    }
+    },
   );
 
   await t.step("should properly identify rollbacks", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.rollback, ENCODING)
+      fs.readFileSync(TEST_FILES.rollback, ENCODING),
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -329,7 +329,7 @@ Deno.test("FlowParser", async (t) => {
 
     assertEquals(
       parsedFlow.screens?.map((n) => n.name),
-      [NODE_NAMES.screen]
+      [NODE_NAMES.screen],
     );
 
     assertEquals(parsedFlow.transitions, [
@@ -371,29 +371,29 @@ Deno.test("FlowParser", async (t) => {
     "should throw an error when the XML is missing a start node",
     async () => {
       systemUnderTest = new FlowParser(
-        fs.readFileSync(TEST_FILES.noStartNode, ENCODING)
+        fs.readFileSync(TEST_FILES.noStartNode, ENCODING),
       );
 
       await assertRejects(
         async () => await systemUnderTest.generateFlowDefinition(),
         Error,
-        ERROR_MESSAGES.flowStartNotDefined
+        ERROR_MESSAGES.flowStartNotDefined,
       );
-    }
+    },
   );
 
   await t.step(
     "should throw an error when the XML contains an invalid transition",
     async () => {
       systemUnderTest = new FlowParser(
-        fs.readFileSync(TEST_FILES.missingTransitionNode, ENCODING)
+        fs.readFileSync(TEST_FILES.missingTransitionNode, ENCODING),
       );
 
       await assertRejects(
         async () => await systemUnderTest.generateFlowDefinition(),
         Error,
-        ERROR_MESSAGES.couldNotFindConnectedNode(NON_EXISTING_ELEMENT)
+        ERROR_MESSAGES.couldNotFindConnectedNode(NON_EXISTING_ELEMENT),
       );
-    }
+    },
   );
 });

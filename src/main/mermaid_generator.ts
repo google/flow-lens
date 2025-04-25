@@ -163,7 +163,8 @@ export class MermaidGenerator extends UmlGenerator {
       const symbol = MermaidGenerator.DIFF_STATUS_TO_SYMBOL[node.diffStatus];
       const color = MermaidGenerator.DIFF_STATUS_TO_COLOR[node.diffStatus];
       // Add more horizontal padding around the diff indicator
-      diffStatus = `<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="${color}"><b>${symbol}</b></font></span>`;
+      diffStatus =
+        `<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="${color}"><b>${symbol}</b></font></span>`;
     }
 
     const sanitizedLabel = this.sanitizeLabel(node.label);

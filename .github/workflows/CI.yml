@@ -1,11 +1,11 @@
-name: Run Tests
+name: Continuous Integration
 
 on:
   pull_request:
     types: [opened, reopened, synchronize]
 
 jobs:
-  run_tests:
+  Continuous_Integration:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,11 +19,14 @@ jobs:
         with:
           deno-version: latest
 
+      - name: Check formatting
+        run: |
+          deno fmt --check
+
       - name: Run Tests
         run: |
           deno test \
             --allow-read \
             --allow-write \
             --allow-env \
-            --allow-run \
-            --trace-leaks
+            --allow-run

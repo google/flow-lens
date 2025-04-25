@@ -43,7 +43,7 @@ const GIT_COMMANDS = {
   getFileContent: (
     filePath: string,
     commitHash: string,
-    repo: string | undefined
+    repo: string | undefined,
   ) => `git ${repo ? `-C ${repo}` : ""} show ${commitHash}:${filePath}`,
 };
 
@@ -82,11 +82,11 @@ export class FlowFileChangeDetector {
         fromOrTo === "old"
           ? (Configuration.getInstance().gitDiffFromHash as string)
           : (Configuration.getInstance().gitDiffToHash as string),
-        Configuration.getInstance().gitRepo
+        Configuration.getInstance().gitRepo,
       );
     } catch (error: unknown) {
       throw new Error(
-        ERROR_MESSAGES.unableToGetFileContent(filePath, error as Error)
+        ERROR_MESSAGES.unableToGetFileContent(filePath, error as Error),
       );
     }
     return fileContent.toString();
@@ -131,15 +131,15 @@ export class FlowFileChangeDetector {
       GIT_COMMANDS.diff(
         Configuration.getInstance().gitDiffFromHash!,
         Configuration.getInstance().gitDiffToHash!,
-        Configuration.getInstance().gitRepo
-      )
+        Configuration.getInstance().gitRepo,
+      ),
     );
   }
 
   private executeGetFileContentCommand(
     filePath: string,
     commitHash: string,
-    repo: string | undefined
+    repo: string | undefined,
   ) {
     return execSync(GIT_COMMANDS.getFileContent(filePath, commitHash, repo));
   }
@@ -149,7 +149,7 @@ export class FlowFileChangeDetector {
       .split(EOL)
       .filter(
         (filePath) =>
-          filePath && filePath.toLowerCase().endsWith(FLOW_FILE_EXTENSION)
+          filePath && filePath.toLowerCase().endsWith(FLOW_FILE_EXTENSION),
       );
   }
 }

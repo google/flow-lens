@@ -15,14 +15,14 @@
  */
 
 import {
+  assert,
   assertEquals,
   assertExists,
   assertStringIncludes,
-  assert,
 } from "@std/assert";
 import * as fs from "node:fs";
 import { Configuration, DiagramTool } from "../main/argument_processor.ts";
-import { getTestConfig } from "./argument_processor_test.ts";
+import { getTestConfig } from "./test_utils.ts";
 import { FlowFileChangeDetector } from "../main/flow_file_change_detector.ts";
 import {
   ERROR_MESSAGES,
@@ -58,14 +58,14 @@ Deno.test("FlowToUmlTransformer", async (t) => {
     transformer = new FlowToUmlTransformer(
       [SAMPLE_FLOW_FILE_PATH],
       GENERATOR_CONTEXT,
-      CHANGE_DETECTOR
+      CHANGE_DETECTOR,
     );
 
     result = await transformer.transformToUmlDiagrams();
 
     assert(
       result.has(SAMPLE_FLOW_FILE_PATH),
-      "result should have the sample file path as a key"
+      "result should have the sample file path as a key",
     );
 
     const flowDifference = result.get(SAMPLE_FLOW_FILE_PATH);
@@ -75,7 +75,7 @@ Deno.test("FlowToUmlTransformer", async (t) => {
     assertStringIncludes(
       newUml,
       PLANT_UML_SIGNATURE,
-      "newUml should contain PLANT_UML_SIGNATURE"
+      "newUml should contain PLANT_UML_SIGNATURE",
     );
 
     Configuration.getInstance = originalGetInstance; // Restore the original getInstance function
@@ -100,7 +100,7 @@ Deno.test("FlowToUmlTransformer", async (t) => {
       transformer = new FlowToUmlTransformer(
         [fakeFilePath],
         GENERATOR_CONTEXT,
-        CHANGE_DETECTOR
+        CHANGE_DETECTOR,
       );
 
       result = await transformer.transformToUmlDiagrams();
@@ -110,16 +110,16 @@ Deno.test("FlowToUmlTransformer", async (t) => {
 
       const expectedErrorMessage = ERROR_MESSAGES.unableToProcessFile(
         fakeFilePath,
-        new Error(XML_READER_ERROR_MESSAGES.invalidFilePath(fakeFilePath))
+        new Error(XML_READER_ERROR_MESSAGES.invalidFilePath(fakeFilePath)),
       );
       assertEquals(
         consoleErrorCall,
         expectedErrorMessage,
-        "console.error call should have the expected message"
+        "console.error call should have the expected message",
       );
 
       Configuration.getInstance = originalGetInstance; // Restore the original getInstance function
       console.error = originalConsoleError; // Restore the original console.error
-    }
+    },
   );
 });

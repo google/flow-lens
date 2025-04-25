@@ -46,12 +46,12 @@ export class Runner {
   }
   private async generateUml() {
     const generatorContext = new UmlGeneratorContext(
-      Configuration.getInstance().diagramTool
+      Configuration.getInstance().diagramTool,
     );
     const transformer = new FlowToUmlTransformer(
       this.flowFilePaths,
       generatorContext,
-      this.changeDetector
+      this.changeDetector,
     );
     this.filePathToFlowDifference = await transformer.transformToUmlDiagrams();
   }

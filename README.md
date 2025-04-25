@@ -5,11 +5,12 @@
 This project helps decode Salesforce Flows by translating their raw XML
 definition files into human-understandable UML diagrams. These visualizations
 clarify the flow's structure and logic, making documentation and code review
-significantly easier. It supports generating diagrams using PlantUML, Graphviz, and
-Mermaid, and can even highlight changes between different versions of a flow by
-processing Git diffs.
+significantly easier. It supports generating diagrams using PlantUML, Graphviz,
+and Mermaid, and can even highlight changes between different versions of a flow
+by processing Git diffs.
 
-Flow Lens is available on JSR, the JavaScript Registry. You can find the package at [jsr.io/@goog/flow-lens](https://jsr.io/@goog/flow-lens).
+Flow Lens is available on JSR, the JavaScript Registry. You can find the package
+at [jsr.io/@goog/flow-lens](https://jsr.io/@goog/flow-lens).
 
 This is not an officially supported Google product. This project is not eligible
 for the
@@ -21,7 +22,8 @@ for the
   Graphviz, and Mermaid.
 - **Handles Git diffs:** Can process changes between two Git commits,
   highlighting added, modified, and deleted elements in the resulting diagram.
-- **GitHub Action integration:** Automatically posts flow diagrams as comments on pull requests.
+- **GitHub Action integration:** Automatically posts flow diagrams as comments
+  on pull requests.
 
 ## Usage
 
@@ -43,8 +45,11 @@ available:
 
 Flow Lens supports two output modes:
 
-1. **json mode (default):** Generates a JSON file containing the UML diagram(s) that can be used for further processing.
-2. **github_action mode:** Automatically posts comments with flow diagrams on pull requests when used in a GitHub Actions workflow. When using this mode, you must specify `mermaid` as the diagram tool.
+1. **json mode (default):** Generates a JSON file containing the UML diagram(s)
+   that can be used for further processing.
+2. **github_action mode:** Automatically posts comments with flow diagrams on
+   pull requests when used in a GitHub Actions workflow. When using this mode,
+   you must specify `mermaid` as the diagram tool.
 
 **Example using file path (json mode):**
 
@@ -80,7 +85,8 @@ deno run \
 
 ### Setting up a GitHub Action
 
-You can set up a GitHub Action to automatically generate and post flow diagrams as comments on pull requests. Here's an example workflow configuration:
+You can set up a GitHub Action to automatically generate and post flow diagrams
+as comments on pull requests. Here's an example workflow configuration:
 
 ```yaml
 name: Generate Flow Preview
@@ -122,13 +128,16 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-When using the GitHub Action mode, Flow Lens will automatically post a comment on the pull request with the old (if applicable) and new versions of the flow whenever a pull request is created or updated. This makes it easy to visualize flow changes directly in the pull request review process.
+When using the GitHub Action mode, Flow Lens will automatically post a comment
+on the pull request with the old (if applicable) and new versions of the flow
+whenever a pull request is created or updated. This makes it easy to visualize
+flow changes directly in the pull request review process.
 
 ## Output
 
-When using the json mode, the output is a JSON file containing the generated UML diagram(s). The structure
-will contain the file paths and their associated old (if applicable) and new UML
-strings.
+When using the json mode, the output is a JSON file containing the generated UML
+diagram(s). The structure will contain the file paths and their associated old
+(if applicable) and new UML strings.
 
 ```json
 [

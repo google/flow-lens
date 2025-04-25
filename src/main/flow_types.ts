@@ -40,7 +40,8 @@ export enum FlowAssignmentOperator {
 
 export enum FlowCollectionProcessorType {
   SORT_COLLECTION_PROCESSOR = "SortCollectionProcessor",
-  RECOMMENDATION_MAP_COLLECTION_PROCESSOR = "RecommendationMapCollectionProcessor",
+  RECOMMENDATION_MAP_COLLECTION_PROCESSOR =
+    "RecommendationMapCollectionProcessor",
   FILTER_COLLECTION_PROCESSOR = "FilterCollectionProcessor",
 }
 

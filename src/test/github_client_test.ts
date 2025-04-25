@@ -26,7 +26,8 @@ class MockOctokit {
       return {
         data: [
           {
-            url: "https://api.github.com/repos/mock-owner/mock-repo/pulls/comments/1",
+            url:
+              "https://api.github.com/repos/mock-owner/mock-repo/pulls/comments/1",
             pull_request_review_id: 42,
             id: 1,
             node_id: "mock-node-id",
@@ -57,13 +58,16 @@ class MockOctokit {
             author_association: "CONTRIBUTOR",
             _links: {
               self: {
-                href: "https://api.github.com/repos/mock-owner/mock-repo/pulls/comments/1",
+                href:
+                  "https://api.github.com/repos/mock-owner/mock-repo/pulls/comments/1",
               },
               html: {
-                href: "https://github.com/mock-owner/mock-repo/pull/42#discussion-1",
+                href:
+                  "https://github.com/mock-owner/mock-repo/pull/42#discussion-1",
               },
               pull_request: {
-                href: "https://api.github.com/repos/mock-owner/mock-repo/pulls/42",
+                href:
+                  "https://api.github.com/repos/mock-owner/mock-repo/pulls/42",
               },
             },
           },
@@ -163,7 +167,7 @@ Deno.test("GithubClient", async (t) => {
       const mockOctokit = new MockOctokit();
       const githubClient = new GithubClient(
         "fake-token",
-        invalidContext
+        invalidContext,
       ) as any;
       githubClient.octokit = mockOctokit;
 
@@ -177,7 +181,7 @@ Deno.test("GithubClient", async (t) => {
       await assertRejects(
         () => githubClient.writeComment(comment),
         Error,
-        ERROR_MESSAGES.NOT_PR_CONTEXT
+        ERROR_MESSAGES.NOT_PR_CONTEXT,
       );
     });
   });
@@ -216,21 +220,21 @@ Deno.test("GithubClient", async (t) => {
         assertEquals(comments[0].body, "Test review comment");
         assertEquals(comments[0].path, "test/file.ts");
         assertEquals(comments[0].pull_request_review_id, 42);
-      }
+      },
     );
 
     await t.step("should throw error when not in PR context", async () => {
       const mockOctokit = new MockOctokit();
       const githubClient = new GithubClient(
         "fake-token",
-        invalidContext
+        invalidContext,
       ) as any;
       githubClient.octokit = mockOctokit;
 
       await assertRejects(
         () => githubClient.getAllCommentsForPullRequest(),
         Error,
-        ERROR_MESSAGES.NOT_PR_CONTEXT
+        ERROR_MESSAGES.NOT_PR_CONTEXT,
       );
     });
 
@@ -247,7 +251,7 @@ Deno.test("GithubClient", async (t) => {
       await assertRejects(
         () => githubClient.getAllCommentsForPullRequest(),
         Error,
-        ERROR_MESSAGES.FETCH_COMMENTS_FAILED("API error")
+        ERROR_MESSAGES.FETCH_COMMENTS_FAILED("API error"),
       );
     });
   });
@@ -274,14 +278,14 @@ Deno.test("GithubClient", async (t) => {
       const mockOctokit = new MockOctokit();
       const githubClient = new GithubClient(
         "fake-token",
-        invalidContext
+        invalidContext,
       ) as any;
       githubClient.octokit = mockOctokit;
 
       await assertRejects(
         () => githubClient.deleteReviewComment(123),
         Error,
-        ERROR_MESSAGES.NOT_PR_CONTEXT
+        ERROR_MESSAGES.NOT_PR_CONTEXT,
       );
     });
 
@@ -298,7 +302,7 @@ Deno.test("GithubClient", async (t) => {
       await assertRejects(
         () => githubClient.deleteReviewComment(123),
         Error,
-        ERROR_MESSAGES.DELETE_COMMENT_FAILED(123, "API error")
+        ERROR_MESSAGES.DELETE_COMMENT_FAILED(123, "API error"),
       );
     });
   });

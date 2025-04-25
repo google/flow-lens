@@ -59,7 +59,7 @@ export class FlowToUmlTransformer {
   constructor(
     private readonly filePaths: string[],
     private readonly generatorContext: UmlGeneratorContext,
-    private readonly changeDetector: FlowFileChangeDetector
+    private readonly changeDetector: FlowFileChangeDetector,
   ) {}
 
   async transformToUmlDiagrams(): Promise<Map<string, FlowDifference>> {
@@ -75,7 +75,7 @@ export class FlowToUmlTransformer {
   }
 
   private async transformToUmlDiagram(
-    filePath: string
+    filePath: string,
   ): Promise<FlowDifference> {
     return new Promise<FlowDifference>(async (resolve, reject) => {
       try {

@@ -94,75 +94,75 @@ export abstract class UmlGenerator {
       this.getHeader(this.parsedFlow.label!),
       this.processFlowElements<flowTypes.FlowApexPluginCall>(
         this.parsedFlow.apexPluginCalls,
-        (node) => this.getFlowApexPluginCall(node)
+        (node) => this.getFlowApexPluginCall(node),
       ),
       this.processFlowElements<flowTypes.FlowAssignment>(
         this.parsedFlow.assignments,
-        (node) => this.getFlowAssignment(node)
+        (node) => this.getFlowAssignment(node),
       ),
       this.processFlowElements<flowTypes.FlowCollectionProcessor>(
         this.parsedFlow.collectionProcessors,
-        (node) => this.getFlowCollectionProcessor(node)
+        (node) => this.getFlowCollectionProcessor(node),
       ),
       this.processFlowElements<flowTypes.FlowDecision>(
         this.parsedFlow.decisions,
-        (node) => this.getFlowDecision(node)
+        (node) => this.getFlowDecision(node),
       ),
       this.processFlowElements<flowTypes.FlowLoop>(
         this.parsedFlow.loops,
-        (node) => this.getFlowLoop(node)
+        (node) => this.getFlowLoop(node),
       ),
       this.processFlowElements<flowTypes.FlowOrchestratedStage>(
         this.parsedFlow.orchestratedStages,
-        (node) => this.getFlowOrchestratedStage(node)
+        (node) => this.getFlowOrchestratedStage(node),
       ),
       this.processFlowElements<flowTypes.FlowRecordCreate>(
         this.parsedFlow.recordCreates,
-        (node) => this.getFlowRecordCreate(node)
+        (node) => this.getFlowRecordCreate(node),
       ),
       this.processFlowElements<flowTypes.FlowRecordDelete>(
         this.parsedFlow.recordDeletes,
-        (node) => this.getFlowRecordDelete(node)
+        (node) => this.getFlowRecordDelete(node),
       ),
       this.processFlowElements<flowTypes.FlowRecordLookup>(
         this.parsedFlow.recordLookups,
-        (node) => this.getFlowRecordLookup(node)
+        (node) => this.getFlowRecordLookup(node),
       ),
       this.processFlowElements<flowTypes.FlowRecordRollback>(
         this.parsedFlow.recordRollbacks,
-        (node) => this.getFlowRecordRollback(node)
+        (node) => this.getFlowRecordRollback(node),
       ),
       this.processFlowElements<flowTypes.FlowRecordUpdate>(
         this.parsedFlow.recordUpdates,
-        (node) => this.getFlowRecordUpdate(node)
+        (node) => this.getFlowRecordUpdate(node),
       ),
       this.processFlowElements<flowTypes.FlowScreen>(
         this.parsedFlow.screens,
-        (node) => this.getFlowScreen(node)
+        (node) => this.getFlowScreen(node),
       ),
       this.processFlowElements<flowTypes.FlowStep>(
         this.parsedFlow.steps,
-        (node) => this.getFlowStep(node)
+        (node) => this.getFlowStep(node),
       ),
       this.processFlowElements<flowTypes.FlowSubflow>(
         this.parsedFlow.subflows,
-        (node) => this.getFlowSubflow(node)
+        (node) => this.getFlowSubflow(node),
       ),
       this.processFlowElements<flowTypes.FlowTransform>(
         this.parsedFlow.transforms,
-        (node) => this.getFlowTransform(node)
+        (node) => this.getFlowTransform(node),
       ),
       this.processFlowElements<flowTypes.FlowWait>(
         this.parsedFlow.waits,
-        (node) => this.getFlowWait(node)
+        (node) => this.getFlowWait(node),
       ),
       this.processFlowElements<flowTypes.FlowActionCall>(
         this.parsedFlow.actionCalls,
-        (node) => this.getFlowActionCall(node)
+        (node) => this.getFlowActionCall(node),
       ),
       this.processFlowElements<flowTypes.FlowCustomError>(
         this.parsedFlow.customErrors,
-        (node) => this.getFlowCustomError(node)
+        (node) => this.getFlowCustomError(node),
       ),
       this.processTransitions(this.parsedFlow.transitions),
       this.getFooter(),
@@ -198,7 +198,7 @@ export abstract class UmlGenerator {
   }
 
   private getFlowCollectionProcessor(
-    node: flowTypes.FlowCollectionProcessor
+    node: flowTypes.FlowCollectionProcessor,
   ): string {
     return this.toUmlString({
       id: node.name,
@@ -231,9 +231,9 @@ export abstract class UmlGenerator {
       let conditionCounter = 1;
       const conditions = rule.conditions.map(
         (condition) =>
-          `${conditionCounter++}. ${condition.leftValueReference} ${
-            condition.operator
-          } ${toString(condition.rightValue)}`
+          `${conditionCounter++}. ${condition.leftValueReference} ${condition.operator} ${
+            toString(condition.rightValue)
+          }`,
       );
       if (conditions.length > 1) {
         const logicLabel = `Logic: ${rule.conditionLogic}`;
@@ -261,7 +261,7 @@ export abstract class UmlGenerator {
   }
 
   private getFlowOrchestratedStage(
-    node: flowTypes.FlowOrchestratedStage
+    node: flowTypes.FlowOrchestratedStage,
   ): string {
     return this.toUmlString({
       id: node.name,
@@ -275,7 +275,7 @@ export abstract class UmlGenerator {
   }
 
   private getFlowOrchestratedStageInnerNodes(
-    node: flowTypes.FlowOrchestratedStage
+    node: flowTypes.FlowOrchestratedStage,
   ): InnerNode[] {
     let counter = 1;
     const result: InnerNode[] = [];
@@ -328,7 +328,7 @@ export abstract class UmlGenerator {
   }
 
   private getFlowRecordLookupInnerNodes(
-    node: flowTypes.FlowRecordLookup
+    node: flowTypes.FlowRecordLookup,
   ): InnerNode[] {
     const innerNodeContent: string[] = [];
     innerNodeContent.push(...this.getFieldsQueried(node));
@@ -363,9 +363,11 @@ export abstract class UmlGenerator {
       `Filter Logic: ${node.filterLogic ? node.filterLogic : "None"}`,
     ];
     const filters = node.filters?.map((filter, index) => {
-      return `${index + 1}. ${filter.field} ${filter.operator} ${toString(
-        filter.value
-      )}`;
+      return `${index + 1}. ${filter.field} ${filter.operator} ${
+        toString(
+          filter.value,
+        )
+      }`;
     });
     if (filters) {
       result.push(...filters);
@@ -407,7 +409,7 @@ export abstract class UmlGenerator {
   }
 
   private getFlowRecordUpdateInnerNodes(
-    node: flowTypes.FlowRecordUpdate
+    node: flowTypes.FlowRecordUpdate,
   ): InnerNode[] {
     const innerNodeContent: string[] = [];
 
@@ -415,9 +417,11 @@ export abstract class UmlGenerator {
       innerNodeContent.push("Filter Criteria:");
       node.filters.forEach((filter, index) => {
         innerNodeContent.push(
-          `${index + 1}. ${filter.field} ${filter.operator} ${toString(
-            filter.value
-          )}`
+          `${index + 1}. ${filter.field} ${filter.operator} ${
+            toString(
+              filter.value,
+            )
+          }`,
         );
       });
     }
@@ -426,7 +430,7 @@ export abstract class UmlGenerator {
       innerNodeContent.push("Field Updates:");
       node.inputAssignments.forEach((assignment) => {
         innerNodeContent.push(
-          `${assignment.field} = ${toString(assignment.value)}`
+          `${assignment.field} = ${toString(assignment.value)}`,
         );
       });
     }
@@ -525,7 +529,7 @@ export abstract class UmlGenerator {
   }
 
   private getFlowCustomErrorInnerNodes(
-    node: flowTypes.FlowCustomError
+    node: flowTypes.FlowCustomError,
   ): InnerNode[] {
     const innerNodeContent: string[] = [];
 
@@ -535,7 +539,7 @@ export abstract class UmlGenerator {
           ? ` (Field: ${message.fieldSelection})`
           : "";
         innerNodeContent.push(
-          `${index + 1}. ${message.errorMessage}${fieldInfo}`
+          `${index + 1}. ${message.errorMessage}${fieldInfo}`,
         );
       });
     }
@@ -552,7 +556,7 @@ export abstract class UmlGenerator {
 
   private processFlowElements<T extends flowTypes.FlowNode>(
     elements: T[] | undefined,
-    elementProcessor: (element: T) => string
+    elementProcessor: (element: T) => string,
   ): string {
     return elements?.map(elementProcessor).join(EOL) ?? "";
   }
@@ -568,7 +572,7 @@ export abstract class UmlGenerator {
 
 function toString(element: flowTypes.FlowElementReferenceOrValue | undefined) {
   if (!element) {
-    return '';
+    return "";
   }
   if (
     element.apexValue ||
@@ -582,13 +586,13 @@ function toString(element: flowTypes.FlowElementReferenceOrValue | undefined) {
   ) {
     return (
       element.stringValue ??
-      element.sobjectValue ??
-      element.apexValue ??
-      element.elementReference ??
-      element.formulaExpression ??
-      element.setupReference ??
-      element.transformValueReference ??
-      element.formulaDataType
+        element.sobjectValue ??
+        element.apexValue ??
+        element.elementReference ??
+        element.formulaExpression ??
+        element.setupReference ??
+        element.transformValueReference ??
+        element.formulaDataType
     );
   }
   if (element.dateTimeValue) {

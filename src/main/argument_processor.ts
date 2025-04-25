@@ -74,9 +74,11 @@ export enum Mode {
  */
 export const ERROR_MESSAGES = {
   unsupportedDiagramTool: (diagramTool: string) =>
-    `Unsupported diagram tool: ${diagramTool}. Valid options are: ${Object.values(
-      DiagramTool
-    ).join(", ")}`,
+    `Unsupported diagram tool: ${diagramTool}. Valid options are: ${
+      Object.values(
+        DiagramTool,
+      ).join(", ")
+    }`,
   filePathDoesNotExist: (filePath: string) =>
     `filePath does not exist: ${filePath}`,
   invalidOutputFileName: (outputFileName: string) =>
@@ -92,9 +94,11 @@ export const ERROR_MESSAGES = {
   outputFileNameRequired: "outputFileName is required for JSON mode",
   outputDirectoryRequired: "outputDirectory is required for JSON mode",
   unsupportedMode: (mode: string) =>
-    `Unsupported mode: ${mode}. Valid options are: ${Object.values(Mode).join(
-      ", "
-    )}`,
+    `Unsupported mode: ${mode}. Valid options are: ${
+      Object.values(Mode).join(
+        ", ",
+      )
+    }`,
   header: "The following errors were encountered:",
 };
 
@@ -170,7 +174,7 @@ export class ArgumentProcessor {
       !Object.values(DiagramTool).includes(lowerCaseDiagramTool as DiagramTool)
     ) {
       this.errorsEncountered.push(
-        ERROR_MESSAGES.unsupportedDiagramTool(this.config.diagramTool)
+        ERROR_MESSAGES.unsupportedDiagramTool(this.config.diagramTool),
       );
     }
   }
@@ -182,7 +186,7 @@ export class ArgumentProcessor {
       !Object.values(Mode).includes(lowerCaseMode as Mode)
     ) {
       this.errorsEncountered.push(
-        ERROR_MESSAGES.unsupportedMode(this.config.mode)
+        ERROR_MESSAGES.unsupportedMode(this.config.mode),
       );
     }
   }
@@ -194,7 +198,7 @@ export class ArgumentProcessor {
     for (const filePath of this.config.filePath) {
       if (!fs.existsSync(filePath)) {
         this.errorsEncountered.push(
-          ERROR_MESSAGES.filePathDoesNotExist(filePath)
+          ERROR_MESSAGES.filePathDoesNotExist(filePath),
         );
       }
     }
@@ -208,7 +212,7 @@ export class ArgumentProcessor {
     const regex = VALID_OUTPUT_FILE_NAME_REGEX;
     if (!regex.test(this.config.outputFileName)) {
       this.errorsEncountered.push(
-        ERROR_MESSAGES.invalidOutputFileName(this.config.outputFileName)
+        ERROR_MESSAGES.invalidOutputFileName(this.config.outputFileName),
       );
     }
   }
@@ -220,7 +224,7 @@ export class ArgumentProcessor {
     }
     if (!fs.existsSync(this.config.outputDirectory)) {
       this.errorsEncountered.push(
-        ERROR_MESSAGES.invalidOutputDirectory(this.config.outputDirectory)
+        ERROR_MESSAGES.invalidOutputDirectory(this.config.outputDirectory),
       );
     }
   }
@@ -231,7 +235,7 @@ export class ArgumentProcessor {
       !(this.config.gitDiffFromHash && this.config.gitDiffToHash)
     ) {
       this.errorsEncountered.push(
-        ERROR_MESSAGES.filePathOrGitDiffFromAndToHashRequired
+        ERROR_MESSAGES.filePathOrGitDiffFromAndToHashRequired,
       );
     }
   }
@@ -243,7 +247,7 @@ export class ArgumentProcessor {
       (this.config.gitDiffFromHash || this.config.gitDiffToHash)
     ) {
       this.errorsEncountered.push(
-        ERROR_MESSAGES.filePathAndGitDiffFromAndToHashMutuallyExclusive
+        ERROR_MESSAGES.filePathAndGitDiffFromAndToHashMutuallyExclusive,
       );
     }
   }
@@ -254,7 +258,7 @@ export class ArgumentProcessor {
       (this.config.gitDiffFromHash && !this.config.gitDiffToHash)
     ) {
       this.errorsEncountered.push(
-        ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether
+        ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether,
       );
     }
   }
@@ -262,7 +266,7 @@ export class ArgumentProcessor {
   private checkForErrors() {
     if (this.errorsEncountered.length > 0) {
       const errors: string[] = this.errorsEncountered.map(
-        (error) => `- ${error}`
+        (error) => `- ${error}`,
       );
       errors.unshift(ERROR_MESSAGES.header);
       throw new Error(errors.join("\n"));
