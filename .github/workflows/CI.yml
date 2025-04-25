@@ -5,7 +5,7 @@ on:
     types: [opened, reopened, synchronize]
 
 jobs:
-  run_tests:
+  Continuous_Integration:
     runs-on: ubuntu-latest
 
     steps:
