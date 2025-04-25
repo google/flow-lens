@@ -21,11 +21,11 @@
 import type { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 import {
-  UmlGenerator,
   type DiagramNode,
+  Icon as UmlIcon,
   type InnerNode,
   SkinColor as UmlSkinColor,
-  Icon as UmlIcon,
+  UmlGenerator,
 } from "./uml_generator.ts";
 
 const EOL = "\n";
@@ -125,8 +125,8 @@ node [shape=box, style="filled, rounded"]`;
   }
 
   toUmlString(node: DiagramNode): string {
-    const graphvizSkinColor =
-      GraphVizGenerator.SKIN_COLOR_MAP[node.color] || SkinColor.NONE;
+    const graphvizSkinColor = GraphVizGenerator.SKIN_COLOR_MAP[node.color] ||
+      SkinColor.NONE;
     const graphvizIcon = GraphVizGenerator.ICON_MAP[node.icon] || Icon.NONE;
 
     return getNodeBody(
@@ -134,14 +134,14 @@ node [shape=box, style="filled, rounded"]`;
       node.type,
       graphvizIcon,
       graphvizSkinColor,
-      this.generateInnerNodeBodyFromInnerNodes(node, node.innerNodes)
+      this.generateInnerNodeBodyFromInnerNodes(node, node.innerNodes),
     );
   }
 
   // Helper method to generate inner node body from DiagramNode's innerNodes
   generateInnerNodeBodyFromInnerNodes(
     parentNode: DiagramNode,
-    innerNodes?: InnerNode[]
+    innerNodes?: InnerNode[],
   ): string {
     if (!innerNodes || innerNodes.length === 0) {
       return "";
@@ -155,7 +155,7 @@ node [shape=box, style="filled, rounded"]`;
         FontColor.WHITE,
         getLabel(innerNode.type),
         getLabel(innerNode.label),
-        innerNode.content
+        innerNode.content,
       );
       result.push(innerNodeBody);
     }
@@ -181,13 +181,14 @@ function getNodeBody(
   type: string,
   icon: Icon,
   skinColor: SkinColor,
-  innerNodeBody?: string
+  innerNodeBody?: string,
 ): string {
   const formattedInnerNodeBody = innerNodeBody
     ? `${EOL}${innerNodeBody}${EOL}`
     : "";
-  const fontColor =
-    skinColor === SkinColor.NONE ? FontColor.BLACK : FontColor.WHITE;
+  const fontColor = skinColor === SkinColor.NONE
+    ? FontColor.BLACK
+    : FontColor.WHITE;
   const diffStyle = node.diffStatus
     ? DIFF_STATUS_TO_STYLE[node.diffStatus]
     : "";
@@ -207,13 +208,15 @@ function getInnerNodeBody(
   color: FontColor,
   type: string,
   label: string,
-  content: string[]
+  content: string[],
 ) {
   const formattedLabel = getLabel([type, label].join(" "));
   return `  <TR>
-    <TD${getColSpan(
-      parentNode
-    )} BORDER="1" COLOR="${color}" ALIGN="LEFT" CELLPADDING="6">
+    <TD${
+    getColSpan(
+      parentNode,
+    )
+  } BORDER="1" COLOR="${color}" ALIGN="LEFT" CELLPADDING="6">
       <B>${formattedLabel}</B>
       ${content.map((content) => `<BR ALIGN="LEFT"/>${content}`).join("")}
     </TD>

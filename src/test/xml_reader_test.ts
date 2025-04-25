@@ -24,7 +24,7 @@ const VALID_FILE_PATH = path.join(TEST_UNDECLARED_OUTPUTS_DIR, "test.xml");
 const INVALID_FILE_PATH = "nonexistent.xml";
 const INVALID_FILE_EXTENSION_PATH = path.join(
   TEST_UNDECLARED_OUTPUTS_DIR,
-  "test.txt"
+  "test.txt",
 );
 const XML_CONTENT = "<root></root>";
 
@@ -35,13 +35,13 @@ Deno.test("XmlReader", async (t) => {
       async () => {
         await Deno.writeFile(
           VALID_FILE_PATH,
-          new TextEncoder().encode(XML_CONTENT)
+          new TextEncoder().encode(XML_CONTENT),
         );
         const xmlReader = new XmlReader(VALID_FILE_PATH);
         const xmlContent = xmlReader.getXmlFileBody();
         assertEquals(xmlContent, XML_CONTENT);
         await Deno.remove(VALID_FILE_PATH);
-      }
+      },
     );
 
     await t.step(
@@ -50,13 +50,13 @@ Deno.test("XmlReader", async (t) => {
         const xmlFilePath = path.join(TEST_UNDECLARED_OUTPUTS_DIR, "test.XmL");
         await Deno.writeFile(
           xmlFilePath,
-          new TextEncoder().encode(XML_CONTENT)
+          new TextEncoder().encode(XML_CONTENT),
         );
         const xmlReader = new XmlReader(xmlFilePath);
         const xmlContent = xmlReader.getXmlFileBody();
         assertEquals(xmlContent, XML_CONTENT);
         await Deno.remove(xmlFilePath);
-      }
+      },
     );
 
     await t.step(
@@ -66,9 +66,9 @@ Deno.test("XmlReader", async (t) => {
         assertThrows(
           () => xmlReader.getXmlFileBody(),
           Error,
-          ERROR_MESSAGES.invalidFilePath(INVALID_FILE_PATH)
+          ERROR_MESSAGES.invalidFilePath(INVALID_FILE_PATH),
         );
-      }
+      },
     );
 
     await t.step(
@@ -76,16 +76,16 @@ Deno.test("XmlReader", async (t) => {
       async () => {
         await Deno.writeFile(
           INVALID_FILE_EXTENSION_PATH,
-          new TextEncoder().encode(XML_CONTENT)
+          new TextEncoder().encode(XML_CONTENT),
         );
         const xmlReader = new XmlReader(INVALID_FILE_EXTENSION_PATH);
         assertThrows(
           () => xmlReader.getXmlFileBody(),
           Error,
-          ERROR_MESSAGES.invalidFileExtension(INVALID_FILE_EXTENSION_PATH)
+          ERROR_MESSAGES.invalidFileExtension(INVALID_FILE_EXTENSION_PATH),
         );
         await Deno.remove(INVALID_FILE_EXTENSION_PATH);
-      }
+      },
     );
   });
 });

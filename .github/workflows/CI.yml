@@ -1,4 +1,4 @@
-name: Run Tests
+name: Continuous Integration
 
 on:
   pull_request:
@@ -18,6 +18,10 @@ jobs:
         uses: denoland/setup-deno@v2
         with:
           deno-version: latest
+
+      - name: Check formatting
+        run: |
+          deno fmt --check
 
       - name: Run Tests
         run: |

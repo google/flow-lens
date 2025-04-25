@@ -52,20 +52,19 @@ const NODE_NAMES = {
   actionCall: "myActionCall",
 };
 
-
 function generateMockFlow(): ParsedFlow {
   return {
     start: {
       name: NODE_NAMES.start,
     } as flowTypes.FlowStart,
     apexPluginCalls: getFlowNodes(
-      NODE_NAMES.apexPluginCall
+      NODE_NAMES.apexPluginCall,
     ) as flowTypes.FlowApexPluginCall[],
     assignments: getFlowNodes(
-      NODE_NAMES.assignment
+      NODE_NAMES.assignment,
     ) as flowTypes.FlowAssignment[],
     collectionProcessors: getFlowNodes(
-      NODE_NAMES.collectionProcessor
+      NODE_NAMES.collectionProcessor,
     ) as flowTypes.FlowCollectionProcessor[],
     decisions: [
       generateDecision(NODE_NAMES.decision),
@@ -75,19 +74,19 @@ function generateMockFlow(): ParsedFlow {
       generateStage(NODE_NAMES.orchestratedStage, NODE_NAMES.stageSteps),
     ],
     recordCreates: getFlowNodes(
-      NODE_NAMES.recordCreate
+      NODE_NAMES.recordCreate,
     ) as flowTypes.FlowRecordCreate[],
     recordDeletes: getFlowNodes(
-      NODE_NAMES.recordDelete
+      NODE_NAMES.recordDelete,
     ) as flowTypes.FlowRecordDelete[],
     recordLookups: getFlowNodes(
-      NODE_NAMES.recordLookup
+      NODE_NAMES.recordLookup,
     ) as flowTypes.FlowRecordLookup[],
     recordRollbacks: getFlowNodes(
-      NODE_NAMES.recordRollback
+      NODE_NAMES.recordRollback,
     ) as flowTypes.FlowRecordRollback[],
     recordUpdates: getFlowNodes(
-      NODE_NAMES.recordUpdate
+      NODE_NAMES.recordUpdate,
     ) as flowTypes.FlowRecordUpdate[],
     screens: getFlowNodes(NODE_NAMES.screen) as flowTypes.FlowScreen[],
     steps: getFlowNodes(NODE_NAMES.step) as flowTypes.FlowStep[],
@@ -95,7 +94,7 @@ function generateMockFlow(): ParsedFlow {
     transforms: getFlowNodes(NODE_NAMES.transform) as flowTypes.FlowTransform[],
     waits: getFlowNodes(NODE_NAMES.wait) as flowTypes.FlowWait[],
     actionCalls: getFlowNodes(
-      NODE_NAMES.actionCall
+      NODE_NAMES.actionCall,
     ) as flowTypes.FlowActionCall[],
     transitions: [
       {
@@ -123,7 +122,7 @@ function getFlowNodes(name: string): flowTypes.FlowNode[] {
 
 function generateStage(
   name: string,
-  stepNames: string[]
+  stepNames: string[],
 ): flowTypes.FlowOrchestratedStage {
   return {
     name: `${name}`,
@@ -179,7 +178,7 @@ function generateTable(
   icon: Icon,
   skinColor: SkinColor,
   fontColor: string,
-  innerNodeBody?: string
+  innerNodeBody?: string,
 ) {
   const formattedInnerNodeBody = innerNodeBody
     ? `${EOL}${innerNodeBody}${EOL}`
@@ -206,7 +205,7 @@ function generateTable(
 function generateInnerNodeCell(
   color: FontColor,
   expectedLabel: string,
-  content: string[]
+  content: string[],
 ) {
   return `  <TR>
     <TD BORDER="1" COLOR="${color}" ALIGN="LEFT" CELLPADDING="6">
@@ -257,8 +256,8 @@ Deno.test("GraphVizGenerator", async (t) => {
         "Apex Plugin Call",
         Icon.CODE,
         SkinColor.NONE,
-        FontColor.BLACK
-      )
+        FontColor.BLACK,
+      ),
     );
   });
 
@@ -278,8 +277,8 @@ Deno.test("GraphVizGenerator", async (t) => {
         "Assignment",
         Icon.ASSIGNMENT,
         SkinColor.ORANGE,
-        FontColor.WHITE
-      )
+        FontColor.WHITE,
+      ),
     );
   });
 
@@ -310,8 +309,8 @@ Deno.test("GraphVizGenerator", async (t) => {
         FontColor.WHITE,
         generateInnerNodeCell(FontColor.WHITE, "Rule myDecisionRule", [
           "1. foo EqualTo true",
-        ])
-      )
+        ]),
+      ),
     );
   });
 
@@ -349,8 +348,8 @@ Deno.test("GraphVizGenerator", async (t) => {
         generateInnerNodeCells([
           generateInnerNodeCell(FontColor.WHITE, "Stage Step 1. step1", []),
           generateInnerNodeCell(FontColor.WHITE, "Stage Step 2. step2", []),
-        ])
-      )
+        ]),
+      ),
     );
   });
 
@@ -397,7 +396,7 @@ Deno.test("GraphVizGenerator", async (t) => {
     result = systemUnderTest.getTransition(mockedFlow.transitions![0]);
     assertEquals(
       result,
-      'FLOW_START -> myApexPluginCall [label="" color="black" style=""]'
+      'FLOW_START -> myApexPluginCall [label="" color="black" style=""]',
     );
   });
 });

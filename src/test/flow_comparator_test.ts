@@ -42,7 +42,7 @@ const NODE_MODIFIED = {
 function createParsedFlow(nodes: flowTypes.FlowNode[]): ParsedFlow {
   return {
     nameToNode: new Map<string, flowTypes.FlowNode>(
-      nodes.map((node) => [node.name, node])
+      nodes.map((node) => [node.name, node]),
     ),
   };
 }

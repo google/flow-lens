@@ -35,6 +35,6 @@ Deno.test("UmlGeneratorContext", async (t) => {
       let generatorContext = new UmlGeneratorContext("fooBar" as DiagramTool);
       const diagram = generatorContext.generateDiagram(parsedFlow);
       assertStringIncludes(diagram, PLANT_UML_SIGNATURE);
-    }
+    },
   );
 });

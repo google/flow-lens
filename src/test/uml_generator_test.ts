@@ -17,7 +17,7 @@
 import { assertEquals } from "@std/assert";
 import { ParsedFlow, Transition } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
-import { UmlGenerator, DiagramNode } from "../main/uml_generator.ts";
+import { DiagramNode, UmlGenerator } from "../main/uml_generator.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const TRANSITION_ARROW = "-->";
@@ -53,13 +53,15 @@ const UML_REPRESENTATIONS = {
   orchestratedStage: (name: string) => `state Orchestrated Stage ${name}${EOL}`,
   recordCreate: (name: string) => `state Record Create ${name}`,
   recordDelete: (name: string) => `state Record Delete ${name}`,
-  recordLookup: (name: string) => `state Record Lookup ${name}
+  recordLookup: (name: string) =>
+    `state Record Lookup ${name}
   sObject: Account
   Fields Queried: all
   Filter Logic: None
   Limit: All Records`,
   recordRollback: (name: string) => `state Record Rollback ${name}`,
-  recordUpdate: (name: string) => `state Record Update ${name}
+  recordUpdate: (name: string) =>
+    `state Record Update ${name}
   Direct Update: sObject: Account
 `,
   screen: (name: string) => `state Screen ${name}`,
@@ -78,33 +80,33 @@ function generateMockFlow() {
       name: NODE_NAMES.start,
     } as flowTypes.FlowStart,
     apexPluginCalls: getFlowNodes(
-      NODE_NAMES.apexPluginCall
+      NODE_NAMES.apexPluginCall,
     ) as flowTypes.FlowApexPluginCall[],
     assignments: getFlowNodes(
-      NODE_NAMES.assignment
+      NODE_NAMES.assignment,
     ) as flowTypes.FlowAssignment[],
     collectionProcessors: getFlowNodes(
-      NODE_NAMES.collectionProcessor
+      NODE_NAMES.collectionProcessor,
     ) as flowTypes.FlowCollectionProcessor[],
     decisions: getFlowNodes(NODE_NAMES.decision) as flowTypes.FlowDecision[],
     loops: getFlowNodes(NODE_NAMES.loop) as flowTypes.FlowLoop[],
     orchestratedStages: getFlowNodes(
-      NODE_NAMES.orchestratedStage
+      NODE_NAMES.orchestratedStage,
     ) as flowTypes.FlowOrchestratedStage[],
     recordCreates: getFlowNodes(
-      NODE_NAMES.recordCreate
+      NODE_NAMES.recordCreate,
     ) as flowTypes.FlowRecordCreate[],
     recordDeletes: getFlowNodes(
-      NODE_NAMES.recordDelete
+      NODE_NAMES.recordDelete,
     ) as flowTypes.FlowRecordDelete[],
     recordLookups: getFlowNodes(
-      NODE_NAMES.recordLookup
+      NODE_NAMES.recordLookup,
     ) as flowTypes.FlowRecordLookup[],
     recordRollbacks: getFlowNodes(
-      NODE_NAMES.recordRollback
+      NODE_NAMES.recordRollback,
     ) as flowTypes.FlowRecordRollback[],
     recordUpdates: getFlowNodes(
-      NODE_NAMES.recordUpdate
+      NODE_NAMES.recordUpdate,
     ) as flowTypes.FlowRecordUpdate[],
     screens: getFlowNodes(NODE_NAMES.screen) as flowTypes.FlowScreen[],
     steps: getFlowNodes(NODE_NAMES.step) as flowTypes.FlowStep[],
@@ -112,7 +114,7 @@ function generateMockFlow() {
     transforms: getFlowNodes(NODE_NAMES.transform) as flowTypes.FlowTransform[],
     waits: getFlowNodes(NODE_NAMES.wait) as flowTypes.FlowWait[],
     actionCalls: getFlowNodes(
-      NODE_NAMES.actionCall
+      NODE_NAMES.actionCall,
     ) as flowTypes.FlowActionCall[],
     transitions: [
       {
@@ -257,15 +259,15 @@ Deno.test("UmlGenerator", async (t) => {
       UML_REPRESENTATIONS.actionCall(NODE_NAMES.actionCall),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.start,
-        NODE_NAMES.apexPluginCall
+        NODE_NAMES.apexPluginCall,
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.apexPluginCall,
-        NODE_NAMES.assignment
+        NODE_NAMES.assignment,
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.assignment,
-        NODE_NAMES.collectionProcessor
+        NODE_NAMES.collectionProcessor,
       ),
     ].join(EOL);
 
@@ -279,7 +281,7 @@ Deno.test("UmlGenerator", async (t) => {
 
     assertEquals(
       uml.includes(UML_REPRESENTATIONS.screen(NODE_NAMES.screen)),
-      false
+      false,
     );
   });
 
@@ -290,7 +292,7 @@ Deno.test("UmlGenerator", async (t) => {
 
     assertEquals(
       uml.includes(UML_REPRESENTATIONS.screen(NODE_NAMES.screen)),
-      false
+      false,
     );
   });
 
@@ -353,10 +355,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -389,10 +391,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -451,10 +453,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -482,10 +484,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -534,9 +536,9 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 });

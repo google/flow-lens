@@ -111,7 +111,8 @@ export class GithubClient {
       throw new Error(ERROR_MESSAGES.MISSING_PR_NUMBER);
     }
 
-    const endpoint = `POST /repos/${this.context.repo.owner}/${this.context.repo.repo}/pulls/${pullRequestNumber}/comments`;
+    const endpoint =
+      `POST /repos/${this.context.repo.owner}/${this.context.repo.repo}/pulls/${pullRequestNumber}/comments`;
     await this.octokit.request(endpoint, comment);
   }
 
@@ -158,14 +159,14 @@ export class GithubClient {
 
     try {
       const response = await this.octokit.request(
-        `GET /repos/${owner}/${repo}/pulls/${prNumber}/comments`
+        `GET /repos/${owner}/${repo}/pulls/${prNumber}/comments`,
       );
       return response.data;
     } catch (error) {
       throw new Error(
         ERROR_MESSAGES.FETCH_COMMENTS_FAILED(
-          error instanceof Error ? error.message : "Unknown error"
-        )
+          error instanceof Error ? error.message : "Unknown error",
+        ),
       );
     }
   }
@@ -186,14 +187,14 @@ export class GithubClient {
 
     try {
       await this.octokit.request(
-        `DELETE /repos/${owner}/${repo}/pulls/comments/${commentId}`
+        `DELETE /repos/${owner}/${repo}/pulls/comments/${commentId}`,
       );
     } catch (error) {
       throw new Error(
         ERROR_MESSAGES.DELETE_COMMENT_FAILED(
           commentId,
-          error instanceof Error ? error.message : "Unknown error"
-        )
+          error instanceof Error ? error.message : "Unknown error",
+        ),
       );
     }
   }

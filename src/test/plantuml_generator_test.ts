@@ -52,13 +52,13 @@ function generateMockFlow(): ParsedFlow {
       name: NODE_NAMES.start,
     } as flowTypes.FlowStart,
     apexPluginCalls: getFlowNodes(
-      NODE_NAMES.apexPluginCall
+      NODE_NAMES.apexPluginCall,
     ) as flowTypes.FlowApexPluginCall[],
     assignments: getFlowNodes(
-      NODE_NAMES.assignment
+      NODE_NAMES.assignment,
     ) as flowTypes.FlowAssignment[],
     collectionProcessors: getFlowNodes(
-      NODE_NAMES.collectionProcessor
+      NODE_NAMES.collectionProcessor,
     ) as flowTypes.FlowCollectionProcessor[],
     decisions: getFlowNodes(NODE_NAMES.decision) as flowTypes.FlowDecision[],
     loops: getFlowNodes(NODE_NAMES.loop) as flowTypes.FlowLoop[],
@@ -66,19 +66,19 @@ function generateMockFlow(): ParsedFlow {
       generateStage(NODE_NAMES.orchestratedStage, NODE_NAMES.stageSteps),
     ],
     recordCreates: getFlowNodes(
-      NODE_NAMES.recordCreate
+      NODE_NAMES.recordCreate,
     ) as flowTypes.FlowRecordCreate[],
     recordDeletes: getFlowNodes(
-      NODE_NAMES.recordDelete
+      NODE_NAMES.recordDelete,
     ) as flowTypes.FlowRecordDelete[],
     recordLookups: getFlowNodes(
-      NODE_NAMES.recordLookup
+      NODE_NAMES.recordLookup,
     ) as flowTypes.FlowRecordLookup[],
     recordRollbacks: getFlowNodes(
-      NODE_NAMES.recordRollback
+      NODE_NAMES.recordRollback,
     ) as flowTypes.FlowRecordRollback[],
     recordUpdates: getFlowNodes(
-      NODE_NAMES.recordUpdate
+      NODE_NAMES.recordUpdate,
     ) as flowTypes.FlowRecordUpdate[],
     screens: getFlowNodes(NODE_NAMES.screen) as flowTypes.FlowScreen[],
     steps: getFlowNodes(NODE_NAMES.step) as flowTypes.FlowStep[],
@@ -86,7 +86,7 @@ function generateMockFlow(): ParsedFlow {
     transforms: getFlowNodes(NODE_NAMES.transform) as flowTypes.FlowTransform[],
     waits: getFlowNodes(NODE_NAMES.wait) as flowTypes.FlowWait[],
     actionCalls: getFlowNodes(
-      NODE_NAMES.actionCall
+      NODE_NAMES.actionCall,
     ) as flowTypes.FlowActionCall[],
     transitions: [
       {
@@ -114,7 +114,7 @@ function getFlowNodes(name: string): flowTypes.FlowNode[] {
 
 function generateStage(
   name: string,
-  stepNames: string[]
+  stepNames: string[],
 ): flowTypes.FlowOrchestratedStage {
   return {
     name: `${name}`,
@@ -171,7 +171,7 @@ Deno.test("PlantUmlGenerator", async (t) => {
     result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
-      'state "**Apex Plugin Call** <&code> \\n myApexPluginCall" as myApexPluginCall'
+      'state "**Apex Plugin Call** <&code> \\n myApexPluginCall" as myApexPluginCall',
     );
   });
 
@@ -186,7 +186,7 @@ Deno.test("PlantUmlGenerator", async (t) => {
     result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
-      'state "**Assignment** <&menu> \\n myAssignment" as myAssignment <<Orange>>'
+      'state "**Assignment** <&menu> \\n myAssignment" as myAssignment <<Orange>>',
     );
   });
 
@@ -201,7 +201,7 @@ Deno.test("PlantUmlGenerator", async (t) => {
     result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
-      'state "**Decision** <&fork> \\n myDecision" as myDecision <<Orange>>'
+      'state "**Decision** <&fork> \\n myDecision" as myDecision <<Orange>>',
     );
   });
 
@@ -235,7 +235,7 @@ Deno.test("PlantUmlGenerator", async (t) => {
         "myOrchestratedStage: __step1__\n" +
         "myOrchestratedStage: ---\n" +
         "myOrchestratedStage: **Stage Step**\n" +
-        "myOrchestratedStage: __step2__"
+        "myOrchestratedStage: __step2__",
     );
   });
 
@@ -251,7 +251,7 @@ Deno.test("PlantUmlGenerator", async (t) => {
     result = systemUnderTest.toUmlString(node);
     assertEquals(
       result,
-      'state "**<&plus{scale=2}>** **Record Create** <&medical-cross> \\n myNode" as myNode <<Pink>> <<Added>>'
+      'state "**<&plus{scale=2}>** **Record Create** <&medical-cross> \\n myNode" as myNode <<Pink>> <<Added>>',
     );
   });
 

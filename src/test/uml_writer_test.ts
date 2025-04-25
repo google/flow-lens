@@ -15,7 +15,7 @@
  */
 
 import { assertEquals, assertExists } from "@std/assert";
-import { spy, assertSpyCalls } from "@std/testing/mock";
+import { assertSpyCalls, spy } from "@std/testing/mock";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import {
@@ -65,12 +65,12 @@ const EXPECTED_DEFAULT_FORMAT = [
 
 const expectedFilePath = path.join(
   TEST_UNDECLARED_OUTPUTS_DIR,
-  `${OUTPUT_FILE_NAME}.json`
+  `${OUTPUT_FILE_NAME}.json`,
 );
 
 function getRuntimeConfig(
   diagramTool: DiagramTool = DiagramTool.PLANTUML,
-  mode: Mode = Mode.JSON
+  mode: Mode = Mode.JSON,
 ): RuntimeConfig {
   return {
     diagramTool,
@@ -110,7 +110,7 @@ Deno.test("UmlWriter", async (t) => {
           path: filePath,
           subject_type: "file",
           body: _body,
-        })
+        }),
       ),
       // Add the new methods
       getAllCommentsForPullRequest: spy(async () => {
@@ -137,7 +137,7 @@ Deno.test("UmlWriter", async (t) => {
 
       writer = new UmlWriter(
         FILE_PATH_TO_FLOW_DIFFERENCE,
-        mockGithubClient as unknown as GithubClient
+        mockGithubClient as unknown as GithubClient,
       );
       await writer.writeUmlDiagrams(); // Make this await the async operation
 
@@ -151,11 +151,11 @@ Deno.test("UmlWriter", async (t) => {
       // Verify that the methods were called the expected number of times
       assertSpyCalls(
         mockGithubClient.translateToComment,
-        FILE_PATH_TO_FLOW_DIFFERENCE.size
+        FILE_PATH_TO_FLOW_DIFFERENCE.size,
       );
       assertSpyCalls(
         mockGithubClient.writeComment,
-        FILE_PATH_TO_FLOW_DIFFERENCE.size
+        FILE_PATH_TO_FLOW_DIFFERENCE.size,
       );
 
       // Verify the content of the calls

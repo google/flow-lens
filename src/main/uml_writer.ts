@@ -40,8 +40,8 @@ export class UmlWriter {
   constructor(
     private readonly filePathToFlowDifference: Map<string, FlowDifference>,
     private readonly githubClient = new GithubClient(
-      Deno.env.get("GITHUB_TOKEN") || ""
-    )
+      Deno.env.get("GITHUB_TOKEN") || "",
+    ),
   ) {}
 
   /**
@@ -61,16 +61,16 @@ export class UmlWriter {
     fs.writeFileSync(
       path.join(
         config.outputDirectory!,
-        `${config.outputFileName!}${FILE_EXTENSION}`
+        `${config.outputFileName!}${FILE_EXTENSION}`,
       ),
-      JSON.stringify(fileBody, null, 2)
+      JSON.stringify(fileBody, null, 2),
     );
   }
 
   private async writeGithubComment(config: RuntimeConfig) {
     try {
-      const existingComments =
-        await this.githubClient.getAllCommentsForPullRequest();
+      const existingComments = await this.githubClient
+        .getAllCommentsForPullRequest();
 
       const flowLensComments = existingComments.filter((comment) =>
         comment.body.includes(HIDDEN_COMMENT_PREFIX)
@@ -83,7 +83,7 @@ export class UmlWriter {
       for (const [filePath, flowDifference] of this.filePathToFlowDifference) {
         const comment = this.githubClient.translateToComment(
           getBody(flowDifference),
-          filePath
+          filePath,
         );
         await this.githubClient.writeComment(comment);
       }
@@ -101,7 +101,7 @@ interface DefaultFormat {
 
 interface Formatter {
   format(
-    filePathToFlowDifference: Map<string, FlowDifference>
+    filePathToFlowDifference: Map<string, FlowDifference>,
   ): DefaultFormat[];
 }
 
@@ -111,7 +111,7 @@ class DefaultFormatter implements Formatter {
    * @param filePathToFlowDifference A map of file paths to UML diagrams.
    */
   format(
-    filePathToFlowDifference: Map<string, FlowDifference>
+    filePathToFlowDifference: Map<string, FlowDifference>,
   ): DefaultFormat[] {
     const result: DefaultFormat[] = [];
     for (const [filePath, flowDifference] of filePathToFlowDifference) {

@@ -31,7 +31,7 @@ const INVALID_OUTPUT_DIRECTORY = "invalid/directory/path";
 const INVALID_MODE = "unsupported";
 
 function setupTest(
-  configModifications: (config: RuntimeConfig) => void = () => {}
+  configModifications: (config: RuntimeConfig) => void = () => {},
 ) {
   let testConfiguration = getTestConfig();
   configModifications(testConfiguration);
@@ -48,187 +48,231 @@ Deno.test("ArgumentProcessor", async (t) => {
     assertEquals(result, config);
   });
 
-  await t.step("should throw an exception when the diagram tool is not supported", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) => (config.diagramTool = INVALID_DIAGRAM_TOOL as DiagramTool)
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.unsupportedDiagramTool(INVALID_DIAGRAM_TOOL)
-    );
-  });
+  await t.step(
+    "should throw an exception when the diagram tool is not supported",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest(
+            (
+              config,
+            ) => (config.diagramTool = INVALID_DIAGRAM_TOOL as DiagramTool),
+          );
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.unsupportedDiagramTool(INVALID_DIAGRAM_TOOL),
+      );
+    },
+  );
 
-  await t.step("should throw an exception when the mode is not supported", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) => (config.mode = INVALID_MODE as Mode)
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.unsupportedMode(INVALID_MODE)
-    );
-  });
+  await t.step(
+    "should throw an exception when the mode is not supported",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest(
+            (config) => (config.mode = INVALID_MODE as Mode),
+          );
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.unsupportedMode(INVALID_MODE),
+      );
+    },
+  );
 
-  await t.step("should validate when mode is GITHUB_ACTION and outputDirectory/outputFileName are not provided", () => {
-    const { argumentProcessor, config } = setupTest((config) => {
-      config.mode = Mode.GITHUB_ACTION;
-      config.outputDirectory = undefined;
-      config.outputFileName = undefined;
-    });
-    const result = argumentProcessor.getConfig();
-    assertEquals(result, config);
-  });
+  await t.step(
+    "should validate when mode is GITHUB_ACTION and outputDirectory/outputFileName are not provided",
+    () => {
+      const { argumentProcessor, config } = setupTest((config) => {
+        config.mode = Mode.GITHUB_ACTION;
+        config.outputDirectory = undefined;
+        config.outputFileName = undefined;
+      });
+      const result = argumentProcessor.getConfig();
+      assertEquals(result, config);
+    },
+  );
 
-  await t.step("should throw an exception when outputDirectory is not provided in JSON mode", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest((config) => {
-          config.mode = Mode.JSON;
-          config.outputDirectory = undefined;
-        });
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.outputDirectoryRequired
-    );
-  });
+  await t.step(
+    "should throw an exception when outputDirectory is not provided in JSON mode",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest((config) => {
+            config.mode = Mode.JSON;
+            config.outputDirectory = undefined;
+          });
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.outputDirectoryRequired,
+      );
+    },
+  );
 
-  await t.step("should throw an exception when outputFileName is not provided in JSON mode", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest((config) => {
-          config.mode = Mode.JSON;
-          config.outputFileName = undefined;
-        });
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.outputFileNameRequired
-    );
-  });
+  await t.step(
+    "should throw an exception when outputFileName is not provided in JSON mode",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest((config) => {
+            config.mode = Mode.JSON;
+            config.outputFileName = undefined;
+          });
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.outputFileNameRequired,
+      );
+    },
+  );
 
-  await t.step("should throw an exception when the file path is not valid", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest((config) => {
-          config.filePath = [INVALID_FILE_PATH];
-          config.gitDiffFromHash = undefined;
-          config.gitDiffToHash = undefined;
-        });
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.filePathDoesNotExist(INVALID_FILE_PATH)
-    );
-  });
+  await t.step(
+    "should throw an exception when the file path is not valid",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest((config) => {
+            config.filePath = [INVALID_FILE_PATH];
+            config.gitDiffFromHash = undefined;
+            config.gitDiffToHash = undefined;
+          });
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.filePathDoesNotExist(INVALID_FILE_PATH),
+      );
+    },
+  );
 
-  await t.step("should throw an exception when the output file name is not populated in JSON mode", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) => (config.outputFileName = "")
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.outputFileNameRequired
-    );
-  });
+  await t.step(
+    "should throw an exception when the output file name is not populated in JSON mode",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest(
+            (config) => (config.outputFileName = ""),
+          );
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.outputFileNameRequired,
+      );
+    },
+  );
 
-  await t.step("should throw an exception when the output file name is not supported in JSON mode", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) => (config.outputFileName = INVALID_OUTPUT_FILE_NAME)
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.invalidOutputFileName(INVALID_OUTPUT_FILE_NAME)
-    );
-  });
+  await t.step(
+    "should throw an exception when the output file name is not supported in JSON mode",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest(
+            (config) => (config.outputFileName = INVALID_OUTPUT_FILE_NAME),
+          );
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.invalidOutputFileName(INVALID_OUTPUT_FILE_NAME),
+      );
+    },
+  );
 
-  await t.step("should throw an exception when the output directory is not valid in JSON mode", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) => (config.outputDirectory = INVALID_OUTPUT_DIRECTORY)
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.invalidOutputDirectory(INVALID_OUTPUT_DIRECTORY)
-    );
-  });
+  await t.step(
+    "should throw an exception when the output directory is not valid in JSON mode",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest(
+            (config) => (config.outputDirectory = INVALID_OUTPUT_DIRECTORY),
+          );
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.invalidOutputDirectory(INVALID_OUTPUT_DIRECTORY),
+      );
+    },
+  );
 
-  await t.step("should throw an exception when the output directory is not specified in JSON mode", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) => (config.outputDirectory = "")
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.outputDirectoryRequired
-    );
-  });
+  await t.step(
+    "should throw an exception when the output directory is not specified in JSON mode",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest(
+            (config) => (config.outputDirectory = ""),
+          );
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.outputDirectoryRequired,
+      );
+    },
+  );
 
-  await t.step("should throw an exception when either the filePath or (gitDiffFromHash and gitDiffToHash) are not specified", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest((config) => {
-          config.gitDiffToHash = undefined;
-          config.gitDiffFromHash = undefined;
-        });
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.filePathOrGitDiffFromAndToHashRequired
-    );
-  });
+  await t.step(
+    "should throw an exception when either the filePath or (gitDiffFromHash and gitDiffToHash) are not specified",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest((config) => {
+            config.gitDiffToHash = undefined;
+            config.gitDiffFromHash = undefined;
+          });
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.filePathOrGitDiffFromAndToHashRequired,
+      );
+    },
+  );
 
-  await t.step("should throw an exception when either the filePath and gitDiffFromHash and gitDiffToHash are specified", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) => (config.filePath = [INVALID_FILE_PATH])
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.filePathAndGitDiffFromAndToHashMutuallyExclusive
-    );
-  });
+  await t.step(
+    "should throw an exception when either the filePath and gitDiffFromHash and gitDiffToHash are specified",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest(
+            (config) => (config.filePath = [INVALID_FILE_PATH]),
+          );
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.filePathAndGitDiffFromAndToHashMutuallyExclusive,
+      );
+    },
+  );
 
-  await t.step("should throw an exception when the `gitDiffFromHash` is specified but `gitDiffToHash` is not", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) => (config.gitDiffToHash = undefined)
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether
-    );
-  });
+  await t.step(
+    "should throw an exception when the `gitDiffFromHash` is specified but `gitDiffToHash` is not",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest(
+            (config) => (config.gitDiffToHash = undefined),
+          );
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether,
+      );
+    },
+  );
 
-  await t.step("should throw an exception when the `gitDiffToHash` is specified but `gitDiffFromHash` is not", () => {
-    assertThrows(
-      () => {
-        const { argumentProcessor } = setupTest(
-          (config) => (config.gitDiffFromHash = undefined)
-        );
-        argumentProcessor.getConfig();
-      },
-      Error,
-      ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether
-    );
-  });
+  await t.step(
+    "should throw an exception when the `gitDiffToHash` is specified but `gitDiffFromHash` is not",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest(
+            (config) => (config.gitDiffFromHash = undefined),
+          );
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether,
+      );
+    },
+  );
 });

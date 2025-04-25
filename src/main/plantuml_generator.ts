@@ -21,9 +21,9 @@
 import type { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 import {
-  UmlGenerator,
   type DiagramNode,
   Icon as UmlIcon,
+  UmlGenerator,
 } from "./uml_generator.ts";
 const EOL = "\n";
 
@@ -148,7 +148,7 @@ title ${label}`;
       plantUmlIcon,
       plantUmlSkinColor,
       diffIcon,
-      diffStyleClass
+      diffStyleClass,
     );
 
     // Handle inner nodes if they exist
@@ -196,11 +196,13 @@ function generateNode(
   icon: Icon,
   skinColor: SkinColor,
   diffIcon: DiffIcon = DiffIcon.NONE,
-  diffStyleClass: string = ""
+  diffStyleClass: string = "",
 ): string {
-  return `state "${diffIcon}**${type}**${icon} \\n ${getLabel(
-    label
-  )}" as ${name}${skinColor}${diffStyleClass}`;
+  return `state "${diffIcon}**${type}**${icon} \\n ${
+    getLabel(
+      label,
+    )
+  }" as ${name}${skinColor}${diffStyleClass}`;
 }
 
 function getLabel(label: string) {
