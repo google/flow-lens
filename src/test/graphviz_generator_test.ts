@@ -52,11 +52,6 @@ const NODE_NAMES = {
   actionCall: "myActionCall",
 };
 
-const DIFF_INDICATOR = {
-  ADDED: 'FONT COLOR="green"><B>+</B>',
-  DELETED: 'FONT COLOR="red"><B>-</B>',
-  MODIFIED: 'FONT COLOR="#DD7A00"><B>Δ</B>',
-};
 
 function generateMockFlow(): ParsedFlow {
   return {
@@ -225,7 +220,7 @@ function generateInnerNodeCells(cells: string[]) {
   return cells.join(EOL);
 }
 
-Deno.test("GraphViz", async (t) => {
+Deno.test("GraphVizGenerator", async (t) => {
   let systemUnderTest: GraphVizGenerator;
   let mockedFlow: ParsedFlow;
   let result: string;

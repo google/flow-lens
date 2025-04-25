@@ -22,7 +22,7 @@ import {
 } from "@std/assert";
 import * as fs from "node:fs";
 import { Configuration, DiagramTool } from "../main/argument_processor.ts";
-import { getTestConfig } from "./argument_processor_test.ts";
+import { getTestConfig } from "./test_utils.ts";
 import { FlowFileChangeDetector } from "../main/flow_file_change_detector.ts";
 import {
   ERROR_MESSAGES,

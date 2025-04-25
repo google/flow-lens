@@ -136,7 +136,7 @@ function generateStage(
   } as flowTypes.FlowOrchestratedStage;
 }
 
-Deno.test("PlantUml", async (t) => {
+Deno.test("PlantUmlGenerator", async (t) => {
   let systemUnderTest: PlantUmlGenerator;
   let mockedFlow: ParsedFlow;
   let result: string;

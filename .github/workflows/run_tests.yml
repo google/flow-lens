@@ -25,5 +25,4 @@ jobs:
             --allow-read \
             --allow-write \
             --allow-env \
-            --allow-run \
-            --trace-leaks
+            --allow-run

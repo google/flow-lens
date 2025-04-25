@@ -17,7 +17,7 @@
 import { assertEquals, assertThrows } from "@std/assert";
 import { Buffer } from "node:buffer";
 import { Configuration } from "../main/argument_processor.ts";
-import { getTestConfig } from "./argument_processor_test.ts";
+import { getTestConfig } from "./test_utils.ts";
 import {
   ERROR_MESSAGES,
   FLOW_FILE_EXTENSION,
