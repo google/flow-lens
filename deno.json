@@ -16,21 +16,7 @@
     "xml2js": "npm:xml2js@^0.6.2",
     "yargs": "npm:yargs@^17.7.2"
   },
-  "compilerOptions": {
-    "allowJs": true,
-    "lib": ["deno.window"],
-    "strict": true,
-    "types": ["deno"]
-  },
   "tasks": {
-    "test": "deno test --allow-read --allow-env"
-  },
-  "fmt": {
-    "lineWidth": 80,
-    "indentWidth": 2,
-    "useTabs": false,
-    "semiColons": true,
-    "singleQuote": false,
-    "proseWrap": "preserve"
+    "test": "deno test --allow-read --allow-env --allow-write --allow-run"
   }
 }
