@@ -87,6 +87,9 @@ Deno.test("ArgumentProcessor", async (t) => {
     () => {
       const { argumentProcessor, config } = setupTest((config) => {
         config.mode = Mode.GITHUB_ACTION;
+        config.diagramTool = DiagramTool.MERMAID;
+        config.gitDiffFromHash = "HEAD^1";
+        config.gitDiffToHash = "HEAD";
         config.outputDirectory = undefined;
         config.outputFileName = undefined;
       });
@@ -273,6 +276,94 @@ Deno.test("ArgumentProcessor", async (t) => {
         Error,
         ERROR_MESSAGES.gitDiffFromAndToHashMustBeSpecifiedTogether,
       );
+    },
+  );
+
+  await t.step(
+    "should validate GitHub Action mode with valid configuration",
+    () => {
+      const validConfig = setupTest((config) => {
+        config.mode = Mode.GITHUB_ACTION;
+        config.diagramTool = DiagramTool.MERMAID;
+        config.gitDiffFromHash = "HEAD^1";
+        config.gitDiffToHash = "HEAD";
+      });
+      validConfig.argumentProcessor.getConfig();
+      assertEquals(validConfig.argumentProcessor.getErrors(), []);
+    },
+  );
+
+  await t.step(
+    "should reject GitHub Action mode with invalid diagram tool",
+    () => {
+      const invalidDiagramTool = setupTest((config) => {
+        config.mode = Mode.GITHUB_ACTION;
+        config.diagramTool = DiagramTool.PLANTUML;
+        config.gitDiffFromHash = "HEAD^1";
+        config.gitDiffToHash = "HEAD";
+      });
+      try {
+        invalidDiagramTool.argumentProcessor.getConfig();
+      } catch {}
+      assertEquals(invalidDiagramTool.argumentProcessor.getErrors(), [
+        ERROR_MESSAGES.githubActionRequiresMermaid,
+      ]);
+    },
+  );
+
+  await t.step(
+    "should reject GitHub Action mode with invalid git diff to hash",
+    () => {
+      const invalidToHash = setupTest((config) => {
+        config.mode = Mode.GITHUB_ACTION;
+        config.diagramTool = DiagramTool.MERMAID;
+        config.gitDiffFromHash = "HEAD^1";
+        config.gitDiffToHash = "HEAD~1";
+      });
+      try {
+        invalidToHash.argumentProcessor.getConfig();
+      } catch {}
+      assertEquals(invalidToHash.argumentProcessor.getErrors(), [
+        ERROR_MESSAGES.githubActionRequiresHeadHash,
+      ]);
+    },
+  );
+
+  await t.step(
+    "should reject GitHub Action mode with invalid git diff from hash",
+    () => {
+      const invalidFromHash = setupTest((config) => {
+        config.mode = Mode.GITHUB_ACTION;
+        config.diagramTool = DiagramTool.MERMAID;
+        config.gitDiffFromHash = "HEAD~2";
+        config.gitDiffToHash = "HEAD";
+      });
+      try {
+        invalidFromHash.argumentProcessor.getConfig();
+      } catch {}
+      assertEquals(invalidFromHash.argumentProcessor.getErrors(), [
+        ERROR_MESSAGES.githubActionRequiresHeadMinusOne,
+      ]);
+    },
+  );
+
+  await t.step(
+    "should reject GitHub Action mode with multiple invalid configurations",
+    () => {
+      const multipleInvalid = setupTest((config) => {
+        config.mode = Mode.GITHUB_ACTION;
+        config.diagramTool = DiagramTool.PLANTUML;
+        config.gitDiffFromHash = "HEAD~2";
+        config.gitDiffToHash = "HEAD~1";
+      });
+      try {
+        multipleInvalid.argumentProcessor.getConfig();
+      } catch {}
+      assertEquals(multipleInvalid.argumentProcessor.getErrors(), [
+        ERROR_MESSAGES.githubActionRequiresMermaid,
+        ERROR_MESSAGES.githubActionRequiresHeadHash,
+        ERROR_MESSAGES.githubActionRequiresHeadMinusOne,
+      ]);
     },
   );
 });

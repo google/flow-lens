@@ -16,8 +16,8 @@
 
 import { assertEquals, assertExists } from "@std/assert";
 import { assertSpyCalls, spy } from "@std/testing/mock";
-import * as fs from "node:fs";
-import * as path from "node:path";
+import { join } from "@std/path";
+import { existsSync } from "@std/fs";
 import {
   Configuration,
   DiagramTool,
@@ -63,7 +63,7 @@ const EXPECTED_DEFAULT_FORMAT = [
   },
 ];
 
-const expectedFilePath = path.join(
+const expectedFilePath = join(
   TEST_UNDECLARED_OUTPUTS_DIR,
   `${OUTPUT_FILE_NAME}.json`,
 );
@@ -90,8 +90,8 @@ Deno.test("UmlWriter", async (t) => {
 
     writer.writeUmlDiagrams();
 
-    assertExists(fs.existsSync(expectedFilePath));
-    fileContent = fs.readFileSync(expectedFilePath, ENCODING).toString();
+    assertExists(existsSync(expectedFilePath));
+    fileContent = Deno.readTextFileSync(expectedFilePath);
     assertEquals(fileContent, JSON.stringify(EXPECTED_DEFAULT_FORMAT, null, 2));
 
     await Deno.remove(expectedFilePath);
