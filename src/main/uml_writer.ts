@@ -18,8 +18,7 @@
  * @fileoverview This file contains the UmlWriter class which is used to write
  * the generated UML diagrams to a file.
  */
-import * as fs from "node:fs";
-import * as path from "node:path";
+import { join } from "@std/path";
 import { Configuration, Mode, RuntimeConfig } from "./argument_processor.ts";
 import { FlowDifference } from "./flow_to_uml_transformer.ts";
 import { GithubClient } from "./github_client.ts";
@@ -57,13 +56,16 @@ export class UmlWriter {
   }
 
   private writeJsonFile(config: RuntimeConfig) {
-    const fileBody = getFormatter().format(this.filePathToFlowDifference);
-    fs.writeFileSync(
-      path.join(
-        config.outputDirectory!,
-        `${config.outputFileName!}${FILE_EXTENSION}`,
-      ),
-      JSON.stringify(fileBody, null, 2),
+    const outputPath = join(
+      config.outputDirectory!,
+      `${config.outputFileName}${FILE_EXTENSION}`,
+    );
+    const formattedDifferences = getFormatter().format(
+      this.filePathToFlowDifference,
+    );
+    Deno.writeTextFileSync(
+      outputPath,
+      JSON.stringify(formattedDifferences, null, 2),
     );
   }
 

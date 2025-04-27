@@ -18,8 +18,8 @@
  * @fileoverview This module processes command line arguments and returns an
  * object containing the arguments.
  */
-import * as fs from "node:fs";
-import { parseArgs } from "@std/cli/parse-args";
+import { existsSync } from "@std/fs";
+import { parseArgs } from "@std/cli";
 
 const VALID_OUTPUT_FILE_NAME_REGEX = new RegExp("^[a-zA-Z0-9_]+$");
 
@@ -100,6 +100,12 @@ export const ERROR_MESSAGES = {
       )
     }`,
   header: "The following errors were encountered:",
+  githubActionRequiresMermaid:
+    "GitHub Action mode requires diagramTool to be 'mermaid'",
+  githubActionRequiresHeadHash:
+    "GitHub Action mode requires gitDiffToHash to be 'HEAD'",
+  githubActionRequiresHeadMinusOne:
+    "GitHub Action mode requires gitDiffFromHash to be 'HEAD^1'",
 };
 
 /**
@@ -162,6 +168,11 @@ export class ArgumentProcessor {
       this.validateOutputFileName();
     }
 
+    // Validate GitHub Action specific requirements
+    if (this.config.mode?.toLowerCase() === Mode.GITHUB_ACTION) {
+      this.validateGitHubActionMode();
+    }
+
     this.validateRequiredArguments();
     this.validateMutuallyExclusiveArguments();
     this.validateConditionalArguments();
@@ -196,7 +207,7 @@ export class ArgumentProcessor {
       return;
     }
     for (const filePath of this.config.filePath) {
-      if (!fs.existsSync(filePath)) {
+      if (!existsSync(filePath)) {
         this.errorsEncountered.push(
           ERROR_MESSAGES.filePathDoesNotExist(filePath),
         );
@@ -222,9 +233,23 @@ export class ArgumentProcessor {
       this.errorsEncountered.push(ERROR_MESSAGES.outputDirectoryRequired);
       return;
     }
-    if (!fs.existsSync(this.config.outputDirectory)) {
+    if (!existsSync(this.config.outputDirectory)) {
       this.errorsEncountered.push(
         ERROR_MESSAGES.invalidOutputDirectory(this.config.outputDirectory),
+      );
+    }
+  }
+
+  private validateGitHubActionMode() {
+    if (this.config.diagramTool?.toLowerCase() !== DiagramTool.MERMAID) {
+      this.errorsEncountered.push(ERROR_MESSAGES.githubActionRequiresMermaid);
+    }
+    if (this.config.gitDiffToHash !== "HEAD") {
+      this.errorsEncountered.push(ERROR_MESSAGES.githubActionRequiresHeadHash);
+    }
+    if (this.config.gitDiffFromHash !== "HEAD^1") {
+      this.errorsEncountered.push(
+        ERROR_MESSAGES.githubActionRequiresHeadMinusOne,
       );
     }
   }
@@ -271,5 +296,13 @@ export class ArgumentProcessor {
       errors.unshift(ERROR_MESSAGES.header);
       throw new Error(errors.join("\n"));
     }
+  }
+
+  /**
+   * Returns the list of errors encountered during argument validation.
+   * @returns An array of error messages
+   */
+  getErrors(): string[] {
+    return this.errorsEncountered;
   }
 }

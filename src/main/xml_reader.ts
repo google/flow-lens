@@ -18,23 +18,19 @@
  * @fileoverview Validates and reads an XML file.
  */
 
-import * as fs from "node:fs";
-
 const XML_FILE_EXTENSION = ".xml";
-const ENCODING = "utf8";
 
 /**
  * Error messages for the XmlReader class.
  */
 export const ERROR_MESSAGES = {
-  invalidFilePath: (filePath: string) =>
-    `File path ${filePath} does not exist.`,
+  invalidFilePath: (filePath: string) => `filePath does not exist: ${filePath}`,
   invalidFileExtension: (filePath: string) =>
-    `File path ${filePath} is not an XML file.`,
+    `filePath must have extension ${XML_FILE_EXTENSION}: ${filePath}`,
 };
 
 /**
- * Reads the XML file and returns the file body.
+ * Validates and reads an XML file.
  */
 export class XmlReader {
   constructor(private readonly filePath: string) {}
@@ -42,11 +38,13 @@ export class XmlReader {
   getXmlFileBody(): string {
     this.validateFilePath();
     this.validateFileExtension();
-    return fs.readFileSync(this.filePath, ENCODING);
+    return Deno.readTextFileSync(this.filePath);
   }
 
   private validateFilePath() {
-    if (!fs.existsSync(this.filePath)) {
+    try {
+      Deno.statSync(this.filePath);
+    } catch {
       throw new Error(ERROR_MESSAGES.invalidFilePath(this.filePath));
     }
   }
