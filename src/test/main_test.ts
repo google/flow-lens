@@ -15,7 +15,7 @@
  */
 
 import { assert, assertEquals, assertExists } from "@std/assert";
-import * as path from "node:path";
+import { join } from "@std/path";
 import {
   Configuration,
   DiagramTool,
@@ -56,6 +56,6 @@ Deno.test(
     assert(runner.filePathToFlowDifference.has(SAMPLE_FLOW_FILE_PATH));
     assertExists(runner.filePathToFlowDifference.get(SAMPLE_FLOW_FILE_PATH));
 
-    await Deno.remove(path.join(TEST_UNDECLARED_OUTPUTS_DIR, "test.json"));
+    await Deno.remove(join(TEST_UNDECLARED_OUTPUTS_DIR, "test.json"));
   },
 );

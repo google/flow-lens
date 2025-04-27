@@ -15,7 +15,6 @@
  */
 
 import { assertEquals, assertThrows } from "@std/assert";
-import { Buffer } from "node:buffer";
 import { Configuration } from "../main/argument_processor.ts";
 import { getTestConfig } from "./test_utils.ts";
 import {
@@ -36,9 +35,11 @@ Deno.test("FlowFileChangeDetector", async (t) => {
     (detector as any).executeVersionCommand = () => undefined;
     (detector as any).executeRevParseCommand = () => undefined;
     (detector as any).executeDiffCommand = () =>
-      Buffer.from(["file1.txt", FLOW_FILE_PATH, "file3.js"].join(EOL));
+      new TextEncoder().encode(
+        ["file1.txt", FLOW_FILE_PATH, "file3.js"].join(EOL),
+      );
     (detector as any).executeGetFileContentCommand = () =>
-      Buffer.from("file content");
+      new TextEncoder().encode("file content");
     // tslint:enable:no-any
   };
 

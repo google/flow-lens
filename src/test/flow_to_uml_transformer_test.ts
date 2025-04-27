@@ -20,7 +20,6 @@ import {
   assertExists,
   assertStringIncludes,
 } from "@std/assert";
-import * as fs from "node:fs";
 import { Configuration, DiagramTool } from "../main/argument_processor.ts";
 import { getTestConfig } from "./test_utils.ts";
 import { FlowFileChangeDetector } from "../main/flow_file_change_detector.ts";
@@ -42,13 +41,14 @@ Deno.test("FlowToUmlTransformer", async (t) => {
   let result: Map<string, FlowDifference>;
 
   await t.step("setup", () => {
-    // Mock the private methods which execute git commands using spyOn
-    const executeGetFileContentCommand = () => {
-      return fs.readFileSync(SAMPLE_FLOW_FILE_PATH, "utf8");
+    // Mock the private method which executes git commands using spyOn
+    const executeGitCommand = () => {
+      return new TextEncoder().encode(
+        Deno.readTextFileSync(SAMPLE_FLOW_FILE_PATH),
+      );
     };
     // Replace the private method with our mock implementation, using type assertion to access it.
-    (CHANGE_DETECTOR as any).executeGetFileContentCommand =
-      executeGetFileContentCommand;
+    (CHANGE_DETECTOR as any).executeGitCommand = executeGitCommand;
   });
 
   await t.step("should transform a flow file to a UML diagram", async () => {

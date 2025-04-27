@@ -14,32 +14,27 @@
  * limitations under the License.
  */
 
-import * as fs from "node:fs";
-import * as path from "node:path";
+import { join } from "@std/path";
 import { ERROR_MESSAGES, FlowParser, ParsedFlow } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import { assert, assertEquals, assertRejects } from "@std/assert";
 
-const ENCODING = "utf8";
 const GOLDENS_PATH = "./src/test/goldens";
 const LOOP_NODE_NAME = "myLoop";
 const NON_EXISTING_ELEMENT = "Non_Existing_Element";
 const START_NODE_NAME = "FLOW_START";
 
 const TEST_FILES = {
-  multipleElements: path.join(GOLDENS_PATH, "multiple_elements.flow-meta.xml"),
-  singleElements: path.join(GOLDENS_PATH, "single_elements.flow-meta.xml"),
-  sample: path.join(GOLDENS_PATH, "sample.flow-meta.xml"),
-  noStartNode: path.join(GOLDENS_PATH, "no_start_node.flow-meta.xml"),
-  missingTransitionNode: path.join(
+  multipleElements: join(GOLDENS_PATH, "multiple_elements.flow-meta.xml"),
+  singleElements: join(GOLDENS_PATH, "single_elements.flow-meta.xml"),
+  sample: join(GOLDENS_PATH, "sample.flow-meta.xml"),
+  noStartNode: join(GOLDENS_PATH, "no_start_node.flow-meta.xml"),
+  missingTransitionNode: join(
     GOLDENS_PATH,
     "missing_transition_node.flow-meta.xml",
   ),
-  circularTransition: path.join(
-    GOLDENS_PATH,
-    "circular_transition.flow-meta.xml",
-  ),
-  rollback: path.join(GOLDENS_PATH, "rollback.flow-meta.xml"),
+  circularTransition: join(GOLDENS_PATH, "circular_transition.flow-meta.xml"),
+  rollback: join(GOLDENS_PATH, "rollback.flow-meta.xml"),
 };
 
 const NODE_NAMES = {
@@ -68,9 +63,7 @@ Deno.test("FlowParser", async (t) => {
   let parsedFlow: ParsedFlow;
 
   await t.step("should parse valid XML into a flow object", async () => {
-    systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.sample, ENCODING),
-    );
+    systemUnderTest = new FlowParser(Deno.readTextFileSync(TEST_FILES.sample));
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
 
@@ -118,7 +111,7 @@ Deno.test("FlowParser", async (t) => {
 
   await t.step("should handle circular transitions", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.circularTransition, ENCODING),
+      Deno.readTextFileSync(TEST_FILES.circularTransition),
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -145,7 +138,7 @@ Deno.test("FlowParser", async (t) => {
     "should ensure multiple node definitions are represented as arrays",
     async () => {
       systemUnderTest = new FlowParser(
-        fs.readFileSync(TEST_FILES.multipleElements, ENCODING),
+        Deno.readTextFileSync(TEST_FILES.multipleElements),
       );
 
       parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -228,7 +221,7 @@ Deno.test("FlowParser", async (t) => {
     "should ensure single node definitions are represented as arrays",
     async () => {
       systemUnderTest = new FlowParser(
-        fs.readFileSync(TEST_FILES.singleElements, ENCODING),
+        Deno.readTextFileSync(TEST_FILES.singleElements),
       );
 
       parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -308,7 +301,7 @@ Deno.test("FlowParser", async (t) => {
 
   await t.step("should properly identify rollbacks", async () => {
     systemUnderTest = new FlowParser(
-      fs.readFileSync(TEST_FILES.rollback, ENCODING),
+      Deno.readTextFileSync(TEST_FILES.rollback),
     );
 
     parsedFlow = await systemUnderTest.generateFlowDefinition();
@@ -371,7 +364,7 @@ Deno.test("FlowParser", async (t) => {
     "should throw an error when the XML is missing a start node",
     async () => {
       systemUnderTest = new FlowParser(
-        fs.readFileSync(TEST_FILES.noStartNode, ENCODING),
+        Deno.readTextFileSync(TEST_FILES.noStartNode),
       );
 
       await assertRejects(
@@ -386,7 +379,7 @@ Deno.test("FlowParser", async (t) => {
     "should throw an error when the XML contains an invalid transition",
     async () => {
       systemUnderTest = new FlowParser(
-        fs.readFileSync(TEST_FILES.missingTransitionNode, ENCODING),
+        Deno.readTextFileSync(TEST_FILES.missingTransitionNode),
       );
 
       await assertRejects(

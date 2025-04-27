@@ -19,7 +19,7 @@
  * flow file into a UML diagram.
  */
 
-import * as path from "node:path";
+import { join } from "@std/path";
 import { Configuration } from "./argument_processor.ts";
 import { compareFlows } from "./flow_comparator.ts";
 import { FlowFileChangeDetector } from "./flow_file_change_detector.ts";
@@ -74,20 +74,34 @@ export class FlowToUmlTransformer {
     return result;
   }
 
-  private async transformToUmlDiagram(
-    filePath: string,
-  ): Promise<FlowDifference> {
-    return new Promise<FlowDifference>(async (resolve, reject) => {
+  private transformToUmlDiagram(filePath: string): Promise<FlowDifference> {
+    return new Promise<FlowDifference>((resolve, reject) => {
       try {
-        let result: unknown = filePath;
-        for (const stage of this.generatePipeline()) {
-          result = await stage.process(result);
-        }
-        resolve(result as FlowDifference);
+        this.processPipeline(filePath, resolve, reject);
       } catch (error) {
         reject(error);
       }
     });
+  }
+
+  private async processPipeline(
+    initialValue: unknown,
+    resolve: (value: FlowDifference) => void,
+    reject: (reason?: unknown) => void,
+  ): Promise<void> {
+    const pipeline = this.generatePipeline();
+    let result = initialValue;
+
+    for (const stage of pipeline) {
+      try {
+        result = await stage.process(result);
+      } catch (error) {
+        reject(error);
+        return;
+      }
+    }
+
+    resolve(result as FlowDifference);
   }
 
   private generatePipeline(): Array<Filter<unknown>> {
@@ -101,7 +115,7 @@ export class FlowToUmlTransformer {
 
 function getFullFilePath(filePath: string): string {
   const gitRepo = Configuration.getInstance().gitRepo;
-  return gitRepo ? path.join(gitRepo, filePath) : filePath;
+  return gitRepo ? join(gitRepo, filePath) : filePath;
 }
 
 interface Filter<T> {
