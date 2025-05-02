@@ -46,7 +46,9 @@ const NODE_NAMES = {
 
 const UML_REPRESENTATIONS = {
   apexPluginCall: (name: string) => `state Apex Plugin Call ${name}`,
-  assignment: (name: string) => `state Assignment ${name}`,
+  assignment: (name: string) => `state Assignment ${name}
+  var1 = Hello World
+  var2 AddItem Test Value`,
   collectionProcessor: (name: string) => `state Collection Processor ${name}`,
   decision: (name: string) => `state Decision ${name}${EOL}`,
   loop: (name: string) => `state Loop ${name}`,
@@ -187,6 +189,33 @@ function getFlowNodes(name: string): flowTypes.FlowNode[] {
         elementSubtype: "RecordDelete",
       },
     ] as flowTypes.FlowRecordDelete[];
+  }
+
+  if (name === NODE_NAMES.assignment) {
+    return [
+      {
+        ...baseNode,
+        elementSubtype: "Assignment",
+        assignmentItems: [
+          {
+            assignToReference: "var1",
+            operator: flowTypes.FlowAssignmentOperator.ASSIGN,
+            value: {
+              stringValue: "Hello World"
+            },
+            processMetadataValues: []
+          },
+          {
+            assignToReference: "var2",
+            operator: flowTypes.FlowAssignmentOperator.ADD_ITEM,
+            value: {
+              stringValue: "Test Value"
+            },
+            processMetadataValues: []
+          }
+        ]
+      },
+    ] as flowTypes.FlowAssignment[];
   }
 
   // Return basic node for other types
@@ -530,6 +559,66 @@ Deno.test("UmlGenerator", async (t) => {
         "Test custom error description: Error Messages:", // type: label format
         "1. Invalid input (Field: Name)",
         "2. Record not found",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`,
+        );
+      });
+    },
+  );
+
+  await t.step(
+    "should generate proper inner node content for FlowAssignment",
+    () => {
+      // Setup test data
+      const assignmentNode: flowTypes.FlowAssignment = {
+        name: "testAssignment",
+        label: "Test Assignment",
+        description: "Test assignment description",
+        elementSubtype: "Assignment",
+        locationX: 0,
+        locationY: 0,
+        assignmentItems: [
+          {
+            assignToReference: "var1",
+            operator: flowTypes.FlowAssignmentOperator.ASSIGN,
+            value: { stringValue: "Hello World" },
+            processMetadataValues: [],
+          },
+          {
+            assignToReference: "var2",
+            operator: flowTypes.FlowAssignmentOperator.ADD,
+            value: { numberValue: 42 },
+            processMetadataValues: [],
+          },
+          {
+            assignToReference: "var3",
+            operator: flowTypes.FlowAssignmentOperator.SUBTRACT,
+            value: { elementReference: "someVariable" },
+            processMetadataValues: [],
+          },
+          {
+            assignToReference: "var4",
+            operator: flowTypes.FlowAssignmentOperator.ADD_ITEM,
+            value: { formulaExpression: "1 + 1" },
+            processMetadataValues: [],
+          },
+        ],
+      };
+
+      mockParsedFlow.assignments = [assignmentNode];
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Assignment testAssignment",
+        "var1 = Hello World",
+        "var2 Add 42",
+        "var3 Subtract someVariable",
+        "var4 AddItem 1 + 1",
       ];
 
       expectedContent.forEach((content) => {

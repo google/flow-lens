@@ -194,7 +194,30 @@ export abstract class UmlGenerator {
       type: "Assignment",
       color: SkinColor.ORANGE,
       icon: Icon.ASSIGNMENT,
+      innerNodes: this.getFlowAssignmentInnerNodes(node),
     });
+  }
+
+  private getFlowAssignmentInnerNodes(node: flowTypes.FlowAssignment): InnerNode[] {
+    const result: InnerNode[] = [];
+    if (!node.assignmentItems) {
+      return result;
+    }
+
+    const assignments: string[] = [];
+    for (const item of node.assignmentItems) {
+      const operator = item.operator === flowTypes.FlowAssignmentOperator.ASSIGN ? "=" : item.operator;
+      assignments.push(`${item.assignToReference} ${operator} ${toString(item.value)}`);
+    }
+
+    result.push({
+      id: `${node.name}__Assignments`,
+      type: "",
+      label: "",
+      content: assignments,
+    });
+
+    return result;
   }
 
   private getFlowCollectionProcessor(

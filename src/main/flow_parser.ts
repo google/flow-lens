@@ -136,6 +136,7 @@ export class FlowParser {
 
     this.beingParsed.apexPluginCalls = ensureArray(flow.apexPluginCalls);
     this.beingParsed.assignments = ensureArray(flow.assignments);
+    setAssignments(this.beingParsed.assignments);
     this.beingParsed.collectionProcessors = ensureArray(
       flow.collectionProcessors,
     );
@@ -441,6 +442,20 @@ export class FlowParser {
  */
 function ensureArray<T>(input: T[] | undefined): T[] | undefined {
   return input ? (Array.isArray(input) ? input : [input]) : input;
+}
+
+/**
+ * Set Assignments
+ *
+ * Assignment items are nested properties which also need to be converted to an
+ * array.
+ */
+function setAssignments(assignments: flowTypes.FlowAssignment[] | undefined) {
+  assignments?.forEach((assignment) => {
+    assignment.assignmentItems = ensureArray(
+      assignment.assignmentItems,
+    ) as flowTypes.FlowAssignmentItem[];
+  });
 }
 
 /**
