@@ -46,7 +46,8 @@ const NODE_NAMES = {
 
 const UML_REPRESENTATIONS = {
   apexPluginCall: (name: string) => `state Apex Plugin Call ${name}`,
-  assignment: (name: string) => `state Assignment ${name}
+  assignment: (name: string) =>
+    `state Assignment ${name}
   var1 = Hello World
   var2 AddItem Test Value`,
   collectionProcessor: (name: string) => `state Collection Processor ${name}`,
@@ -201,19 +202,19 @@ function getFlowNodes(name: string): flowTypes.FlowNode[] {
             assignToReference: "var1",
             operator: flowTypes.FlowAssignmentOperator.ASSIGN,
             value: {
-              stringValue: "Hello World"
+              stringValue: "Hello World",
             },
-            processMetadataValues: []
+            processMetadataValues: [],
           },
           {
             assignToReference: "var2",
             operator: flowTypes.FlowAssignmentOperator.ADD_ITEM,
             value: {
-              stringValue: "Test Value"
+              stringValue: "Test Value",
             },
-            processMetadataValues: []
-          }
-        ]
+            processMetadataValues: [],
+          },
+        ],
       },
     ] as flowTypes.FlowAssignment[];
   }

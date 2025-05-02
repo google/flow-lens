@@ -198,7 +198,9 @@ export abstract class UmlGenerator {
     });
   }
 
-  private getFlowAssignmentInnerNodes(node: flowTypes.FlowAssignment): InnerNode[] {
+  private getFlowAssignmentInnerNodes(
+    node: flowTypes.FlowAssignment,
+  ): InnerNode[] {
     const result: InnerNode[] = [];
     if (!node.assignmentItems) {
       return result;
@@ -206,8 +208,12 @@ export abstract class UmlGenerator {
 
     const assignments: string[] = [];
     for (const item of node.assignmentItems) {
-      const operator = item.operator === flowTypes.FlowAssignmentOperator.ASSIGN ? "=" : item.operator;
-      assignments.push(`${item.assignToReference} ${operator} ${toString(item.value)}`);
+      const operator = item.operator === flowTypes.FlowAssignmentOperator.ASSIGN
+        ? "="
+        : item.operator;
+      assignments.push(
+        `${item.assignToReference} ${operator} ${toString(item.value)}`,
+      );
     }
 
     result.push({
