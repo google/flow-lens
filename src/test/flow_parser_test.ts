@@ -35,6 +35,11 @@ const TEST_FILES = {
   ),
   circularTransition: join(GOLDENS_PATH, "circular_transition.flow-meta.xml"),
   rollback: join(GOLDENS_PATH, "rollback.flow-meta.xml"),
+  singleFilter: join(GOLDENS_PATH, "single_filter.flow-meta.xml"),
+  singleScheduledPath: join(GOLDENS_PATH, "single_scheduled_path.flow-meta.xml"),
+  singleCapability: join(GOLDENS_PATH, "single_capability.flow-meta.xml"),
+  multipleStartElements: join(GOLDENS_PATH, "multiple_start_elements.flow-meta.xml"),
+  noStartElements: join(GOLDENS_PATH, "no_start_elements.flow-meta.xml"),
 };
 
 const NODE_NAMES = {
@@ -387,6 +392,120 @@ Deno.test("FlowParser", async (t) => {
         Error,
         ERROR_MESSAGES.couldNotFindConnectedNode(NON_EXISTING_ELEMENT),
       );
+    },
+  );
+
+  await t.step(
+    "should ensure flow start filters are always treated as arrays",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.singleFilter),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow.start);
+      assert(parsedFlow.start.filters);
+      assert(Array.isArray(parsedFlow.start.filters));
+      assertEquals(parsedFlow.start.filters.length, 1);
+      assertEquals(parsedFlow.start.filters[0].field, "Name");
+      assertEquals(parsedFlow.start.filters[0].operator, "IsNull");
+      assertEquals(parsedFlow.start.filters[0].value.booleanValue, "true");
+    },
+  );
+
+  await t.step(
+    "should ensure flow start scheduled paths are always treated as arrays",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.singleScheduledPath),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow.start);
+      assert(parsedFlow.start.scheduledPaths);
+      assert(Array.isArray(parsedFlow.start.scheduledPaths));
+      assertEquals(parsedFlow.start.scheduledPaths.length, 1);
+      assertEquals(parsedFlow.start.scheduledPaths[0].label, "Daily");
+      assertEquals(parsedFlow.start.scheduledPaths[0].offsetNumber, "1");
+      assertEquals(parsedFlow.start.scheduledPaths[0].offsetUnit, "Days");
+    },
+  );
+
+  await t.step(
+    "should ensure flow start capability types are always treated as arrays",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.singleCapability),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow.start);
+      assert(parsedFlow.start.capabilityTypes);
+      assert(Array.isArray(parsedFlow.start.capabilityTypes));
+      assertEquals(parsedFlow.start.capabilityTypes.length, 1);
+      assertEquals(parsedFlow.start.capabilityTypes[0].capabilityName, "Chatter");
+    },
+  );
+
+  await t.step(
+    "should ensure flow start with multiple filters, scheduled paths, and capabilities are handled correctly",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.multipleStartElements),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow.start);
+      
+      // Check filters
+      assert(parsedFlow.start.filters);
+      assert(Array.isArray(parsedFlow.start.filters));
+      assertEquals(parsedFlow.start.filters.length, 2);
+      assertEquals(parsedFlow.start.filters[0].field, "Name");
+      assertEquals(parsedFlow.start.filters[0].operator, "IsNull");
+      assertEquals(parsedFlow.start.filters[0].value.booleanValue, "true");
+      assertEquals(parsedFlow.start.filters[1].field, "Type");
+      assertEquals(parsedFlow.start.filters[1].operator, "EqualTo");
+      assertEquals(parsedFlow.start.filters[1].value.stringValue, "Prospect");
+      
+      // Check scheduled paths
+      assert(parsedFlow.start.scheduledPaths);
+      assert(Array.isArray(parsedFlow.start.scheduledPaths));
+      assertEquals(parsedFlow.start.scheduledPaths.length, 2);
+      assertEquals(parsedFlow.start.scheduledPaths[0].label, "Daily");
+      assertEquals(parsedFlow.start.scheduledPaths[0].offsetNumber, "1");
+      assertEquals(parsedFlow.start.scheduledPaths[0].offsetUnit, "Days");
+      assertEquals(parsedFlow.start.scheduledPaths[1].label, "Weekly");
+      assertEquals(parsedFlow.start.scheduledPaths[1].offsetNumber, "7");
+      assertEquals(parsedFlow.start.scheduledPaths[1].offsetUnit, "Days");
+      
+      // Check capability types
+      assert(parsedFlow.start.capabilityTypes);
+      assert(Array.isArray(parsedFlow.start.capabilityTypes));
+      assertEquals(parsedFlow.start.capabilityTypes.length, 2);
+      assertEquals(parsedFlow.start.capabilityTypes[0].capabilityName, "Chatter");
+      assertEquals(parsedFlow.start.capabilityTypes[1].capabilityName, "Lightning");
+    },
+  );
+
+  await t.step(
+    "should handle flow start with no filters, scheduled paths, or capabilities gracefully",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.noStartElements),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow.start);
+      // These should be undefined when not present in XML
+      assertEquals(parsedFlow.start.filters, undefined);
+      assertEquals(parsedFlow.start.scheduledPaths, undefined);
+      assertEquals(parsedFlow.start.capabilityTypes, undefined);
     },
   );
 });

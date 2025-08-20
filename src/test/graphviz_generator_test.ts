@@ -163,8 +163,9 @@ function generateDecision(name: string): flowTypes.FlowDecision {
             leftValueReference: "foo",
             operator: flowTypes.FlowComparisonOperator.EQUAL_TO,
             rightValue: {
-              booleanValue: true,
+              booleanValue: "true",
             },
+            processMetadataValues: [],
           },
         ],
       },

@@ -67,6 +67,7 @@ export interface Transition {
  */
 export interface ParsedFlow {
   label?: string;
+  processType?: flowTypes.FlowProcessType;
   start?: flowTypes.FlowStart;
   apexPluginCalls?: flowTypes.FlowApexPluginCall[];
   assignments?: flowTypes.FlowAssignment[];
@@ -131,8 +132,10 @@ export class FlowParser {
 
   private populateFlowNodes(flow: flowTypes.Flow) {
     this.beingParsed.label = flow.label;
+    this.beingParsed.processType = flow.processType;
     this.beingParsed.start = flow.start;
     this.validateFlowStart();
+    setFlowStart(this.beingParsed.start);
 
     this.beingParsed.apexPluginCalls = ensureArray(flow.apexPluginCalls);
     this.beingParsed.assignments = ensureArray(flow.assignments);
@@ -567,6 +570,33 @@ function setCustomErrorMessages(
     customError.customErrorMessages = ensureArray(
       customError.customErrorMessages,
     ) as flowTypes.FlowCustomErrorMessage[];
+  }
+}
+
+/**
+ * Set Flow Start
+ *
+ * Flow Start filters and scheduled paths are nested properties which also
+ * need to be converted to arrays.
+ */
+function setFlowStart(start: flowTypes.FlowStart | undefined) {
+  if (!start) {
+    return;
+  }
+  if (start.filters) {
+    start.filters = ensureArray(
+      start.filters,
+    ) as flowTypes.FlowRecordFilter[];
+  }
+  if (start.scheduledPaths) {
+    start.scheduledPaths = ensureArray(
+      start.scheduledPaths,
+    ) as flowTypes.FlowScheduledPath[];
+  }
+  if (start.capabilityTypes) {
+    start.capabilityTypes = ensureArray(
+      start.capabilityTypes,
+    ) as flowTypes.FlowCapability[];
   }
 }
 
