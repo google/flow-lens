@@ -439,14 +439,14 @@ export class FlowParser {
 
   private getTransitionsFromFlowStart(node: flowTypes.FlowStart): Transition[] {
     const result: Transition[] = [];
-    
+
     // Add main flow transition
     if (node.connector) {
       result.push(
         this.createTransition(node, node.connector, false, undefined),
       );
     }
-    
+
     // Add scheduled path transitions
     if (node.scheduledPaths && node.scheduledPaths.length > 0) {
       for (const scheduledPath of node.scheduledPaths) {
@@ -458,7 +458,7 @@ export class FlowParser {
         }
       }
     }
-    
+
     return result;
   }
 }

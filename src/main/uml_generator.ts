@@ -183,79 +183,91 @@ export abstract class UmlGenerator {
 
     const start = this.parsedFlow.start;
     const entryCriteria: string[] = [];
-    
+
     // Add process type information from the flow
     if (this.parsedFlow.processType) {
       entryCriteria.push(`Process Type: ${this.parsedFlow.processType}`);
     }
-    
+
     // Add trigger type information
     if (start.triggerType) {
       entryCriteria.push(`Trigger Type: ${start.triggerType}`);
     }
-    
+
     // Add object information for record-triggered flows
     if (start.object) {
       entryCriteria.push(`Object: ${start.object}`);
     }
-    
+
     // Add record trigger type information
     if (start.recordTriggerType) {
       entryCriteria.push(`Record Trigger: ${start.recordTriggerType}`);
     }
-    
+
     // Add entry type information
     if (start.entryType) {
       entryCriteria.push(`Entry Type: ${start.entryType}`);
     }
-    
+
     // Add filter information
     if (start.filterLogic && start.filters && start.filters.length > 0) {
       entryCriteria.push(`Filter Logic: ${start.filterLogic}`);
       start.filters.forEach((filter, index) => {
-        entryCriteria.push(`${index + 1}. ${filter.field} ${filter.operator} ${toString(filter.value)}`);
+        entryCriteria.push(
+          `${index + 1}. ${filter.field} ${filter.operator} ${
+            toString(filter.value)
+          }`,
+        );
       });
     }
-    
+
     // Add filter formula if present
     if (start.filterFormula) {
       entryCriteria.push(`Filter Formula: ${start.filterFormula}`);
     }
-    
+
     // Add schedule information for scheduled flows
     if (start.schedule) {
-      entryCriteria.push(`Schedule: ${start.schedule.frequency} starting ${start.schedule.startDate} at ${start.schedule.startTime}`);
+      entryCriteria.push(
+        `Schedule: ${start.schedule.frequency} starting ${start.schedule.startDate} at ${start.schedule.startTime}`,
+      );
     }
-    
+
     // Add scheduled paths information
     if (start.scheduledPaths && start.scheduledPaths.length > 0) {
       start.scheduledPaths.forEach((path, index) => {
-        entryCriteria.push(`Scheduled Path ${index + 1}: ${path.label} (${path.offsetNumber} ${path.offsetUnit})`);
+        entryCriteria.push(
+          `Scheduled Path ${
+            index + 1
+          }: ${path.label} (${path.offsetNumber} ${path.offsetUnit})`,
+        );
       });
     }
-    
+
     // Add capability information
     if (start.capabilityTypes && start.capabilityTypes.length > 0) {
       start.capabilityTypes.forEach((capability, index) => {
-        entryCriteria.push(`Capability ${index + 1}: ${capability.capabilityName}`);
+        entryCriteria.push(
+          `Capability ${index + 1}: ${capability.capabilityName}`,
+        );
       });
     }
-    
+
     // Add form information for form-triggered flows
     if (start.form) {
       entryCriteria.push(`Form: ${start.form}`);
     }
-    
+
     // Add segment information
     if (start.segment) {
       entryCriteria.push(`Segment: ${start.segment}`);
     }
-    
+
     // Add flow run as user information
     if (start.flowRunAsUser) {
       entryCriteria.push(`Run As: ${start.flowRunAsUser}`);
     }
-    
+
     // If no specific criteria found, add a default message
     if (entryCriteria.length === 0) {
       entryCriteria.push("No specific entry criteria defined");

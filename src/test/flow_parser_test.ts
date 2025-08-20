@@ -36,13 +36,22 @@ const TEST_FILES = {
   circularTransition: join(GOLDENS_PATH, "circular_transition.flow-meta.xml"),
   rollback: join(GOLDENS_PATH, "rollback.flow-meta.xml"),
   singleFilter: join(GOLDENS_PATH, "single_filter.flow-meta.xml"),
-  singleScheduledPath: join(GOLDENS_PATH, "single_scheduled_path.flow-meta.xml"),
+  singleScheduledPath: join(
+    GOLDENS_PATH,
+    "single_scheduled_path.flow-meta.xml",
+  ),
   singleCapability: join(GOLDENS_PATH, "single_capability.flow-meta.xml"),
-  multipleStartElements: join(GOLDENS_PATH, "multiple_start_elements.flow-meta.xml"),
+  multipleStartElements: join(
+    GOLDENS_PATH,
+    "multiple_start_elements.flow-meta.xml",
+  ),
   noStartElements: join(GOLDENS_PATH, "no_start_elements.flow-meta.xml"),
   asyncPathTest: join(GOLDENS_PATH, "async_path_test.flow-meta.xml"),
   multipleAsyncPaths: join(GOLDENS_PATH, "multiple_async_paths.flow-meta.xml"),
-  nonAsyncScheduledPath: join(GOLDENS_PATH, "non_async_scheduled_path.flow-meta.xml"),
+  nonAsyncScheduledPath: join(
+    GOLDENS_PATH,
+    "non_async_scheduled_path.flow-meta.xml",
+  ),
 };
 
 const NODE_NAMES = {
@@ -449,7 +458,10 @@ Deno.test("FlowParser", async (t) => {
       assert(parsedFlow.start.capabilityTypes);
       assert(Array.isArray(parsedFlow.start.capabilityTypes));
       assertEquals(parsedFlow.start.capabilityTypes.length, 1);
-      assertEquals(parsedFlow.start.capabilityTypes[0].capabilityName, "Chatter");
+      assertEquals(
+        parsedFlow.start.capabilityTypes[0].capabilityName,
+        "Chatter",
+      );
     },
   );
 
@@ -463,7 +475,7 @@ Deno.test("FlowParser", async (t) => {
       parsedFlow = await systemUnderTest.generateFlowDefinition();
 
       assert(parsedFlow.start);
-      
+
       // Check filters
       assert(parsedFlow.start.filters);
       assert(Array.isArray(parsedFlow.start.filters));
@@ -474,7 +486,7 @@ Deno.test("FlowParser", async (t) => {
       assertEquals(parsedFlow.start.filters[1].field, "Type");
       assertEquals(parsedFlow.start.filters[1].operator, "EqualTo");
       assertEquals(parsedFlow.start.filters[1].value.stringValue, "Prospect");
-      
+
       // Check scheduled paths
       assert(parsedFlow.start.scheduledPaths);
       assert(Array.isArray(parsedFlow.start.scheduledPaths));
@@ -485,13 +497,19 @@ Deno.test("FlowParser", async (t) => {
       assertEquals(parsedFlow.start.scheduledPaths[1].label, "Weekly");
       assertEquals(parsedFlow.start.scheduledPaths[1].offsetNumber, "7");
       assertEquals(parsedFlow.start.scheduledPaths[1].offsetUnit, "Days");
-      
+
       // Check capability types
       assert(parsedFlow.start.capabilityTypes);
       assert(Array.isArray(parsedFlow.start.capabilityTypes));
       assertEquals(parsedFlow.start.capabilityTypes.length, 2);
-      assertEquals(parsedFlow.start.capabilityTypes[0].capabilityName, "Chatter");
-      assertEquals(parsedFlow.start.capabilityTypes[1].capabilityName, "Lightning");
+      assertEquals(
+        parsedFlow.start.capabilityTypes[0].capabilityName,
+        "Chatter",
+      );
+      assertEquals(
+        parsedFlow.start.capabilityTypes[1].capabilityName,
+        "Lightning",
+      );
     },
   );
 
@@ -523,7 +541,7 @@ Deno.test("FlowParser", async (t) => {
 
       assert(parsedFlow.transitions);
       assertEquals(parsedFlow.transitions.length, 2);
-      
+
       // Main flow transition (no label)
       assertEquals(parsedFlow.transitions[0], {
         from: START_NODE_NAME,
@@ -531,7 +549,7 @@ Deno.test("FlowParser", async (t) => {
         fault: false,
         label: undefined,
       });
-      
+
       // Async path transition (with path type as label)
       assertEquals(parsedFlow.transitions[1], {
         from: START_NODE_NAME,
@@ -553,7 +571,7 @@ Deno.test("FlowParser", async (t) => {
 
       assert(parsedFlow.transitions);
       assertEquals(parsedFlow.transitions.length, 3);
-      
+
       // Main flow transition (no label)
       assertEquals(parsedFlow.transitions[0], {
         from: START_NODE_NAME,
@@ -561,7 +579,7 @@ Deno.test("FlowParser", async (t) => {
         fault: false,
         label: undefined,
       });
-      
+
       // First async path transition
       assertEquals(parsedFlow.transitions[1], {
         from: START_NODE_NAME,
@@ -569,7 +587,7 @@ Deno.test("FlowParser", async (t) => {
         fault: false,
         label: "AsyncAfterCommit",
       });
-      
+
       // Second async path transition
       assertEquals(parsedFlow.transitions[2], {
         from: START_NODE_NAME,
@@ -591,7 +609,7 @@ Deno.test("FlowParser", async (t) => {
 
       assert(parsedFlow.transitions);
       assertEquals(parsedFlow.transitions.length, 2);
-      
+
       // Main flow transition (no label)
       assertEquals(parsedFlow.transitions[0], {
         from: START_NODE_NAME,
@@ -599,7 +617,7 @@ Deno.test("FlowParser", async (t) => {
         fault: false,
         label: undefined,
       });
-      
+
       // Non-async scheduled path transition (with path type as label)
       assertEquals(parsedFlow.transitions[1], {
         from: START_NODE_NAME,

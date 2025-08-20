@@ -700,7 +700,8 @@ Deno.test("UmlGenerator", async (t) => {
             value: { stringValue: "Inactive" },
           },
         ],
-        filterFormula: "{!$Record.Type} = 'Customer' && {!$Record.Status} != 'Inactive'",
+        filterFormula:
+          "{!$Record.Type} = 'Customer' && {!$Record.Status} != 'Inactive'",
       };
 
       const uml = systemUnderTest.generateUml();
@@ -753,7 +754,8 @@ Deno.test("UmlGenerator", async (t) => {
             connector: { targetReference: "END", isGoTo: false },
             offsetNumber: "1",
             offsetUnit: flowTypes.FlowScheduledPathOffsetUnit.DAYS,
-            timeSource: flowTypes.FlowScheduledPathTimeSource.RECORD_TRIGGER_EVENT,
+            timeSource:
+              flowTypes.FlowScheduledPathTimeSource.RECORD_TRIGGER_EVENT,
             description: "Daily scheduled path",
           },
           {
@@ -1052,7 +1054,9 @@ Deno.test("UmlGenerator", async (t) => {
         }
       }
 
-      const recordChangeGenerator = new ConcreteUmlGenerator(recordChangeMockFlow);
+      const recordChangeGenerator = new ConcreteUmlGenerator(
+        recordChangeMockFlow,
+      );
       const uml = recordChangeGenerator.generateUml();
 
       const expectedContent = [
