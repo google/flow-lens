@@ -260,7 +260,9 @@ export class FlowParser {
    */
   private getTransitionsForNode(node: flowTypes.FlowNode): Transition[] {
     const transitions: Transition[] = [];
-    if (
+    if (isFlowStart(node)) {
+      transitions.push(...this.getTransitionsFromFlowStart(node));
+    } else if (
       isRecordCreate(node) ||
       isRecordDelete(node) ||
       isRecordLookup(node) ||
@@ -432,6 +434,31 @@ export class FlowParser {
         this.createTransition(node, node.faultConnector, true, FAULT),
       );
     }
+    return result;
+  }
+
+  private getTransitionsFromFlowStart(node: flowTypes.FlowStart): Transition[] {
+    const result: Transition[] = [];
+    
+    // Add main flow transition
+    if (node.connector) {
+      result.push(
+        this.createTransition(node, node.connector, false, undefined),
+      );
+    }
+    
+    // Add scheduled path transitions
+    if (node.scheduledPaths && node.scheduledPaths.length > 0) {
+      for (const scheduledPath of node.scheduledPaths) {
+        if (scheduledPath.connector) {
+          const label = scheduledPath.pathType;
+          result.push(
+            this.createTransition(node, scheduledPath.connector, false, label),
+          );
+        }
+      }
+    }
+    
     return result;
   }
 }
@@ -695,4 +722,10 @@ function isCustomError(
   node: flowTypes.FlowNode,
 ): node is flowTypes.FlowCustomError {
   return (node as flowTypes.FlowCustomError).customErrorMessages !== undefined;
+}
+
+function isFlowStart(
+  node: flowTypes.FlowNode,
+): node is flowTypes.FlowStart {
+  return (node as flowTypes.FlowStart).connector !== undefined;
 }

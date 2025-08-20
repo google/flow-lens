@@ -40,6 +40,9 @@ const TEST_FILES = {
   singleCapability: join(GOLDENS_PATH, "single_capability.flow-meta.xml"),
   multipleStartElements: join(GOLDENS_PATH, "multiple_start_elements.flow-meta.xml"),
   noStartElements: join(GOLDENS_PATH, "no_start_elements.flow-meta.xml"),
+  asyncPathTest: join(GOLDENS_PATH, "async_path_test.flow-meta.xml"),
+  multipleAsyncPaths: join(GOLDENS_PATH, "multiple_async_paths.flow-meta.xml"),
+  nonAsyncScheduledPath: join(GOLDENS_PATH, "non_async_scheduled_path.flow-meta.xml"),
 };
 
 const NODE_NAMES = {
@@ -506,6 +509,104 @@ Deno.test("FlowParser", async (t) => {
       assertEquals(parsedFlow.start.filters, undefined);
       assertEquals(parsedFlow.start.scheduledPaths, undefined);
       assertEquals(parsedFlow.start.capabilityTypes, undefined);
+    },
+  );
+
+  await t.step(
+    "should handle single async path correctly",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.asyncPathTest),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow.transitions);
+      assertEquals(parsedFlow.transitions.length, 2);
+      
+      // Main flow transition (no label)
+      assertEquals(parsedFlow.transitions[0], {
+        from: START_NODE_NAME,
+        to: "main_update",
+        fault: false,
+        label: undefined,
+      });
+      
+      // Async path transition (with path type as label)
+      assertEquals(parsedFlow.transitions[1], {
+        from: START_NODE_NAME,
+        to: "async_update",
+        fault: false,
+        label: "AsyncAfterCommit",
+      });
+    },
+  );
+
+  await t.step(
+    "should handle multiple async paths correctly",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.multipleAsyncPaths),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow.transitions);
+      assertEquals(parsedFlow.transitions.length, 3);
+      
+      // Main flow transition (no label)
+      assertEquals(parsedFlow.transitions[0], {
+        from: START_NODE_NAME,
+        to: "main_update",
+        fault: false,
+        label: undefined,
+      });
+      
+      // First async path transition
+      assertEquals(parsedFlow.transitions[1], {
+        from: START_NODE_NAME,
+        to: "async_update_1",
+        fault: false,
+        label: "AsyncAfterCommit",
+      });
+      
+      // Second async path transition
+      assertEquals(parsedFlow.transitions[2], {
+        from: START_NODE_NAME,
+        to: "async_update_2",
+        fault: false,
+        label: "AsyncAfterCommit",
+      });
+    },
+  );
+
+  await t.step(
+    "should not label non-async scheduled paths as asynchronous",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.nonAsyncScheduledPath),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow.transitions);
+      assertEquals(parsedFlow.transitions.length, 2);
+      
+      // Main flow transition (no label)
+      assertEquals(parsedFlow.transitions[0], {
+        from: START_NODE_NAME,
+        to: "main_update",
+        fault: false,
+        label: undefined,
+      });
+      
+      // Non-async scheduled path transition (with path type as label)
+      assertEquals(parsedFlow.transitions[1], {
+        from: START_NODE_NAME,
+        to: "scheduled_update",
+        fault: false,
+        label: "RecordField",
+      });
     },
   );
 });
