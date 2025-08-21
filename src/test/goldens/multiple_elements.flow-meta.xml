@@ -68,7 +68,7 @@
   <recordDeletes>
     <name>myRecordDelete</name>
   </recordDeletes>
-   <recordDeletes>
+  <recordDeletes>
     <name>myRecordDelete2</name>
   </recordDeletes>
   <recordLookups>
@@ -80,7 +80,7 @@
   <recordRollbacks>
     <name>myRecordRollback</name>
   </recordRollbacks>
-   <recordRollbacks>
+  <recordRollbacks>
     <name>myRecordRollback2</name>
   </recordRollbacks>
   <recordUpdates>
