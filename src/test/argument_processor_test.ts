@@ -99,6 +99,74 @@ Deno.test("ArgumentProcessor", async (t) => {
   );
 
   await t.step(
+    "should validate when mode is MARKDOWN and outputDirectory is provided",
+    () => {
+      const { argumentProcessor, config } = setupTest((config) => {
+        config.mode = Mode.MARKDOWN;
+        config.diagramTool = DiagramTool.MERMAID;
+        config.outputDirectory = ".";
+        config.outputFileName = undefined;
+      });
+      const result = argumentProcessor.getConfig();
+      assertEquals(result, config);
+    },
+  );
+
+  await t.step(
+    "should reject markdown mode with non-mermaid diagram tool",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest((config) => {
+            config.mode = Mode.MARKDOWN;
+            config.diagramTool = DiagramTool.GRAPH_VIZ;
+            config.outputDirectory = "test/output";
+          });
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.markdownRequiresMermaid,
+      );
+    },
+  );
+
+  await t.step(
+    "should reject markdown mode without outputDirectory",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest((config) => {
+            config.mode = Mode.MARKDOWN;
+            config.diagramTool = DiagramTool.MERMAID;
+            config.outputDirectory = undefined;
+          });
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.outputDirectoryRequired,
+      );
+    },
+  );
+
+  await t.step(
+    "should reject markdown mode with non-existent outputDirectory",
+    () => {
+      assertThrows(
+        () => {
+          const { argumentProcessor } = setupTest((config) => {
+            config.mode = Mode.MARKDOWN;
+            config.diagramTool = DiagramTool.MERMAID;
+            config.outputDirectory = "non/existent/directory";
+          });
+          argumentProcessor.getConfig();
+        },
+        Error,
+        ERROR_MESSAGES.invalidOutputDirectory("non/existent/directory"),
+      );
+    },
+  );
+
+  await t.step(
     "should throw an exception when outputDirectory is not provided in JSON mode",
     () => {
       assertThrows(

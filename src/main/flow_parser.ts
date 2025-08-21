@@ -67,6 +67,7 @@ export interface Transition {
  */
 export interface ParsedFlow {
   label?: string;
+  fullName?: string;
   processType?: flowTypes.FlowProcessType;
   start?: flowTypes.FlowStart;
   apexPluginCalls?: flowTypes.FlowApexPluginCall[];
@@ -132,6 +133,7 @@ export class FlowParser {
 
   private populateFlowNodes(flow: flowTypes.Flow) {
     this.beingParsed.label = flow.label;
+    this.beingParsed.fullName = flow.fullName;
     this.beingParsed.processType = flow.processType;
     this.beingParsed.start = flow.start;
     this.validateFlowStart();
@@ -228,6 +230,7 @@ export class FlowParser {
     if (!start) {
       return result;
     }
+
     const queue: flowTypes.FlowNode[] = [start];
     const visitedNodes = new Set<string>();
     while (queue.length > 0) {
@@ -237,6 +240,7 @@ export class FlowParser {
       }
       visitedNodes.add(node.name);
       const transitions = this.getTransitionsForNode(node);
+
       for (const transition of transitions) {
         const toNode = this.beingParsed.nameToNode?.get(transition.to);
         if (toNode) {
@@ -245,6 +249,7 @@ export class FlowParser {
       }
       result.push(...transitions);
     }
+
     return result;
   }
 
@@ -290,6 +295,7 @@ export class FlowParser {
     ) {
       transitions.push(...this.getTransitionsFromConnector(node));
     }
+
     return transitions;
   }
 
@@ -361,6 +367,7 @@ export class FlowParser {
       | flowTypes.FlowActionCall,
   ): Transition[] {
     const result: Transition[] = [];
+
     if (node.connector) {
       result.push(
         this.createTransition(node, node.connector, false, undefined),
@@ -371,6 +378,7 @@ export class FlowParser {
         this.createTransition(node, node.faultConnector, true, FAULT),
       );
     }
+
     return result;
   }
 
@@ -405,6 +413,7 @@ export class FlowParser {
       | flowTypes.FlowCustomError,
   ): Transition[] {
     const result: Transition[] = [];
+
     if (node.connector) {
       for (
         const connector of Array.isArray(node.connector)
@@ -414,6 +423,7 @@ export class FlowParser {
         result.push(this.createTransition(node, connector, false, undefined));
       }
     }
+
     return result;
   }
 
@@ -727,5 +737,6 @@ function isCustomError(
 function isFlowStart(
   node: flowTypes.FlowNode,
 ): node is flowTypes.FlowStart {
-  return (node as flowTypes.FlowStart).connector !== undefined;
+  return (node as flowTypes.FlowStart).name === START &&
+    (node as flowTypes.FlowStart).label === undefined;
 }
