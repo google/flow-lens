@@ -776,8 +776,6 @@ Deno.test("UmlGenerator", async (t) => {
         "Process Type: AutoLaunchedFlow",
         "Trigger Type: Scheduled",
         "Schedule: Daily starting 2024-01-01 at 09:00:00",
-        "Scheduled Path 1: Daily Processing (1 Days)",
-        "Scheduled Path 2: Weekly Report (7 Days)",
       ];
 
       expectedContent.forEach((content) => {

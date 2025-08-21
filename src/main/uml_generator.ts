@@ -233,17 +233,6 @@ export abstract class UmlGenerator {
       );
     }
 
-    // Add scheduled paths information
-    if (start.scheduledPaths && start.scheduledPaths.length > 0) {
-      start.scheduledPaths.forEach((path, index) => {
-        entryCriteria.push(
-          `Scheduled Path ${
-            index + 1
-          }: ${path.label} (${path.offsetNumber} ${path.offsetUnit})`,
-        );
-      });
-    }
-
     // Add capability information
     if (start.capabilityTypes && start.capabilityTypes.length > 0) {
       start.capabilityTypes.forEach((capability, index) => {
