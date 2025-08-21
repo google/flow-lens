@@ -108,8 +108,7 @@ export const ERROR_MESSAGES = {
     "GitHub Action mode requires gitDiffToHash to be 'HEAD'",
   githubActionRequiresHeadMinusOne:
     "GitHub Action mode requires gitDiffFromHash to be 'HEAD^1'",
-  markdownRequiresMermaid:
-    "Markdown mode requires diagramTool to be 'mermaid'",
+  markdownRequiresMermaid: "Markdown mode requires diagramTool to be 'mermaid'",
 };
 
 /**
@@ -253,7 +252,6 @@ export class ArgumentProcessor {
       );
     }
   }
-
 
   private validateGitHubActionMode() {
     if (this.config.diagramTool?.toLowerCase() !== DiagramTool.MERMAID) {

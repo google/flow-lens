@@ -50,7 +50,7 @@ export class UmlWriter {
    */
   async writeUmlDiagrams() {
     const config = Configuration.getInstance();
-    
+
     if (config.mode === Mode.JSON) {
       this.writeJsonFile(config);
     } else if (config.mode === Mode.GITHUB_ACTION) {
@@ -101,26 +101,27 @@ export class UmlWriter {
   }
 
   private writeMarkdownFiles(config: RuntimeConfig) {
-
     for (const [filePath, flowDifference] of this.filePathToFlowDifference) {
-      
       const flowApiName = this.extractFlowApiName(filePath);
-      
+
       const outputPath = join(
         config.outputDirectory!,
         `${flowApiName}.md`,
       );
-      
+
       let markdownContent = "";
       const tripleBackticks = "```";
-      
+
       if (flowDifference.old) {
-        markdownContent += `## Old Version${EOL}${EOL}${tripleBackticks}mermaid${EOL}${flowDifference.old}${EOL}${tripleBackticks}${EOL}${EOL}`;
-        markdownContent += `## New Version${EOL}${EOL}${tripleBackticks}mermaid${EOL}${flowDifference.new}${EOL}${tripleBackticks}${EOL}`;
+        markdownContent +=
+          `## Old Version${EOL}${EOL}${tripleBackticks}mermaid${EOL}${flowDifference.old}${EOL}${tripleBackticks}${EOL}${EOL}`;
+        markdownContent +=
+          `## New Version${EOL}${EOL}${tripleBackticks}mermaid${EOL}${flowDifference.new}${EOL}${tripleBackticks}${EOL}`;
       } else {
-        markdownContent += `${tripleBackticks}mermaid${EOL}${flowDifference.new}${EOL}${tripleBackticks}${EOL}`;
+        markdownContent +=
+          `${tripleBackticks}mermaid${EOL}${flowDifference.new}${EOL}${tripleBackticks}${EOL}`;
       }
-      
+
       Deno.writeTextFileSync(outputPath, markdownContent);
     }
   }
@@ -128,13 +129,13 @@ export class UmlWriter {
   private extractFlowApiName(filePath: string): string {
     // Extract the flow API name from the file path
     // The file path should contain the flow API name
-    const fileName = filePath.split('/').pop() || '';
+    const fileName = filePath.split("/").pop() || "";
     // Remove common flow file extensions
     const flowApiName = fileName
-      .replace(/\.flow-meta\.xml$/, '')
-      .replace(/\.flow$/, '')
-      .replace(/\.xml$/, '');
-    return flowApiName || 'flow';
+      .replace(/\.flow-meta\.xml$/, "")
+      .replace(/\.flow$/, "")
+      .replace(/\.xml$/, "");
+    return flowApiName || "flow";
   }
 }
 

@@ -137,8 +137,7 @@ export class FlowFileChangeDetector {
    */
   private executeGitCommand(args: string[]): Uint8Array {
     const repo = Configuration.getInstance().gitRepo;
-    const commandArgs = [repo ? `-C ${repo}` : "", ...args].filter(Boolean);
-
+    const commandArgs = repo ? ["-C", repo, ...args] : args;
     return new Deno.Command("git", { args: commandArgs }).outputSync().stdout;
   }
 }

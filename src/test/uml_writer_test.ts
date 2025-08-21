@@ -180,7 +180,7 @@ Deno.test("UmlWriter", async (t) => {
     // Mock the Configuration.getInstance to return our test config
     const originalGetInstance = Configuration.getInstance;
     const testConfig = getRuntimeConfig(DiagramTool.MERMAID, Mode.MARKDOWN);
-    
+
     Configuration.getInstance = () => testConfig;
 
     try {
@@ -197,19 +197,19 @@ Deno.test("UmlWriter", async (t) => {
 
       // Use OS-appropriate newlines for test expectations
       const eol = Deno.build.os === "windows" ? "\r\n" : "\n";
-      
+
       // Check the content of the first file (no old version)
       fileContent = Deno.readTextFileSync(expectedFile1Path);
       assertEquals(
         fileContent,
-        `\`\`\`mermaid${eol}uml1${eol}\`\`\`${eol}`
+        `\`\`\`mermaid${eol}uml1${eol}\`\`\`${eol}`,
       );
 
       // Check the content of the second file (with old version)
       fileContent = Deno.readTextFileSync(expectedFile2Path);
       assertEquals(
         fileContent,
-        `## Old Version${eol}${eol}\`\`\`mermaid${eol}uml1${eol}\`\`\`${eol}${eol}## New Version${eol}${eol}\`\`\`mermaid${eol}uml2${eol}\`\`\`${eol}`
+        `## Old Version${eol}${eol}\`\`\`mermaid${eol}uml1${eol}\`\`\`${eol}${eol}## New Version${eol}${eol}\`\`\`mermaid${eol}uml2${eol}\`\`\`${eol}`,
       );
 
       // Clean up

@@ -32,7 +32,7 @@ available:
 
 | Option              | Description                                                                                            | Type     | Default    | Required                            |
 | ------------------- | ------------------------------------------------------------------------------------------------------ | -------- | ---------- | ----------------------------------- |
-| `--mode`            | The output mode ('json' or 'github_action').                                                           | string   | `json`     | No                                  |
+| `--mode`            | The output mode ('json', 'markdown', or 'github_action').                                              | string   | `json`     | No                                  |
 | `--diagramTool`     | The diagram tool to use ('plantuml', 'graphviz', or 'mermaid').                                        | string   | `graphviz` | No                                  |
 | `--filePath`        | Path(s) to the Salesforce Flow XML file(s). Specify multiple files using space separated values.       | string[] |            | No (Git diff or file path required) |
 | `--gitDiffFromHash` | The starting commit hash for the Git diff.                                                             | string   |            | No (Only with Git diff)             |
@@ -40,16 +40,6 @@ available:
 | `--gitRepo`         | Path to the Git repository (required when using Git diff and the script isn't run from the repo root). | string   |            | No                                  |
 | `--outputDirectory` | The directory to save the output file.                                                                 | string   |            | Yes (Only in json mode)             |
 | `--outputFileName`  | The name of the output file (without extension).                                                       | string   |            | Yes (Only in json mode)             |
-
-### Output Modes
-
-Flow Lens supports two output modes:
-
-1. **json mode (default):** Generates a JSON file containing the UML diagram(s)
-   that can be used for further processing.
-2. **github_action mode:** Automatically posts comments with flow diagrams on
-   pull requests when used in a GitHub Actions workflow. When using this mode,
-   you must specify `mermaid` as the diagram tool.
 
 **Example using file path (json mode):**
 
@@ -83,10 +73,86 @@ deno run \
   --outputFileName="test"
 ```
 
-### Setting up a GitHub Action
+## Output
 
-You can set up a GitHub Action to automatically generate and post flow diagrams
-as comments on pull requests. Here's an example workflow configuration:
+Flow Lens supports three output modes:
+
+1. **json mode (default):** Generates a JSON file containing the UML diagram(s)
+   that can be used for further processing.
+2. **markdown mode:** Generates individual `.md` files for each flow in the
+   specified output directory. Each markdown file contains Mermaid diagrams
+   wrapped in code blocks.
+3. **github_action mode:** Automatically posts comments with flow diagrams on
+   pull requests when used in a GitHub Actions workflow. When using this mode,
+   you must specify `mermaid` as the diagram tool.
+
+### JSON Mode (default)
+
+When using the `json` mode, the output is a JSON file containing the generated
+UML diagram(s). The structure will contain the file paths and their associated
+old (if applicable) and new UML strings.
+
+```json
+[
+  {
+    "path": "force-app/main/default/flows/ArticleSubmissionStatus.flow-meta.xml",
+    "difference": {
+      "old": "UML_STRING_HERE",
+      "new": "UML_STRING_HERE"
+    }
+  },
+  {
+    "path": "force-app/main/default/flows/LeadConversionScreen.flow-meta.xml",
+    "difference": {
+      "old": "UML_STRING_HERE",
+      "new": "UML_STRING_HERE"
+    }
+  }
+]
+```
+
+### Markdown Mode
+
+When using the `markdown` mode, Flow Lens generates individual `.md` files for
+each flow in the specified output directory. Each markdown file is named after
+the flow's API name and contains the UML diagram wrapped in Mermaid code blocks.
+
+**File Structure:**
+
+```
+outputDirectory/
+├── FlowName1.md
+├── FlowName2.md
+└── FlowName3.md
+```
+
+**Markdown Content Format:**
+
+- If there's only a new version (no diff), the file contains a single Mermaid
+  diagram
+- If there are both old and new versions (diff mode), the file contains:
+  - `## Old Version` section with the previous diagram
+  - `## New Version` section with the current diagram
+- Each diagram is wrapped in triple backticks with the `mermaid` language
+  identifier
+
+**Note:** Markdown mode only works with the `mermaid` diagram tool and requires
+an `outputDirectory` to be specified.
+
+### GitHub Action Mode
+
+When using the `github_action` mode, Flow Lens automatically posts flow diagrams
+as comments on pull requests. This mode is designed for use in GitHub Actions
+workflows and requires the `mermaid` diagram tool.
+
+**Requirements:**
+
+- Must be run in a GitHub Actions workflow
+- Requires `mermaid` as the diagram tool
+- Needs appropriate GitHub permissions to post comments
+- Requires `GITHUB_TOKEN` environment variable
+
+**Example GitHub Actions Workflow:**
 
 ```yaml
 name: Generate Flow Preview
@@ -128,54 +194,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 ```
 
-When using the GitHub Action mode, Flow Lens will automatically post a comment
-on the pull request with the old (if applicable) and new versions of the flow
-whenever a pull request is created or updated. This makes it easy to visualize
-flow changes directly in the pull request review process.
+**What Happens:**
 
-## Output
-
-When using the json mode, the output is a JSON file containing the generated UML
-diagram(s). The structure will contain the file paths and their associated old
-(if applicable) and new UML strings.
-
-```json
-[
-  {
-    "path": "force-app/main/default/flows/ArticleSubmissionStatus.flow-meta.xml",
-    "difference": {
-      "old": "UML_STRING_HERE",
-      "new": "UML_STRING_HERE"
-    }
-  },
-  {
-    "path": "force-app/main/default/flows/LeadConversionScreen.flow-meta.xml",
-    "difference": {
-      "old": "UML_STRING_HERE",
-      "new": "UML_STRING_HERE"
-    }
-  }
-]
-```
-
-## Frequently Asked Questions
-
-### Why is this built using Deno?
-
-Porting the project from Google's internal Blaze build system to Deno was easier
-than setting it up in Node.js, as there is no transpilation step from TypeScript
-to JavaScript. Deno's built-in TypeScript support made the migration process
-much smoother.
-
-### How is this different than Todd Halfpenny's flow visualizer?
-
-While
-[Todd's project](https://github.com/toddhalfpenny/salesforce-flow-visualiser) is
-excellent, Flow Lens was built and used internally at Google before Todd's
-project was available for commercial use. The key differentiator is that Flow
-Lens represents flow differences structurally, making it ideal for assistance
-with code reviews. This structural diff visualization is not available in other
-flow visualization tools.
+- Flow Lens detects the pull request context automatically
+- Generates Mermaid diagrams for changed flows
+- Posts a comment with both old and new versions (if applicable)
+- Updates existing comments when the PR is modified
+- Requires no manual file management or output directory setup
 
 ## Example
 
@@ -320,7 +345,10 @@ flow visualization tools.
 deno run \
   --allow-read \
   --allow-write \
+  --allow-run \
+  --allow-env \
   jsr:@goog/flow-lens \
+  --mode="markdown" \
   --diagramTool="mermaid" \
   --gitRepo="/path/to/salesforce_project/" \
   --gitDiffFromHash="HEAD~1" \
@@ -329,30 +357,66 @@ deno run \
   --outputFileName="test"
 ```
 
-`test.json`
+# `./Demo.md`
 
-```json
-[
-  {
-    "path": "force-app/main/default/flows/Demo.flow-meta.xml",
-    "difference": {
-      "old": "---\ntitle: \"Demo\"\n---\nstateDiagram-v2\n\n  classDef pink fill:#F9548A, color:white\n  classDef orange fill:#DD7A00, color:white\n  classDef navy fill:#344568, color:white\n  classDef blue fill:#1B96FF, color:white\n  classDef modified stroke-width: 5px, stroke: orange\n  classDef added stroke-width: 5px, stroke: green\n  classDef deleted stroke-width: 5px, stroke: red\n\n  state \"<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"red\"><b>-</b></font></span><b>Assignment</b> 📝<br> <u>Set the Description</u><hr>Get_the_Acme_Account.Description = This is a Demonstration!\" as Set_the_Description\n  class Set_the_Description orange deleted\n  state \"<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"#DD7A00\"><b>Δ</b></font></span><b>Record Lookup</b> 🔍<br> <u>Get the 'Acme' Account</u><hr><b>sObject: Account</b><br>Fields Queried: all<br>Filter Logic: and<br>1. Name EqualTo Acme<br>Limit: First Record Only\" as Get_the_Acme_Account\n  class Get_the_Acme_Account pink modified\n  state \"<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"#DD7A00\"><b>Δ</b></font></span><b>Record Update</b> ✏️<br> <u>Update the 'Acme' Account</u><hr><b>Reference Update</b><br><u>Get_the_Acme_Account</u><br>\" as Update_the_Acme_Account\n  class Update_the_Acme_Account pink modified\n  FLOW_START --> Get_the_Acme_Account\n  Get_the_Acme_Account --> Set_the_Description\n  Set_the_Description --> Update_the_Acme_Account",
-      "new": "---\ntitle: \"Demo\"\n---\nstateDiagram-v2\n\n  classDef pink fill:#F9548A, color:white\n  classDef orange fill:#DD7A00, color:white\n  classDef navy fill:#344568, color:white\n  classDef blue fill:#1B96FF, color:white\n  classDef modified stroke-width: 5px, stroke: orange\n  classDef added stroke-width: 5px, stroke: green\n  classDef deleted stroke-width: 5px, stroke: red\n\n  state \"<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"green\"><b>+</b></font></span><b>Assignment</b> 📝<br> <u>Set the Type</u><hr>Get_the_Acme_Account.Type = Other\" as Set_the_Type\n  class Set_the_Type orange added\n  state \"<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"#DD7A00\"><b>Δ</b></font></span><b>Record Lookup</b> 🔍<br> <u>Get the 'Acme' Account</u><hr><b>sObject: Account</b><br>Fields Queried: all<br>Filter Logic: and<br>1. Name EqualTo Acme<br>Limit: First Record Only\" as Get_the_Acme_Account\n  class Get_the_Acme_Account pink modified\n  state \"<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"#DD7A00\"><b>Δ</b></font></span><b>Record Update</b> ✏️<br> <u>Update the 'Acme' Account</u><hr><b>Reference Update</b><br><u>Get_the_Acme_Account</u><br>\" as Update_the_Acme_Account\n  class Update_the_Acme_Account pink modified\n  state \"<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"green\"><b>+</b></font></span><b>Action Call</b> ⚡<br> <u>Log Error</u>\" as Log_Error\n  class Log_Error navy added\n  state \"<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"green\"><b>+</b></font></span><b>Action Call</b> ⚡<br> <u>Log Error</u>\" as Log_Error2\n  class Log_Error2 navy added\n  FLOW_START --> Get_the_Acme_Account\n  Get_the_Acme_Account --> Set_the_Type\n  Get_the_Acme_Account --> Log_Error : ❌ Fault ❌\n  Set_the_Type --> Update_the_Acme_Account\n  Update_the_Acme_Account --> Log_Error2 : ❌ Fault ❌"
-    }
-  }
-]
+## Old Version
+
+```mermaid
+---
+title: "Demo"
+---
+stateDiagram-v2
+
+  classDef pink fill:#F9548A, color:white
+  classDef orange fill:#DD7A00, color:white
+  classDef navy fill:#344568, color:white
+  classDef blue fill:#1B96FF, color:white
+  classDef modified stroke-width: 5px, stroke: orange
+  classDef added stroke-width: 5px, stroke: green
+  classDef deleted stroke-width: 5px, stroke: red
+
+  state "<b>Flow Start</b> <br> <u>Flow Start</u><hr><b>Flow Details</b><br>Process Type: AutoLaunchedFlow" as FLOW_START
+  state "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="red"><b>-</b></font></span><b>Assignment</b> 📝<br> <u>Set the Description</u><hr>Get_the_Acme_Account.Description = This is a Demonstration!" as Set_the_Description
+  class Set_the_Description orange deleted
+  state "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="#DD7A00"><b>Δ</b></font></span><b>Record Lookup</b> 🔍<br> <u>Get the 'Acme' Account</u><hr><b>sObject: Account</b><br>Fields Queried: all<br>Filter Logic: and<br>1. Name EqualTo Acme<br>Limit: First Record Only" as Get_the_Acme_Account
+  class Get_the_Acme_Account pink modified
+  state "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="#DD7A00"><b>Δ</b></font></span><b>Record Update</b> ✏️<br> <u>Update the 'Acme' Account</u><hr><b>Reference Update</b><br><u>Get_the_Acme_Account</u><br>" as Update_the_Acme_Account
+  class Update_the_Acme_Account pink modified
+  FLOW_START --> Get_the_Acme_Account
+  Get_the_Acme_Account --> Set_the_Description
+  Set_the_Description --> Update_the_Acme_Account
 ```
 
-<table>
-  <tr>
-    <td> Old </td> <td> New </td>
-  </tr>
-  <tr>
-    <td>
-      <img src="docs/img/Diff_Old.png">
-    </td>
-    <td>
-      <img src="docs/img/Diff_New.png">
-    </td>
-  </tr>
-</table>
+## New Version
+
+```mermaid
+---
+title: "Demo"
+---
+stateDiagram-v2
+
+  classDef pink fill:#F9548A, color:white
+  classDef orange fill:#DD7A00, color:white
+  classDef navy fill:#344568, color:white
+  classDef blue fill:#1B96FF, color:white
+  classDef modified stroke-width: 5px, stroke: orange
+  classDef added stroke-width: 5px, stroke: green
+  classDef deleted stroke-width: 5px, stroke: red
+
+  state "<b>Flow Start</b> <br> <u>Flow Start</u><hr><b>Flow Details</b><br>Process Type: AutoLaunchedFlow" as FLOW_START
+  state "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="green"><b>+</b></font></span><b>Assignment</b> 📝<br> <u>Set the Type</u><hr>Get_the_Acme_Account.Type = Other" as Set_the_Type
+  class Set_the_Type orange added
+  state "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="#DD7A00"><b>Δ</b></font></span><b>Record Lookup</b> 🔍<br> <u>Get the 'Acme' Account</u><hr><b>sObject: Account</b><br>Fields Queried: all<br>Filter Logic: and<br>1. Name EqualTo Acme<br>Limit: First Record Only" as Get_the_Acme_Account
+  class Get_the_Acme_Account pink modified
+  state "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="#DD7A00"><b>Δ</b></font></span><b>Record Update</b> ✏️<br> <u>Update the 'Acme' Account</u><hr><b>Reference Update</b><br><u>Get_the_Acme_Account</u><br>" as Update_the_Acme_Account
+  class Update_the_Acme_Account pink modified
+  state "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="green"><b>+</b></font></span><b>Action Call</b> ⚡<br> <u>Log Error</u>" as Log_Error
+  class Log_Error navy added
+  state "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color="green"><b>+</b></font></span><b>Action Call</b> ⚡<br> <u>Log Error</u>" as Log_Error2
+  class Log_Error2 navy added
+  FLOW_START --> Get_the_Acme_Account
+  Get_the_Acme_Account --> Set_the_Type
+  Get_the_Acme_Account --> Log_Error : ❌ Fault ❌
+  Set_the_Type --> Update_the_Acme_Account
+  Update_the_Acme_Account --> Log_Error2 : ❌ Fault ❌
+```
