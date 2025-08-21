@@ -175,4 +175,49 @@ Deno.test("UmlWriter", async (t) => {
       Deno.env.get = originalEnvGet;
     }
   });
+
+  await t.step("should write UML diagrams as markdown files", async () => {
+    // Mock the Configuration.getInstance to return our test config
+    const originalGetInstance = Configuration.getInstance;
+    const testConfig = getRuntimeConfig(DiagramTool.MERMAID, Mode.MARKDOWN);
+    
+    Configuration.getInstance = () => testConfig;
+
+    try {
+      writer = new UmlWriter(FILE_PATH_TO_FLOW_DIFFERENCE);
+
+      writer.writeUmlDiagrams();
+
+      // Check that markdown files were created
+      const expectedFile1Path = join(TEST_UNDECLARED_OUTPUTS_DIR, "file1.md");
+      const expectedFile2Path = join(TEST_UNDECLARED_OUTPUTS_DIR, "file2.md");
+
+      assertExists(existsSync(expectedFile1Path));
+      assertExists(existsSync(expectedFile2Path));
+
+      // Use OS-appropriate newlines for test expectations
+      const eol = Deno.build.os === "windows" ? "\r\n" : "\n";
+      
+      // Check the content of the first file (no old version)
+      fileContent = Deno.readTextFileSync(expectedFile1Path);
+      assertEquals(
+        fileContent,
+        `\`\`\`mermaid${eol}uml1${eol}\`\`\`${eol}`
+      );
+
+      // Check the content of the second file (with old version)
+      fileContent = Deno.readTextFileSync(expectedFile2Path);
+      assertEquals(
+        fileContent,
+        `## Old Version${eol}${eol}\`\`\`mermaid${eol}uml1${eol}\`\`\`${eol}${eol}## New Version${eol}${eol}\`\`\`mermaid${eol}uml2${eol}\`\`\`${eol}`
+      );
+
+      // Clean up
+      await Deno.remove(expectedFile1Path);
+      await Deno.remove(expectedFile2Path);
+    } finally {
+      // Restore original Configuration.getInstance
+      Configuration.getInstance = originalGetInstance;
+    }
+  });
 });

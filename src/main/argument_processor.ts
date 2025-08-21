@@ -67,6 +67,7 @@ export enum DiagramTool {
 export enum Mode {
   JSON = "json",
   GITHUB_ACTION = "github_action",
+  MARKDOWN = "markdown",
 }
 
 /**
@@ -93,6 +94,7 @@ export const ERROR_MESSAGES = {
     "gitDiffFromHash and gitDiffToHash must be specified together",
   outputFileNameRequired: "outputFileName is required for JSON mode",
   outputDirectoryRequired: "outputDirectory is required for JSON mode",
+
   unsupportedMode: (mode: string) =>
     `Unsupported mode: ${mode}. Valid options are: ${
       Object.values(Mode).join(
@@ -106,6 +108,8 @@ export const ERROR_MESSAGES = {
     "GitHub Action mode requires gitDiffToHash to be 'HEAD'",
   githubActionRequiresHeadMinusOne:
     "GitHub Action mode requires gitDiffFromHash to be 'HEAD^1'",
+  markdownRequiresMermaid:
+    "Markdown mode requires diagramTool to be 'mermaid'",
 };
 
 /**
@@ -168,9 +172,19 @@ export class ArgumentProcessor {
       this.validateOutputFileName();
     }
 
+    // Validate output directory for markdown mode
+    if (this.config.mode?.toLowerCase() === Mode.MARKDOWN) {
+      this.validateOutputDirectory();
+    }
+
     // Validate GitHub Action specific requirements
     if (this.config.mode?.toLowerCase() === Mode.GITHUB_ACTION) {
       this.validateGitHubActionMode();
+    }
+
+    // Validate Markdown specific requirements
+    if (this.config.mode?.toLowerCase() === Mode.MARKDOWN) {
+      this.validateMarkdownMode();
     }
 
     this.validateRequiredArguments();
@@ -240,6 +254,7 @@ export class ArgumentProcessor {
     }
   }
 
+
   private validateGitHubActionMode() {
     if (this.config.diagramTool?.toLowerCase() !== DiagramTool.MERMAID) {
       this.errorsEncountered.push(ERROR_MESSAGES.githubActionRequiresMermaid);
@@ -251,6 +266,12 @@ export class ArgumentProcessor {
       this.errorsEncountered.push(
         ERROR_MESSAGES.githubActionRequiresHeadMinusOne,
       );
+    }
+  }
+
+  private validateMarkdownMode() {
+    if (this.config.diagramTool?.toLowerCase() !== DiagramTool.MERMAID) {
+      this.errorsEncountered.push(ERROR_MESSAGES.markdownRequiresMermaid);
     }
   }
 

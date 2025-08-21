@@ -67,6 +67,7 @@ export interface Transition {
  */
 export interface ParsedFlow {
   label?: string;
+  fullName?: string;
   processType?: flowTypes.FlowProcessType;
   start?: flowTypes.FlowStart;
   apexPluginCalls?: flowTypes.FlowApexPluginCall[];
@@ -132,6 +133,7 @@ export class FlowParser {
 
   private populateFlowNodes(flow: flowTypes.Flow) {
     this.beingParsed.label = flow.label;
+    this.beingParsed.fullName = flow.fullName;
     this.beingParsed.processType = flow.processType;
     this.beingParsed.start = flow.start;
     this.validateFlowStart();

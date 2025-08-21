@@ -23,6 +23,8 @@ import { Configuration, Mode, RuntimeConfig } from "./argument_processor.ts";
 import { FlowDifference } from "./flow_to_uml_transformer.ts";
 import { GithubClient } from "./github_client.ts";
 
+const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+
 const FILE_EXTENSION = ".json";
 const HIDDEN_COMMENT_PREFIX = "<!--flow-lens-hidden-comment-->";
 const MERMAID_OPEN_TAG = "```mermaid";
@@ -48,10 +50,13 @@ export class UmlWriter {
    */
   async writeUmlDiagrams() {
     const config = Configuration.getInstance();
+    
     if (config.mode === Mode.JSON) {
       this.writeJsonFile(config);
     } else if (config.mode === Mode.GITHUB_ACTION) {
       await this.writeGithubComment(config);
+    } else if (config.mode === Mode.MARKDOWN) {
+      this.writeMarkdownFiles(config);
     }
   }
 
@@ -93,6 +98,43 @@ export class UmlWriter {
       console.error("Failed to update GitHub comments:", error);
       throw error;
     }
+  }
+
+  private writeMarkdownFiles(config: RuntimeConfig) {
+
+    for (const [filePath, flowDifference] of this.filePathToFlowDifference) {
+      
+      const flowApiName = this.extractFlowApiName(filePath);
+      
+      const outputPath = join(
+        config.outputDirectory!,
+        `${flowApiName}.md`,
+      );
+      
+      let markdownContent = "";
+      const tripleBackticks = "```";
+      
+      if (flowDifference.old) {
+        markdownContent += `## Old Version${EOL}${EOL}${tripleBackticks}mermaid${EOL}${flowDifference.old}${EOL}${tripleBackticks}${EOL}${EOL}`;
+        markdownContent += `## New Version${EOL}${EOL}${tripleBackticks}mermaid${EOL}${flowDifference.new}${EOL}${tripleBackticks}${EOL}`;
+      } else {
+        markdownContent += `${tripleBackticks}mermaid${EOL}${flowDifference.new}${EOL}${tripleBackticks}${EOL}`;
+      }
+      
+      Deno.writeTextFileSync(outputPath, markdownContent);
+    }
+  }
+
+  private extractFlowApiName(filePath: string): string {
+    // Extract the flow API name from the file path
+    // The file path should contain the flow API name
+    const fileName = filePath.split('/').pop() || '';
+    // Remove common flow file extensions
+    const flowApiName = fileName
+      .replace(/\.flow-meta\.xml$/, '')
+      .replace(/\.flow$/, '')
+      .replace(/\.xml$/, '');
+    return flowApiName || 'flow';
   }
 }
 
