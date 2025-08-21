@@ -145,10 +145,15 @@ function generateDecision(name: string): flowTypes.FlowDecision {
   return {
     name: name,
     label: name,
+    elementSubtype: "Decision",
+    locationX: 0,
+    locationY: 0,
+    description: name,
     rules: [
       {
         name: `${name}_rule1`,
         label: "Rule 1",
+        description: "Rule 1 description",
         conditions: [
           {
             leftValueReference: "leftValue",
@@ -156,12 +161,14 @@ function generateDecision(name: string): flowTypes.FlowDecision {
             rightValue: {
               stringValue: "rightValue",
             },
+            processMetadataValues: [],
           },
         ],
       },
       {
         name: `${name}_rule2`,
         label: "Rule 2",
+        description: "Rule 2 description",
         conditions: [
           {
             leftValueReference: "anotherLeftValue",
@@ -169,13 +176,15 @@ function generateDecision(name: string): flowTypes.FlowDecision {
             rightValue: {
               stringValue: "anotherRightValue",
             },
+            processMetadataValues: [],
           },
           {
             leftValueReference: "thirdLeftValue",
             operator: "GreaterThan",
             rightValue: {
-              numberValue: 10,
+              numberValue: "10",
             },
+            processMetadataValues: [],
           },
         ],
         conditionLogic: "1 AND 2",

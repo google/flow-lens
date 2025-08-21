@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+  <label>Scheduled Path Test</label>
+  <processType>AutoLaunchedFlow</processType>
+  <start>
+    <locationX>50</locationX>
+    <locationY>0</locationY>
+    <connector>
+      <targetReference>Assignment1</targetReference>
+    </connector>
+    <scheduledPaths>
+      <label>Daily</label>
+      <offsetNumber>1</offsetNumber>
+      <offsetUnit>Days</offsetUnit>
+    </scheduledPaths>
+  </start>
+  <assignments>
+    <name>Assignment1</name>
+    <label>Assignment1</label>
+    <locationX>200</locationX>
+    <locationY>0</locationY>
+    <assignmentItems>
+      <assignToReference>$Record</assignToReference>
+      <field>Description</field>
+      <value>
+        <stringValue>Updated</stringValue>
+      </value>
+    </assignmentItems>
+    <connector>
+      <targetReference>END</targetReference>
+    </connector>
+  </assignments>
+</Flow>

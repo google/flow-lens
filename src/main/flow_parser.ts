@@ -67,6 +67,7 @@ export interface Transition {
  */
 export interface ParsedFlow {
   label?: string;
+  processType?: flowTypes.FlowProcessType;
   start?: flowTypes.FlowStart;
   apexPluginCalls?: flowTypes.FlowApexPluginCall[];
   assignments?: flowTypes.FlowAssignment[];
@@ -131,8 +132,10 @@ export class FlowParser {
 
   private populateFlowNodes(flow: flowTypes.Flow) {
     this.beingParsed.label = flow.label;
+    this.beingParsed.processType = flow.processType;
     this.beingParsed.start = flow.start;
     this.validateFlowStart();
+    setFlowStart(this.beingParsed.start);
 
     this.beingParsed.apexPluginCalls = ensureArray(flow.apexPluginCalls);
     this.beingParsed.assignments = ensureArray(flow.assignments);
@@ -257,7 +260,9 @@ export class FlowParser {
    */
   private getTransitionsForNode(node: flowTypes.FlowNode): Transition[] {
     const transitions: Transition[] = [];
-    if (
+    if (isFlowStart(node)) {
+      transitions.push(...this.getTransitionsFromFlowStart(node));
+    } else if (
       isRecordCreate(node) ||
       isRecordDelete(node) ||
       isRecordLookup(node) ||
@@ -431,6 +436,31 @@ export class FlowParser {
     }
     return result;
   }
+
+  private getTransitionsFromFlowStart(node: flowTypes.FlowStart): Transition[] {
+    const result: Transition[] = [];
+
+    // Add main flow transition
+    if (node.connector) {
+      result.push(
+        this.createTransition(node, node.connector, false, undefined),
+      );
+    }
+
+    // Add scheduled path transitions
+    if (node.scheduledPaths && node.scheduledPaths.length > 0) {
+      for (const scheduledPath of node.scheduledPaths) {
+        if (scheduledPath.connector) {
+          const label = scheduledPath.pathType;
+          result.push(
+            this.createTransition(node, scheduledPath.connector, false, label),
+          );
+        }
+      }
+    }
+
+    return result;
+  }
 }
 
 /**
@@ -571,6 +601,33 @@ function setCustomErrorMessages(
 }
 
 /**
+ * Set Flow Start
+ *
+ * Flow Start filters and scheduled paths are nested properties which also
+ * need to be converted to arrays.
+ */
+function setFlowStart(start: flowTypes.FlowStart | undefined) {
+  if (!start) {
+    return;
+  }
+  if (start.filters) {
+    start.filters = ensureArray(
+      start.filters,
+    ) as flowTypes.FlowRecordFilter[];
+  }
+  if (start.scheduledPaths) {
+    start.scheduledPaths = ensureArray(
+      start.scheduledPaths,
+    ) as flowTypes.FlowScheduledPath[];
+  }
+  if (start.capabilityTypes) {
+    start.capabilityTypes = ensureArray(
+      start.capabilityTypes,
+    ) as flowTypes.FlowCapability[];
+  }
+}
+
+/**
  * The following functions are used to determine if a node is a specific type
  * of node.
  */
@@ -665,4 +722,10 @@ function isCustomError(
   node: flowTypes.FlowNode,
 ): node is flowTypes.FlowCustomError {
   return (node as flowTypes.FlowCustomError).customErrorMessages !== undefined;
+}
+
+function isFlowStart(
+  node: flowTypes.FlowNode,
+): node is flowTypes.FlowStart {
+  return (node as flowTypes.FlowStart).connector !== undefined;
 }

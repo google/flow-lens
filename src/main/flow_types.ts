@@ -714,7 +714,7 @@ export interface FlowScheduledPath extends FlowElement {
   connector: FlowConnector;
   label: string;
   maxBatchSize?: number; // Default is 200
-  offsetNumber: number; // Can be positive or negative
+  offsetNumber: string; // XML parser returns string values for numbers
   offsetUnit: FlowScheduledPathOffsetUnit;
   pathType?: FlowScheduledPathType; // Default is null
   recordField?: string; // Required if timeSource is RecordField
@@ -824,13 +824,13 @@ export interface FlowActionCallOutputParameter {
 
 export interface FlowElementReferenceOrValue {
   apexValue?: string;
-  booleanValue?: boolean;
+  booleanValue?: string; // XML parser returns string values for booleans
   dateTimeValue?: string; // Assuming dateTime is represented as a string
   dateValue?: string; // Assuming date is represented as a string
   elementReference?: string;
   formulaDataType?: FormulaDataType;
   formulaExpression?: string;
-  numberValue?: number; // using number to represent double
+  numberValue?: string; // XML parser returns string values for numbers
   setupReference?: string;
   setupReferenceType?: string;
   sobjectValue?: string;

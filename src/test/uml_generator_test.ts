@@ -45,6 +45,10 @@ const NODE_NAMES = {
 };
 
 const UML_REPRESENTATIONS = {
+  flowStart: () =>
+    `state Flow Start FLOW_START
+  Flow Details
+  No specific entry criteria defined`,
   apexPluginCall: (name: string) => `state Apex Plugin Call ${name}`,
   assignment: (name: string) =>
     `state Assignment ${name}
@@ -270,6 +274,7 @@ Deno.test("UmlGenerator", async (t) => {
 
     const expectedUml = [
       NODE_NAMES.label,
+      UML_REPRESENTATIONS.flowStart(),
       UML_REPRESENTATIONS.apexPluginCall(NODE_NAMES.apexPluginCall),
       UML_REPRESENTATIONS.assignment(NODE_NAMES.assignment),
       UML_REPRESENTATIONS.collectionProcessor(NODE_NAMES.collectionProcessor),
@@ -593,7 +598,7 @@ Deno.test("UmlGenerator", async (t) => {
           {
             assignToReference: "var2",
             operator: flowTypes.FlowAssignmentOperator.ADD,
-            value: { numberValue: 42 },
+            value: { numberValue: "42" },
             processMetadataValues: [],
           },
           {
@@ -629,6 +634,503 @@ Deno.test("UmlGenerator", async (t) => {
           `Expected UML: ${uml} to contain: ${content}`,
         );
       });
+    },
+  );
+
+  await t.step(
+    "should generate AutoLaunchedFlow start node with process type",
+    () => {
+      // Setup test data for AutoLaunchedFlow
+      mockParsedFlow.processType = flowTypes.FlowProcessType.AUTOLAUNCHED_FLOW;
+      mockParsedFlow.start = {
+        name: "FLOW_START",
+        label: "Flow Start",
+        locationX: 0,
+        locationY: 0,
+        elementSubtype: "Start",
+        description: "AutoLaunched flow start",
+        connector: { targetReference: "nextNode", isGoTo: false },
+      };
+
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Flow Start FLOW_START",
+        "Flow Details",
+        "Process Type: AutoLaunchedFlow",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`,
+        );
+      });
+    },
+  );
+
+  await t.step(
+    "should generate record-triggered flow start node with filters",
+    () => {
+      // Setup test data for record-triggered flow
+      mockParsedFlow.processType = flowTypes.FlowProcessType.FLOW;
+      mockParsedFlow.start = {
+        name: "FLOW_START",
+        label: "Flow Start",
+        locationX: 0,
+        locationY: 0,
+        elementSubtype: "Start",
+        description: "Record-triggered flow start",
+        connector: { targetReference: "nextNode", isGoTo: false },
+        triggerType: flowTypes.FlowTriggerType.RECORD_AFTER_SAVE,
+        object: "Account",
+        recordTriggerType: flowTypes.RecordTriggerType.CREATE_AND_UPDATE,
+        entryType: flowTypes.FlowEntryType.ALWAYS,
+        filterLogic: "1 AND 2",
+        filters: [
+          {
+            field: "Type",
+            operator: flowTypes.FlowRecordFilterOperator.EQUAL_TO,
+            value: { stringValue: "Customer" },
+          },
+          {
+            field: "Status",
+            operator: flowTypes.FlowRecordFilterOperator.NOT_EQUAL_TO,
+            value: { stringValue: "Inactive" },
+          },
+        ],
+        filterFormula:
+          "{!$Record.Type} = 'Customer' && {!$Record.Status} != 'Inactive'",
+      };
+
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Process Type: Flow",
+        "Trigger Type: RecordAfterSave",
+        "Object: Account",
+        "Record Trigger: CreateAndUpdate",
+        "Entry Type: Always",
+        "Filter Logic: 1 AND 2",
+        "1. Type EqualTo Customer",
+        "2. Status NotEqualTo Inactive",
+        "Filter Formula: {!$Record.Type} = 'Customer' && {!$Record.Status} != 'Inactive'",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`,
+        );
+      });
+    },
+  );
+
+  await t.step(
+    "should generate scheduled flow start node with schedule information",
+    () => {
+      // Setup test data for scheduled flow
+      mockParsedFlow.processType = flowTypes.FlowProcessType.AUTOLAUNCHED_FLOW;
+      mockParsedFlow.start = {
+        name: "FLOW_START",
+        label: "Flow Start",
+        locationX: 0,
+        locationY: 0,
+        elementSubtype: "Start",
+        description: "Scheduled flow start",
+        connector: { targetReference: "nextNode", isGoTo: false },
+        triggerType: flowTypes.FlowTriggerType.SCHEDULED,
+        schedule: {
+          frequency: flowTypes.FlowStartFrequency.DAILY,
+          startDate: "2024-01-01",
+          startTime: "09:00:00",
+        },
+        scheduledPaths: [
+          {
+            name: "DailyPath",
+            label: "Daily Processing",
+            connector: { targetReference: "END", isGoTo: false },
+            offsetNumber: "1",
+            offsetUnit: flowTypes.FlowScheduledPathOffsetUnit.DAYS,
+            timeSource:
+              flowTypes.FlowScheduledPathTimeSource.RECORD_TRIGGER_EVENT,
+            description: "Daily scheduled path",
+          },
+          {
+            name: "WeeklyPath",
+            label: "Weekly Report",
+            connector: { targetReference: "END", isGoTo: false },
+            offsetNumber: "7",
+            offsetUnit: flowTypes.FlowScheduledPathOffsetUnit.DAYS,
+            timeSource: flowTypes.FlowScheduledPathTimeSource.RECORD_FIELD,
+            description: "Weekly scheduled path",
+          },
+        ],
+      };
+
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Process Type: AutoLaunchedFlow",
+        "Trigger Type: Scheduled",
+        "Schedule: Daily starting 2024-01-01 at 09:00:00",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`,
+        );
+      });
+    },
+  );
+
+  await t.step(
+    "should generate platform event triggered flow start node",
+    () => {
+      // Setup test data for platform event flow
+      mockParsedFlow.processType = flowTypes.FlowProcessType.AUTOLAUNCHED_FLOW;
+      mockParsedFlow.start = {
+        name: "FLOW_START",
+        label: "Flow Start",
+        locationX: 0,
+        locationY: 0,
+        elementSubtype: "Start",
+        description: "Platform event triggered flow start",
+        connector: { targetReference: "nextNode", isGoTo: false },
+        triggerType: flowTypes.FlowTriggerType.PLATFORM_EVENT,
+        object: "Order_Event__e",
+        segment: "High_Value_Orders",
+        flowRunAsUser: "admin@example.com",
+      };
+
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Process Type: AutoLaunchedFlow",
+        "Trigger Type: PlatformEvent",
+        "Object: Order_Event__e",
+        "Segment: High_Value_Orders",
+        "Run As: admin@example.com",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`,
+        );
+      });
+    },
+  );
+
+  await t.step(
+    "should generate flow start node with capabilities and form",
+    () => {
+      // Setup test data for capability-based flow
+      mockParsedFlow.processType = flowTypes.FlowProcessType.FLOW;
+      mockParsedFlow.start = {
+        name: "FLOW_START",
+        label: "Flow Start",
+        locationX: 0,
+        locationY: 0,
+        elementSubtype: "Start",
+        description: "Capability-based flow start",
+        connector: { targetReference: "nextNode", isGoTo: false },
+        triggerType: flowTypes.FlowTriggerType.CAPABILITY,
+        capabilityTypes: [
+          {
+            name: "DataProcessing",
+            capabilityName: "Data Processing Capability",
+            inputs: [
+              {
+                name: "InputData",
+                capabilityInputName: "Data Input",
+                dataType: "sObject",
+                isCollection: true,
+                description: "Input data collection",
+              },
+            ],
+            description: "Data processing capability",
+          },
+          {
+            name: "ValidationCapability",
+            capabilityName: "Validation Rules",
+            inputs: [
+              {
+                name: "RecordToValidate",
+                capabilityInputName: "Record Input",
+                dataType: "sObject",
+                isCollection: false,
+                description: "Record to validate",
+              },
+            ],
+            description: "Validation capability",
+          },
+        ],
+        form: "Custom_Lead_Form",
+        segment: "Enterprise_Customers",
+      };
+
+      const uml = systemUnderTest.generateUml();
+
+      const expectedContent = [
+        "Process Type: Flow",
+        "Trigger Type: Capability",
+        "Capability 1: Data Processing Capability",
+        "Capability 2: Validation Rules",
+        "Form: Custom_Lead_Form",
+        "Segment: Enterprise_Customers",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`,
+        );
+      });
+    },
+  );
+
+  await t.step(
+    "should handle minimal start node configuration",
+    () => {
+      // Create a minimal mock flow with just the start node
+      const minimalMockFlow: ParsedFlow = {
+        label: "Minimal Test",
+        processType: undefined,
+        start: {
+          name: "FLOW_START",
+          label: "Flow Start",
+          locationX: 0,
+          locationY: 0,
+          elementSubtype: "Start",
+          description: "Minimal flow start",
+          connector: { targetReference: "nextNode", isGoTo: false },
+        },
+        transitions: [],
+      };
+
+      // Create a fresh generator with the minimal mock flow
+      class ConcreteUmlGenerator extends UmlGenerator {
+        getHeader(label: string): string {
+          return label;
+        }
+        toUmlString(node: DiagramNode): string {
+          let result = `state ${node.type} ${node.id}`;
+          if (node.innerNodes) {
+            const innerContent = node.innerNodes
+              .map((innerNode) => {
+                const header = [innerNode.type, innerNode.label]
+                  .filter(Boolean)
+                  .join(": ");
+
+                const content = innerNode.content
+                  .map((line) => `  ${line}`)
+                  .join(EOL);
+
+                return header ? `  ${header}${EOL}${content}` : content;
+              })
+              .join(EOL);
+            result += EOL + innerContent;
+          }
+          return result;
+        }
+        getTransition(transition: Transition): string {
+          return UML_REPRESENTATIONS.transition(transition.from, transition.to);
+        }
+        getFooter(): string {
+          return "";
+        }
+      }
+
+      const minimalGenerator = new ConcreteUmlGenerator(minimalMockFlow);
+      const uml = minimalGenerator.generateUml();
+
+      const expectedContent = [
+        "Flow Start FLOW_START",
+        "Flow Details",
+        "No specific entry criteria defined",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`,
+        );
+      });
+
+      // Should not contain any specific trigger information
+      const unexpectedContent = [
+        "Process Type:",
+        "Trigger Type:",
+        "Filter Logic:",
+      ];
+
+      unexpectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          false,
+          `Expected UML: ${uml} to NOT contain: ${content}`,
+        );
+      });
+    },
+  );
+
+  await t.step(
+    "should handle start node with record change criteria",
+    () => {
+      // Create a record change mock flow with just the start node
+      const recordChangeMockFlow: ParsedFlow = {
+        label: "Record Change Test",
+        processType: flowTypes.FlowProcessType.FLOW,
+        start: {
+          name: "FLOW_START",
+          label: "Flow Start",
+          locationX: 0,
+          locationY: 0,
+          elementSubtype: "Start",
+          description: "Record change flow start",
+          connector: { targetReference: "nextNode", isGoTo: false },
+          triggerType: flowTypes.FlowTriggerType.RECORD_BEFORE_SAVE,
+          object: "Opportunity",
+          recordTriggerType: flowTypes.RecordTriggerType.UPDATE,
+          entryType: flowTypes.FlowEntryType.ALWAYS,
+          doesRequireRecordChangedToMeetCriteria: true,
+          filterLogic: "1 OR 2",
+          filters: [
+            {
+              field: "StageName",
+              operator: flowTypes.FlowRecordFilterOperator.EQUAL_TO,
+              value: { stringValue: "Closed Won" },
+            },
+            {
+              field: "Amount",
+              operator: flowTypes.FlowRecordFilterOperator.GREATER_THAN,
+              value: { numberValue: "100000" },
+            },
+          ],
+        },
+        transitions: [],
+      };
+
+      // Create a fresh generator with the record change mock flow
+      class ConcreteUmlGenerator extends UmlGenerator {
+        getHeader(label: string): string {
+          return label;
+        }
+        toUmlString(node: DiagramNode): string {
+          let result = `state ${node.type} ${node.id}`;
+          if (node.innerNodes) {
+            const innerContent = node.innerNodes
+              .map((innerNode) => {
+                const header = [innerNode.type, innerNode.label]
+                  .filter(Boolean)
+                  .join(": ");
+
+                const content = innerNode.content
+                  .map((line) => `  ${line}`)
+                  .join(EOL);
+
+                return header ? `  ${header}${EOL}${content}` : content;
+              })
+              .join(EOL);
+            result += EOL + innerContent;
+          }
+          return result;
+        }
+        getTransition(transition: Transition): string {
+          return UML_REPRESENTATIONS.transition(transition.from, transition.to);
+        }
+        getFooter(): string {
+          return "";
+        }
+      }
+
+      const recordChangeGenerator = new ConcreteUmlGenerator(
+        recordChangeMockFlow,
+      );
+      const uml = recordChangeGenerator.generateUml();
+
+      const expectedContent = [
+        "Process Type: Flow",
+        "Trigger Type: RecordBeforeSave",
+        "Object: Opportunity",
+        "Record Trigger: Update",
+        "Entry Type: Always",
+        "Filter Logic: 1 OR 2",
+        "1. StageName EqualTo Closed Won",
+        "2. Amount GreaterThan 100000",
+      ];
+
+      expectedContent.forEach((content) => {
+        assertEquals(
+          uml.includes(content),
+          true,
+          `Expected UML: ${uml} to contain: ${content}`,
+        );
+      });
+    },
+  );
+
+  await t.step(
+    "should handle empty start node gracefully",
+    () => {
+      // Create an empty mock flow with no start node
+      const emptyMockFlow: ParsedFlow = {
+        label: "Empty Test",
+        processType: undefined,
+        start: undefined,
+        transitions: [],
+      };
+
+      // Create a fresh generator with the empty mock flow
+      class ConcreteUmlGenerator extends UmlGenerator {
+        getHeader(label: string): string {
+          return label;
+        }
+        toUmlString(node: DiagramNode): string {
+          let result = `state ${node.type} ${node.id}`;
+          if (node.innerNodes) {
+            const innerContent = node.innerNodes
+              .map((innerNode) => {
+                const header = [innerNode.type, innerNode.label]
+                  .filter(Boolean)
+                  .join(": ");
+
+                const content = innerNode.content
+                  .map((line) => `  ${line}`)
+                  .join(EOL);
+
+                return header ? `  ${header}${EOL}${content}` : content;
+              })
+              .join(EOL);
+            result += EOL + innerContent;
+          }
+          return result;
+        }
+        getTransition(transition: Transition): string {
+          return UML_REPRESENTATIONS.transition(transition.from, transition.to);
+        }
+        getFooter(): string {
+          return "";
+        }
+      }
+
+      const emptyGenerator = new ConcreteUmlGenerator(emptyMockFlow);
+      const uml = emptyGenerator.generateUml();
+
+      // Should not contain flow start node when undefined
+      assertEquals(
+        uml.includes("Flow Start FLOW_START"),
+        false,
+        "Should not contain flow start node when undefined",
+      );
     },
   );
 });
