@@ -18,7 +18,7 @@ import { assertEquals } from "@std/assert";
 import { ParsedFlow, Transition } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import { DiagramNode, UmlGenerator } from "../main/uml_generator.ts";
-import { generateMockFlow, NODE_NAMES } from "./mock_flow.ts";
+import { generateMockFlow, NODE_NAMES } from "./utilities/mock_flow.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const TRANSITION_ARROW = "-->";
@@ -34,11 +34,13 @@ const UML_REPRESENTATIONS = {
   var1 = Hello World
   var2 AddItem Test Value`,
   collectionProcessor: (name: string) => `state Collection Processor ${name}`,
-  decision: (name: string) => `state Decision ${name}
+  decision: (name: string) =>
+    `state Decision ${name}
   Rule: myDecisionRule
   1. foo EqualTo true`,
   loop: (name: string) => `state Loop ${name}`,
-  orchestratedStage: (name: string) => `state Orchestrated Stage ${name}
+  orchestratedStage: (name: string) =>
+    `state Orchestrated Stage ${name}
   Step: 1. step1
 
   Step: 2. step2
@@ -132,19 +134,19 @@ Deno.test("UmlGenerator", async (t) => {
       UML_REPRESENTATIONS.actionCall(NODE_NAMES.actionCall),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.start,
-        NODE_NAMES.apexPluginCall
+        NODE_NAMES.apexPluginCall,
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.apexPluginCall,
-        NODE_NAMES.assignment
+        NODE_NAMES.assignment,
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.assignment,
-        NODE_NAMES.decision
+        NODE_NAMES.decision,
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.assignment,
-        NODE_NAMES.collectionProcessor
+        NODE_NAMES.collectionProcessor,
       ),
     ].join(EOL);
 
@@ -158,7 +160,7 @@ Deno.test("UmlGenerator", async (t) => {
 
     assertEquals(
       uml.includes(UML_REPRESENTATIONS.screen(NODE_NAMES.screen)),
-      false
+      false,
     );
   });
 
@@ -169,7 +171,7 @@ Deno.test("UmlGenerator", async (t) => {
 
     assertEquals(
       uml.includes(UML_REPRESENTATIONS.screen(NODE_NAMES.screen)),
-      false
+      false,
     );
   });
 
@@ -232,10 +234,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -268,10 +270,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -330,10 +332,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -361,10 +363,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -413,10 +415,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -473,10 +475,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -506,10 +508,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -564,10 +566,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -624,10 +626,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -663,10 +665,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step(
@@ -732,10 +734,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`
+          `Expected UML: ${uml} to contain: ${content}`,
         );
       });
-    }
+    },
   );
 
   await t.step("should handle minimal start node configuration", () => {
@@ -769,7 +771,7 @@ Deno.test("UmlGenerator", async (t) => {
       assertEquals(
         uml.includes(content),
         true,
-        `Expected UML: ${uml} to contain: ${content}`
+        `Expected UML: ${uml} to contain: ${content}`,
       );
     });
 
@@ -784,7 +786,7 @@ Deno.test("UmlGenerator", async (t) => {
       assertEquals(
         uml.includes(content),
         false,
-        `Expected UML: ${uml} to NOT contain: ${content}`
+        `Expected UML: ${uml} to NOT contain: ${content}`,
       );
     });
   });
@@ -826,7 +828,7 @@ Deno.test("UmlGenerator", async (t) => {
 
     // Create a fresh generator with the record change mock flow
     const recordChangeGenerator = new ConcreteUmlGenerator(
-      recordChangeMockFlow
+      recordChangeMockFlow,
     );
     const uml = recordChangeGenerator.generateUml();
 
@@ -845,7 +847,7 @@ Deno.test("UmlGenerator", async (t) => {
       assertEquals(
         uml.includes(content),
         true,
-        `Expected UML: ${uml} to contain: ${content}`
+        `Expected UML: ${uml} to contain: ${content}`,
       );
     });
   });
@@ -867,7 +869,7 @@ Deno.test("UmlGenerator", async (t) => {
     assertEquals(
       uml.includes("Flow Start FLOW_START"),
       false,
-      "Should not contain flow start node when undefined"
+      "Should not contain flow start node when undefined",
     );
   });
 });

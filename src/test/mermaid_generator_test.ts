@@ -23,7 +23,7 @@ import {
   Icon as UmlIcon,
   SkinColor as UmlSkinColor,
 } from "../main/uml_generator.ts";
-import { generateMockFlow } from "./mock_flow.ts";
+import { generateMockFlow } from "./utilities/mock_flow.ts";
 
 // @ts-ignore: Deno types
 Deno.test("MermaidGenerator", async (t) => {
@@ -115,7 +115,7 @@ Deno.test("MermaidGenerator", async (t) => {
     result = systemUnderTest.toUmlString(node);
     assertStringIncludes(
       result,
-      "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"green\"><b>+</b></font></span>"
+      "<span style='padding:6px;margin:6px;background-color:#FFFFFF;'><font color=\"green\"><b>+</b></font></span>",
     );
     assertStringIncludes(result, "class myNode pink");
   });
@@ -177,11 +177,11 @@ Deno.test("MermaidGenerator", async (t) => {
     assertStringIncludes(result, "FLOW_START --> myApexPluginCall");
     assertStringIncludes(
       result,
-      "myApexPluginCall --> myAssignment :  Normal Transition "
+      "myApexPluginCall --> myAssignment :  Normal Transition ",
     );
     assertStringIncludes(
       result,
-      "myAssignment --> myDecision : ❌ Error Path ❌"
+      "myAssignment --> myDecision : ❌ Error Path ❌",
     );
 
     assertStringIncludes(result, "class");

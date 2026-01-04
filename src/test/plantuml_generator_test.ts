@@ -15,7 +15,6 @@
  */
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { ParsedFlow } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import { PlantUmlGenerator } from "../main/plantuml_generator.ts";
 import {
@@ -23,128 +22,12 @@ import {
   Icon as UmlIcon,
   SkinColor as UmlSkinColor,
 } from "../main/uml_generator.ts";
-
-const NODE_NAMES = {
-  start: "FLOW_START",
-  apexPluginCall: "myApexPluginCall",
-  assignment: "myAssignment",
-  collectionProcessor: "myCollectionProcessor",
-  decision: "myDecision",
-  loop: "myLoop",
-  orchestratedStage: "myOrchestratedStage",
-  recordCreate: "myRecordCreate",
-  recordDelete: "myRecordDelete",
-  recordLookup: "myRecordLookup",
-  recordRollback: "myRecordRollback",
-  recordUpdate: "myRecordUpdate",
-  screen: "myScreen",
-  stageSteps: ["step1", "step2", "step3"],
-  step: "myStep",
-  subflow: "mySubflow",
-  transform: "myTransform",
-  wait: "myWait",
-  actionCall: "myActionCall",
-};
-
-function generateMockFlow(): ParsedFlow {
-  return {
-    start: {
-      name: NODE_NAMES.start,
-    } as flowTypes.FlowStart,
-    apexPluginCalls: getFlowNodes(
-      NODE_NAMES.apexPluginCall,
-    ) as flowTypes.FlowApexPluginCall[],
-    assignments: getFlowNodes(
-      NODE_NAMES.assignment,
-    ) as flowTypes.FlowAssignment[],
-    collectionProcessors: getFlowNodes(
-      NODE_NAMES.collectionProcessor,
-    ) as flowTypes.FlowCollectionProcessor[],
-    decisions: getFlowNodes(NODE_NAMES.decision) as flowTypes.FlowDecision[],
-    loops: getFlowNodes(NODE_NAMES.loop) as flowTypes.FlowLoop[],
-    orchestratedStages: [
-      generateStage(NODE_NAMES.orchestratedStage, NODE_NAMES.stageSteps),
-    ],
-    recordCreates: getFlowNodes(
-      NODE_NAMES.recordCreate,
-    ) as flowTypes.FlowRecordCreate[],
-    recordDeletes: getFlowNodes(
-      NODE_NAMES.recordDelete,
-    ) as flowTypes.FlowRecordDelete[],
-    recordLookups: getFlowNodes(
-      NODE_NAMES.recordLookup,
-    ) as flowTypes.FlowRecordLookup[],
-    recordRollbacks: getFlowNodes(
-      NODE_NAMES.recordRollback,
-    ) as flowTypes.FlowRecordRollback[],
-    recordUpdates: getFlowNodes(
-      NODE_NAMES.recordUpdate,
-    ) as flowTypes.FlowRecordUpdate[],
-    screens: getFlowNodes(NODE_NAMES.screen) as flowTypes.FlowScreen[],
-    steps: getFlowNodes(NODE_NAMES.step) as flowTypes.FlowStep[],
-    subflows: getFlowNodes(NODE_NAMES.subflow) as flowTypes.FlowSubflow[],
-    transforms: getFlowNodes(NODE_NAMES.transform) as flowTypes.FlowTransform[],
-    waits: getFlowNodes(NODE_NAMES.wait) as flowTypes.FlowWait[],
-    actionCalls: getFlowNodes(
-      NODE_NAMES.actionCall,
-    ) as flowTypes.FlowActionCall[],
-    transitions: [
-      {
-        from: NODE_NAMES.start,
-        to: NODE_NAMES.apexPluginCall,
-        fault: false,
-      },
-      {
-        from: NODE_NAMES.apexPluginCall,
-        to: NODE_NAMES.assignment,
-        fault: false,
-      },
-      {
-        from: NODE_NAMES.assignment,
-        to: NODE_NAMES.collectionProcessor,
-        fault: false,
-      },
-    ],
-  };
-}
-
-function getFlowNodes(name: string): flowTypes.FlowNode[] {
-  return [{ name: `${name}`, label: `${name}` }] as flowTypes.FlowNode[];
-}
-
-function generateStage(
-  name: string,
-  stepNames: string[],
-): flowTypes.FlowOrchestratedStage {
-  return {
-    name: `${name}`,
-    label: `${name}`,
-    elementSubtype: "OrchestratedStage",
-    locationX: 0,
-    locationY: 0,
-    description: `${name}`,
-    stageSteps: stepNames.map((stepName) => ({
-      name: `${stepName}`,
-      label: `${stepName}`,
-      elementSubtype: "Step",
-      locationX: 0,
-      locationY: 0,
-      description: `${stepName}`,
-      actionName: `${stepName}Action`,
-      actionType: flowTypes.FlowStageStepActionType.STEP_BACKGROUND,
-    })),
-  } as flowTypes.FlowOrchestratedStage;
-}
+import { generateMockFlow } from "./utilities/mock_flow.ts";
 
 Deno.test("PlantUmlGenerator", async (t) => {
-  let systemUnderTest: PlantUmlGenerator;
-  let mockedFlow: ParsedFlow;
+  const mockedFlow = generateMockFlow();
+  const systemUnderTest = new PlantUmlGenerator(mockedFlow);
   let result: string;
-
-  await t.step("Setup", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new PlantUmlGenerator(mockedFlow);
-  });
 
   await t.step("should generate header", () => {
     const label = "foo";

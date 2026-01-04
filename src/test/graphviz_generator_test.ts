@@ -28,7 +28,7 @@ import {
   Icon as UmlIcon,
   SkinColor as UmlSkinColor,
 } from "../main/uml_generator.ts";
-import { generateMockFlow } from "./mock_flow.ts";
+import { generateMockFlow } from "./utilities/mock_flow.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 
@@ -38,7 +38,7 @@ function generateTable(
   icon: Icon,
   skinColor: SkinColor,
   fontColor: string,
-  innerNodeBody?: string
+  innerNodeBody?: string,
 ) {
   const formattedInnerNodeBody = innerNodeBody
     ? `${EOL}${innerNodeBody}${EOL}`
@@ -65,7 +65,7 @@ function generateTable(
 function generateInnerNodeCell(
   color: FontColor,
   expectedLabel: string,
-  content: string[]
+  content: string[],
 ) {
   return `  <TR>
     <TD BORDER="1" COLOR="${color}" ALIGN="LEFT" CELLPADDING="6">
@@ -111,8 +111,8 @@ Deno.test("GraphVizGenerator", async (t) => {
         "Apex Plugin Call",
         Icon.CODE,
         SkinColor.NONE,
-        FontColor.BLACK
-      )
+        FontColor.BLACK,
+      ),
     );
   });
 
@@ -132,8 +132,8 @@ Deno.test("GraphVizGenerator", async (t) => {
         "Assignment",
         Icon.ASSIGNMENT,
         SkinColor.ORANGE,
-        FontColor.WHITE
-      )
+        FontColor.WHITE,
+      ),
     );
   });
 
@@ -164,8 +164,8 @@ Deno.test("GraphVizGenerator", async (t) => {
         FontColor.WHITE,
         generateInnerNodeCell(FontColor.WHITE, "Rule myDecisionRule", [
           "1. foo EqualTo true",
-        ])
-      )
+        ]),
+      ),
     );
   });
 
@@ -203,8 +203,8 @@ Deno.test("GraphVizGenerator", async (t) => {
         generateInnerNodeCells([
           generateInnerNodeCell(FontColor.WHITE, "Stage Step 1. step1", []),
           generateInnerNodeCell(FontColor.WHITE, "Stage Step 2. step2", []),
-        ])
-      )
+        ]),
+      ),
     );
   });
 
@@ -251,7 +251,7 @@ Deno.test("GraphVizGenerator", async (t) => {
     result = systemUnderTest.getTransition(mockedFlow.transitions![0]);
     assertEquals(
       result,
-      'FLOW_START -> myApexPluginCall [label="" color="black" style=""]'
+      'FLOW_START -> myApexPluginCall [label="" color="black" style=""]',
     );
   });
 });
