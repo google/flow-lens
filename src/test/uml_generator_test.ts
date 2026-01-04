@@ -34,9 +34,17 @@ const UML_REPRESENTATIONS = {
   var1 = Hello World
   var2 AddItem Test Value`,
   collectionProcessor: (name: string) => `state Collection Processor ${name}`,
-  decision: (name: string) => `state Decision ${name}${EOL}`,
+  decision: (name: string) => `state Decision ${name}
+  Rule: myDecisionRule
+  1. foo EqualTo true`,
   loop: (name: string) => `state Loop ${name}`,
-  orchestratedStage: (name: string) => `state Orchestrated Stage ${name}${EOL}`,
+  orchestratedStage: (name: string) => `state Orchestrated Stage ${name}
+  Step: 1. step1
+
+  Step: 2. step2
+
+  Step: 3. step3
+`,
   recordCreate: (name: string) => `state Record Create ${name}`,
   recordDelete: (name: string) => `state Record Delete ${name}`,
   recordLookup: (name: string) =>

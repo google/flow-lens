@@ -19,13 +19,14 @@ import { ParsedFlow } from "../main/flow_parser.ts";
 
 export const NODE_NAMES = {
   label: "test",
-  start: "start",
+  start: "FLOW_START",
   apexPluginCall: "myApexPluginCall",
   assignment: "myAssignment",
   collectionProcessor: "myCollectionProcessor",
   decision: "myDecision",
   loop: "myLoop",
   orchestratedStage: "myOrchestratedStage",
+  stageSteps: ["step1", "step2", "step3"],
   recordCreate: "myRecordCreate",
   recordDelete: "myRecordDelete",
   recordLookup: "myRecordLookup",
@@ -110,6 +111,9 @@ const NODE_FACTORIES: Record<string, NodeFactory> = {
   [NODE_NAMES.recordCreate]: createRecordCreateNode,
   [NODE_NAMES.recordDelete]: createRecordDeleteNode,
   [NODE_NAMES.assignment]: createAssignmentNode,
+  [NODE_NAMES.decision]: generateDecision,
+  [NODE_NAMES.orchestratedStage]: (name: string) =>
+    generateStage(name, NODE_NAMES.stageSteps),
 };
 
 function getFlowNodes(name: string): flowTypes.FlowNode[] {
@@ -207,6 +211,55 @@ function createBasicNode(name: string): flowTypes.FlowNode[] {
     {
       ...createBaseNode(name),
       elementSubtype: "Unknown",
+    },
+  ];
+}
+
+function generateStage(
+  name: string,
+  stepNames: string[] = []
+): flowTypes.FlowOrchestratedStage[] {
+  return [
+    {
+      ...createBaseNode(name),
+      elementSubtype: "OrchestratedStage",
+      stageSteps: stepNames.map((stepName) => ({
+        name: stepName,
+        label: stepName,
+        elementSubtype: "Step",
+        locationX: 0,
+        locationY: 0,
+        description: stepName,
+        actionName: `${stepName}Action`,
+        actionType: flowTypes.FlowStageStepActionType.STEP_BACKGROUND,
+      })),
+    },
+  ];
+}
+
+function generateDecision(name: string): flowTypes.FlowDecision[] {
+  return [
+    {
+      ...createBaseNode(name),
+      elementSubtype: "Decision",
+      rules: [
+        {
+          name: `${name}Rule`,
+          label: `${name}Rule`,
+          description: `${name}Rule`,
+          conditionLogic: "and",
+          conditions: [
+            {
+              leftValueReference: "foo",
+              operator: flowTypes.FlowComparisonOperator.EQUAL_TO,
+              rightValue: {
+                booleanValue: "true",
+              },
+              processMetadataValues: [],
+            },
+          ],
+        },
+      ],
     },
   ];
 }
