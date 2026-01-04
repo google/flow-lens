@@ -20,6 +20,7 @@
 
 import type { Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
+import { EOL } from "./constants.ts";
 import {
   type DiagramNode,
   Icon as UmlIcon,
@@ -28,7 +29,6 @@ import {
   UmlGenerator,
 } from "./uml_generator.ts";
 
-const EOL = "\n";
 const TABLE_BEGIN = `<
 <TABLE CELLSPACING="0" CELLPADDING="0" BORDER="0" CELLBORDER="0">`;
 const TABLE_END = `</TABLE>

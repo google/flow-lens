@@ -22,29 +22,31 @@ import {
   FLOW_FILE_EXTENSION,
   FlowFileChangeDetector,
 } from "../main/flow_file_change_detector.ts";
+import { EOL } from "../main/constants.ts";
 
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const FLOW_FILE_PATH = "file2" + FLOW_FILE_EXTENSION;
 
 /**
  * Test helper type that exposes private methods for mocking purposes.
  * Uses Omit to remove private methods and re-adds them as public.
  */
-type TestableFlowFileChangeDetector = Omit<
-  FlowFileChangeDetector,
-  | "executeVersionCommand"
-  | "executeRevParseCommand"
-  | "executeDiffCommand"
-  | "executeGetFileContentCommand"
-> & {
-  executeVersionCommand: () => void;
-  executeRevParseCommand: () => void;
-  executeDiffCommand: () => Uint8Array;
-  executeGetFileContentCommand: (
-    filePath: string,
-    commitHash: string
-  ) => Uint8Array;
-};
+type TestableFlowFileChangeDetector =
+  & Omit<
+    FlowFileChangeDetector,
+    | "executeVersionCommand"
+    | "executeRevParseCommand"
+    | "executeDiffCommand"
+    | "executeGetFileContentCommand"
+  >
+  & {
+    executeVersionCommand: () => void;
+    executeRevParseCommand: () => void;
+    executeDiffCommand: () => Uint8Array;
+    executeGetFileContentCommand: (
+      filePath: string,
+      commitHash: string,
+    ) => Uint8Array;
+  };
 
 function createDetector(): TestableFlowFileChangeDetector {
   const detector =
@@ -53,7 +55,7 @@ function createDetector(): TestableFlowFileChangeDetector {
   detector.executeRevParseCommand = () => undefined;
   detector.executeDiffCommand = () =>
     new TextEncoder().encode(
-      ["file1.txt", FLOW_FILE_PATH, "file3.js"].join(EOL)
+      ["file1.txt", FLOW_FILE_PATH, "file3.js"].join(EOL),
     );
   detector.executeGetFileContentCommand = () =>
     new TextEncoder().encode("file content");
@@ -70,7 +72,7 @@ Deno.test("FlowFileChangeDetector", async (t) => {
       const flowFiles = detector.getFlowFiles();
 
       assertEquals(flowFiles, [FLOW_FILE_PATH]);
-    }
+    },
   );
 
   await t.step("should throw error if git is not installed", () => {
@@ -82,7 +84,7 @@ Deno.test("FlowFileChangeDetector", async (t) => {
     assertThrows(
       () => detector.getFlowFiles(),
       Error,
-      ERROR_MESSAGES.gitIsNotInstalledError
+      ERROR_MESSAGES.gitIsNotInstalledError,
     );
   });
 
@@ -95,7 +97,7 @@ Deno.test("FlowFileChangeDetector", async (t) => {
     assertThrows(
       () => detector.getFlowFiles(),
       Error,
-      ERROR_MESSAGES.notInGitRepoError
+      ERROR_MESSAGES.notInGitRepoError,
     );
   });
 
@@ -108,7 +110,7 @@ Deno.test("FlowFileChangeDetector", async (t) => {
     assertThrows(
       () => detector.getFlowFiles(),
       Error,
-      ERROR_MESSAGES.diffError(new Error("Diff error"))
+      ERROR_MESSAGES.diffError(new Error("Diff error")),
     );
   });
 
@@ -137,8 +139,8 @@ Deno.test("FlowFileChangeDetector", async (t) => {
       Error,
       ERROR_MESSAGES.unableToGetFileContent(
         FLOW_FILE_PATH,
-        new Error("Get file content error")
-      )
+        new Error("Get file content error"),
+      ),
     );
   });
 });

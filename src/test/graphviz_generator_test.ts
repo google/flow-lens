@@ -29,8 +29,7 @@ import {
   SkinColor as UmlSkinColor,
 } from "../main/uml_generator.ts";
 import { generateMockFlow } from "./utilities/mock_flow.ts";
-
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+import { EOL } from "../main/constants.ts";
 
 function generateTable(
   nodeName: string,

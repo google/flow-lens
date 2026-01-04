@@ -19,8 +19,8 @@ import { ParsedFlow, Transition } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import { DiagramNode, UmlGenerator } from "../main/uml_generator.ts";
 import { generateMockFlow, NODE_NAMES } from "./utilities/mock_flow.ts";
+import { EOL } from "../main/constants.ts";
 
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const TRANSITION_ARROW = "-->";
 
 const UML_REPRESENTATIONS = {

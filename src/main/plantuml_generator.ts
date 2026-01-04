@@ -25,7 +25,7 @@ import {
   Icon as UmlIcon,
   UmlGenerator,
 } from "./uml_generator.ts";
-const EOL = "\n";
+import { EOL } from "./constants.ts";
 
 enum SkinColor {
   NONE = "",

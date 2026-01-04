@@ -20,13 +20,13 @@
  */
 
 import { Configuration } from "./argument_processor.ts";
+import { EOL } from "./constants.ts";
 
 const ADDED = "A";
 const MODIFIED = "M";
 const RENAMED = "R";
 const COPIED = "C";
 const SUPPORTED_DIFF_TYPES = [ADDED, MODIFIED, RENAMED, COPIED].join("");
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 
 /** The extension of flow files. */
 export const FLOW_FILE_EXTENSION = ".flow-meta.xml";
