@@ -18,31 +18,10 @@ import { assertEquals } from "@std/assert";
 import { ParsedFlow, Transition } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import { DiagramNode, UmlGenerator } from "../main/uml_generator.ts";
+import { generateMockFlow, NODE_NAMES } from "./mock_flow.ts";
 
 const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const TRANSITION_ARROW = "-->";
-
-const NODE_NAMES = {
-  label: "test",
-  start: "start",
-  apexPluginCall: "myApexPluginCall",
-  assignment: "myAssignment",
-  collectionProcessor: "myCollectionProcessor",
-  decision: "myDecision",
-  loop: "myLoop",
-  orchestratedStage: "myOrchestratedStage",
-  recordCreate: "myRecordCreate",
-  recordDelete: "myRecordDelete",
-  recordLookup: "myRecordLookup",
-  recordRollback: "myRecordRollback",
-  recordUpdate: "myRecordUpdate",
-  screen: "myScreen",
-  step: "myStep",
-  subflow: "mySubflow",
-  transform: "myTransform",
-  wait: "myWait",
-  actionCall: "myActionCall",
-};
 
 const UML_REPRESENTATIONS = {
   flowStart: () =>
@@ -80,194 +59,45 @@ const UML_REPRESENTATIONS = {
   transition: (from: string, to: string) => `${from} ${TRANSITION_ARROW} ${to}`,
 };
 
-function generateMockFlow() {
-  return {
-    label: NODE_NAMES.label,
-    start: {
-      name: NODE_NAMES.start,
-    } as flowTypes.FlowStart,
-    apexPluginCalls: getFlowNodes(
-      NODE_NAMES.apexPluginCall,
-    ) as flowTypes.FlowApexPluginCall[],
-    assignments: getFlowNodes(
-      NODE_NAMES.assignment,
-    ) as flowTypes.FlowAssignment[],
-    collectionProcessors: getFlowNodes(
-      NODE_NAMES.collectionProcessor,
-    ) as flowTypes.FlowCollectionProcessor[],
-    decisions: getFlowNodes(NODE_NAMES.decision) as flowTypes.FlowDecision[],
-    loops: getFlowNodes(NODE_NAMES.loop) as flowTypes.FlowLoop[],
-    orchestratedStages: getFlowNodes(
-      NODE_NAMES.orchestratedStage,
-    ) as flowTypes.FlowOrchestratedStage[],
-    recordCreates: getFlowNodes(
-      NODE_NAMES.recordCreate,
-    ) as flowTypes.FlowRecordCreate[],
-    recordDeletes: getFlowNodes(
-      NODE_NAMES.recordDelete,
-    ) as flowTypes.FlowRecordDelete[],
-    recordLookups: getFlowNodes(
-      NODE_NAMES.recordLookup,
-    ) as flowTypes.FlowRecordLookup[],
-    recordRollbacks: getFlowNodes(
-      NODE_NAMES.recordRollback,
-    ) as flowTypes.FlowRecordRollback[],
-    recordUpdates: getFlowNodes(
-      NODE_NAMES.recordUpdate,
-    ) as flowTypes.FlowRecordUpdate[],
-    screens: getFlowNodes(NODE_NAMES.screen) as flowTypes.FlowScreen[],
-    steps: getFlowNodes(NODE_NAMES.step) as flowTypes.FlowStep[],
-    subflows: getFlowNodes(NODE_NAMES.subflow) as flowTypes.FlowSubflow[],
-    transforms: getFlowNodes(NODE_NAMES.transform) as flowTypes.FlowTransform[],
-    waits: getFlowNodes(NODE_NAMES.wait) as flowTypes.FlowWait[],
-    actionCalls: getFlowNodes(
-      NODE_NAMES.actionCall,
-    ) as flowTypes.FlowActionCall[],
-    transitions: [
-      {
-        from: NODE_NAMES.start,
-        to: NODE_NAMES.apexPluginCall,
-        fault: false,
-      },
-      {
-        from: NODE_NAMES.apexPluginCall,
-        to: NODE_NAMES.assignment,
-        fault: false,
-      },
-      {
-        from: NODE_NAMES.assignment,
-        to: NODE_NAMES.collectionProcessor,
-        fault: false,
-      },
-    ],
-  };
-}
-
-function getFlowNodes(name: string): flowTypes.FlowNode[] {
-  const baseNode = {
-    name: name,
-    label: name,
-    locationX: 0,
-    locationY: 0,
-    description: "",
-  };
-
-  // Add specific properties based on node name
-  if (name === NODE_NAMES.recordUpdate) {
-    return [
-      {
-        ...baseNode,
-        object: "Account",
-        inputAssignments: [],
-        inputReference: "",
-        elementSubtype: "RecordUpdate",
-        filters: [],
-      },
-    ] as flowTypes.FlowRecordUpdate[];
+class ConcreteUmlGenerator extends UmlGenerator {
+  getHeader(label: string): string {
+    return label;
   }
+  toUmlString(node: DiagramNode): string {
+    let result = `state ${node.type} ${node.id}`;
+    if (node.innerNodes) {
+      const innerContent = node.innerNodes
+        .map((innerNode) => {
+          const header = [innerNode.type, innerNode.label]
+            .filter(Boolean)
+            .join(": ");
 
-  if (name === NODE_NAMES.recordLookup) {
-    return [
-      {
-        ...baseNode,
-        object: "Account",
-        elementSubtype: "RecordLookup",
-      },
-    ] as flowTypes.FlowRecordLookup[];
+          const content = innerNode.content
+            .map((line) => `  ${line}`)
+            .join(EOL);
+
+          return header ? `  ${header}${EOL}${content}` : content;
+        })
+        .join(EOL);
+      result += EOL + innerContent;
+    }
+    return result;
   }
-
-  if (name === NODE_NAMES.recordCreate) {
-    return [
-      {
-        ...baseNode,
-        object: "Account",
-        elementSubtype: "RecordCreate",
-      },
-    ] as flowTypes.FlowRecordCreate[];
+  getTransition(transition: Transition): string {
+    return UML_REPRESENTATIONS.transition(transition.from, transition.to);
   }
-
-  if (name === NODE_NAMES.recordDelete) {
-    return [
-      {
-        ...baseNode,
-        object: "Account",
-        elementSubtype: "RecordDelete",
-      },
-    ] as flowTypes.FlowRecordDelete[];
+  getFooter(): string {
+    return "";
   }
-
-  if (name === NODE_NAMES.assignment) {
-    return [
-      {
-        ...baseNode,
-        elementSubtype: "Assignment",
-        assignmentItems: [
-          {
-            assignToReference: "var1",
-            operator: flowTypes.FlowAssignmentOperator.ASSIGN,
-            value: {
-              stringValue: "Hello World",
-            },
-            processMetadataValues: [],
-          },
-          {
-            assignToReference: "var2",
-            operator: flowTypes.FlowAssignmentOperator.ADD_ITEM,
-            value: {
-              stringValue: "Test Value",
-            },
-            processMetadataValues: [],
-          },
-        ],
-      },
-    ] as flowTypes.FlowAssignment[];
-  }
-
-  // Return basic node for other types
-  return [baseNode] as flowTypes.FlowNode[];
 }
 
 Deno.test("UmlGenerator", async (t) => {
   let systemUnderTest: UmlGenerator;
   let mockParsedFlow: ParsedFlow;
 
-  await t.step("setup", () => {
-    mockParsedFlow = generateMockFlow();
-
-    class ConcreteUmlGenerator extends UmlGenerator {
-      getHeader(label: string): string {
-        return label;
-      }
-      toUmlString(node: DiagramNode): string {
-        let result = `state ${node.type} ${node.id}`;
-        if (node.innerNodes) {
-          const innerContent = node.innerNodes
-            .map((innerNode) => {
-              const header = [innerNode.type, innerNode.label]
-                .filter(Boolean)
-                .join(": ");
-
-              const content = innerNode.content
-                .map((line) => `  ${line}`)
-                .join(EOL);
-
-              return header ? `  ${header}${EOL}${content}` : content;
-            })
-            .join(EOL);
-          result += EOL + innerContent;
-        }
-        return result;
-      }
-      getTransition(transition: Transition): string {
-        return UML_REPRESENTATIONS.transition(transition.from, transition.to);
-      }
-      getFooter(): string {
-        return "";
-      }
-    }
-
-    systemUnderTest = new ConcreteUmlGenerator(mockParsedFlow);
-  });
+  // Setup: initialize test data and system under test
+  mockParsedFlow = generateMockFlow();
+  systemUnderTest = new ConcreteUmlGenerator(mockParsedFlow);
 
   await t.step("should generate UML with all flow elements", () => {
     const uml = systemUnderTest.generateUml();
@@ -294,15 +124,15 @@ Deno.test("UmlGenerator", async (t) => {
       UML_REPRESENTATIONS.actionCall(NODE_NAMES.actionCall),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.start,
-        NODE_NAMES.apexPluginCall,
+        NODE_NAMES.apexPluginCall
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.apexPluginCall,
-        NODE_NAMES.assignment,
+        NODE_NAMES.assignment
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.assignment,
-        NODE_NAMES.collectionProcessor,
+        NODE_NAMES.collectionProcessor
       ),
     ].join(EOL);
 
@@ -316,7 +146,7 @@ Deno.test("UmlGenerator", async (t) => {
 
     assertEquals(
       uml.includes(UML_REPRESENTATIONS.screen(NODE_NAMES.screen)),
-      false,
+      false
     );
   });
 
@@ -327,7 +157,7 @@ Deno.test("UmlGenerator", async (t) => {
 
     assertEquals(
       uml.includes(UML_REPRESENTATIONS.screen(NODE_NAMES.screen)),
-      false,
+      false
     );
   });
 
@@ -390,10 +220,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -426,10 +256,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -488,10 +318,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -519,10 +349,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -571,10 +401,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -631,10 +461,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -664,10 +494,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -722,10 +552,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -782,10 +612,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -821,10 +651,10 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
   await t.step(
@@ -890,247 +720,142 @@ Deno.test("UmlGenerator", async (t) => {
         assertEquals(
           uml.includes(content),
           true,
-          `Expected UML: ${uml} to contain: ${content}`,
+          `Expected UML: ${uml} to contain: ${content}`
         );
       });
-    },
+    }
   );
 
-  await t.step(
-    "should handle minimal start node configuration",
-    () => {
-      // Create a minimal mock flow with just the start node
-      const minimalMockFlow: ParsedFlow = {
-        label: "Minimal Test",
-        processType: undefined,
-        start: {
-          name: "FLOW_START",
-          label: "Flow Start",
-          locationX: 0,
-          locationY: 0,
-          elementSubtype: "Start",
-          description: "Minimal flow start",
-          connector: { targetReference: "nextNode", isGoTo: false },
-        },
-        transitions: [],
-      };
+  await t.step("should handle minimal start node configuration", () => {
+    // Create a minimal mock flow with just the start node
+    const minimalMockFlow: ParsedFlow = {
+      label: "Minimal Test",
+      processType: undefined,
+      start: {
+        name: "FLOW_START",
+        label: "Flow Start",
+        locationX: 0,
+        locationY: 0,
+        elementSubtype: "Start",
+        description: "Minimal flow start",
+        connector: { targetReference: "nextNode", isGoTo: false },
+      },
+      transitions: [],
+    };
 
-      // Create a fresh generator with the minimal mock flow
-      class ConcreteUmlGenerator extends UmlGenerator {
-        getHeader(label: string): string {
-          return label;
-        }
-        toUmlString(node: DiagramNode): string {
-          let result = `state ${node.type} ${node.id}`;
-          if (node.innerNodes) {
-            const innerContent = node.innerNodes
-              .map((innerNode) => {
-                const header = [innerNode.type, innerNode.label]
-                  .filter(Boolean)
-                  .join(": ");
+    // Create a fresh generator with the minimal mock flow
+    const minimalGenerator = new ConcreteUmlGenerator(minimalMockFlow);
+    const uml = minimalGenerator.generateUml();
 
-                const content = innerNode.content
-                  .map((line) => `  ${line}`)
-                  .join(EOL);
+    const expectedContent = [
+      "Flow Start FLOW_START",
+      "Flow Details",
+      "No specific entry criteria defined",
+    ];
 
-                return header ? `  ${header}${EOL}${content}` : content;
-              })
-              .join(EOL);
-            result += EOL + innerContent;
-          }
-          return result;
-        }
-        getTransition(transition: Transition): string {
-          return UML_REPRESENTATIONS.transition(transition.from, transition.to);
-        }
-        getFooter(): string {
-          return "";
-        }
-      }
-
-      const minimalGenerator = new ConcreteUmlGenerator(minimalMockFlow);
-      const uml = minimalGenerator.generateUml();
-
-      const expectedContent = [
-        "Flow Start FLOW_START",
-        "Flow Details",
-        "No specific entry criteria defined",
-      ];
-
-      expectedContent.forEach((content) => {
-        assertEquals(
-          uml.includes(content),
-          true,
-          `Expected UML: ${uml} to contain: ${content}`,
-        );
-      });
-
-      // Should not contain any specific trigger information
-      const unexpectedContent = [
-        "Process Type:",
-        "Trigger Type:",
-        "Filter Logic:",
-      ];
-
-      unexpectedContent.forEach((content) => {
-        assertEquals(
-          uml.includes(content),
-          false,
-          `Expected UML: ${uml} to NOT contain: ${content}`,
-        );
-      });
-    },
-  );
-
-  await t.step(
-    "should handle start node with record change criteria",
-    () => {
-      // Create a record change mock flow with just the start node
-      const recordChangeMockFlow: ParsedFlow = {
-        label: "Record Change Test",
-        processType: flowTypes.FlowProcessType.FLOW,
-        start: {
-          name: "FLOW_START",
-          label: "Flow Start",
-          locationX: 0,
-          locationY: 0,
-          elementSubtype: "Start",
-          description: "Record change flow start",
-          connector: { targetReference: "nextNode", isGoTo: false },
-          triggerType: flowTypes.FlowTriggerType.RECORD_BEFORE_SAVE,
-          object: "Opportunity",
-          recordTriggerType: flowTypes.RecordTriggerType.UPDATE,
-          entryType: flowTypes.FlowEntryType.ALWAYS,
-          doesRequireRecordChangedToMeetCriteria: true,
-          filterLogic: "1 OR 2",
-          filters: [
-            {
-              field: "StageName",
-              operator: flowTypes.FlowRecordFilterOperator.EQUAL_TO,
-              value: { stringValue: "Closed Won" },
-            },
-            {
-              field: "Amount",
-              operator: flowTypes.FlowRecordFilterOperator.GREATER_THAN,
-              value: { numberValue: "100000" },
-            },
-          ],
-        },
-        transitions: [],
-      };
-
-      // Create a fresh generator with the record change mock flow
-      class ConcreteUmlGenerator extends UmlGenerator {
-        getHeader(label: string): string {
-          return label;
-        }
-        toUmlString(node: DiagramNode): string {
-          let result = `state ${node.type} ${node.id}`;
-          if (node.innerNodes) {
-            const innerContent = node.innerNodes
-              .map((innerNode) => {
-                const header = [innerNode.type, innerNode.label]
-                  .filter(Boolean)
-                  .join(": ");
-
-                const content = innerNode.content
-                  .map((line) => `  ${line}`)
-                  .join(EOL);
-
-                return header ? `  ${header}${EOL}${content}` : content;
-              })
-              .join(EOL);
-            result += EOL + innerContent;
-          }
-          return result;
-        }
-        getTransition(transition: Transition): string {
-          return UML_REPRESENTATIONS.transition(transition.from, transition.to);
-        }
-        getFooter(): string {
-          return "";
-        }
-      }
-
-      const recordChangeGenerator = new ConcreteUmlGenerator(
-        recordChangeMockFlow,
-      );
-      const uml = recordChangeGenerator.generateUml();
-
-      const expectedContent = [
-        "Process Type: Flow",
-        "Trigger Type: RecordBeforeSave",
-        "Object: Opportunity",
-        "Record Trigger: Update",
-        "Entry Type: Always",
-        "Filter Logic: 1 OR 2",
-        "1. StageName EqualTo Closed Won",
-        "2. Amount GreaterThan 100000",
-      ];
-
-      expectedContent.forEach((content) => {
-        assertEquals(
-          uml.includes(content),
-          true,
-          `Expected UML: ${uml} to contain: ${content}`,
-        );
-      });
-    },
-  );
-
-  await t.step(
-    "should handle empty start node gracefully",
-    () => {
-      // Create an empty mock flow with no start node
-      const emptyMockFlow: ParsedFlow = {
-        label: "Empty Test",
-        processType: undefined,
-        start: undefined,
-        transitions: [],
-      };
-
-      // Create a fresh generator with the empty mock flow
-      class ConcreteUmlGenerator extends UmlGenerator {
-        getHeader(label: string): string {
-          return label;
-        }
-        toUmlString(node: DiagramNode): string {
-          let result = `state ${node.type} ${node.id}`;
-          if (node.innerNodes) {
-            const innerContent = node.innerNodes
-              .map((innerNode) => {
-                const header = [innerNode.type, innerNode.label]
-                  .filter(Boolean)
-                  .join(": ");
-
-                const content = innerNode.content
-                  .map((line) => `  ${line}`)
-                  .join(EOL);
-
-                return header ? `  ${header}${EOL}${content}` : content;
-              })
-              .join(EOL);
-            result += EOL + innerContent;
-          }
-          return result;
-        }
-        getTransition(transition: Transition): string {
-          return UML_REPRESENTATIONS.transition(transition.from, transition.to);
-        }
-        getFooter(): string {
-          return "";
-        }
-      }
-
-      const emptyGenerator = new ConcreteUmlGenerator(emptyMockFlow);
-      const uml = emptyGenerator.generateUml();
-
-      // Should not contain flow start node when undefined
+    expectedContent.forEach((content) => {
       assertEquals(
-        uml.includes("Flow Start FLOW_START"),
-        false,
-        "Should not contain flow start node when undefined",
+        uml.includes(content),
+        true,
+        `Expected UML: ${uml} to contain: ${content}`
       );
-    },
-  );
+    });
+
+    // Should not contain any specific trigger information
+    const unexpectedContent = [
+      "Process Type:",
+      "Trigger Type:",
+      "Filter Logic:",
+    ];
+
+    unexpectedContent.forEach((content) => {
+      assertEquals(
+        uml.includes(content),
+        false,
+        `Expected UML: ${uml} to NOT contain: ${content}`
+      );
+    });
+  });
+
+  await t.step("should handle start node with record change criteria", () => {
+    // Create a record change mock flow with just the start node
+    const recordChangeMockFlow: ParsedFlow = {
+      label: "Record Change Test",
+      processType: flowTypes.FlowProcessType.FLOW,
+      start: {
+        name: "FLOW_START",
+        label: "Flow Start",
+        locationX: 0,
+        locationY: 0,
+        elementSubtype: "Start",
+        description: "Record change flow start",
+        connector: { targetReference: "nextNode", isGoTo: false },
+        triggerType: flowTypes.FlowTriggerType.RECORD_BEFORE_SAVE,
+        object: "Opportunity",
+        recordTriggerType: flowTypes.RecordTriggerType.UPDATE,
+        entryType: flowTypes.FlowEntryType.ALWAYS,
+        doesRequireRecordChangedToMeetCriteria: true,
+        filterLogic: "1 OR 2",
+        filters: [
+          {
+            field: "StageName",
+            operator: flowTypes.FlowRecordFilterOperator.EQUAL_TO,
+            value: { stringValue: "Closed Won" },
+          },
+          {
+            field: "Amount",
+            operator: flowTypes.FlowRecordFilterOperator.GREATER_THAN,
+            value: { numberValue: "100000" },
+          },
+        ],
+      },
+      transitions: [],
+    };
+
+    // Create a fresh generator with the record change mock flow
+    const recordChangeGenerator = new ConcreteUmlGenerator(
+      recordChangeMockFlow
+    );
+    const uml = recordChangeGenerator.generateUml();
+
+    const expectedContent = [
+      "Process Type: Flow",
+      "Trigger Type: RecordBeforeSave",
+      "Object: Opportunity",
+      "Record Trigger: Update",
+      "Entry Type: Always",
+      "Filter Logic: 1 OR 2",
+      "1. StageName EqualTo Closed Won",
+      "2. Amount GreaterThan 100000",
+    ];
+
+    expectedContent.forEach((content) => {
+      assertEquals(
+        uml.includes(content),
+        true,
+        `Expected UML: ${uml} to contain: ${content}`
+      );
+    });
+  });
+
+  await t.step("should handle empty start node gracefully", () => {
+    // Create an empty mock flow with no start node
+    const emptyMockFlow: ParsedFlow = {
+      label: "Empty Test",
+      processType: undefined,
+      start: undefined,
+      transitions: [],
+    };
+
+    // Create a fresh generator with the empty mock flow
+    const emptyGenerator = new ConcreteUmlGenerator(emptyMockFlow);
+    const uml = emptyGenerator.generateUml();
+
+    // Should not contain flow start node when undefined
+    assertEquals(
+      uml.includes("Flow Start FLOW_START"),
+      false,
+      "Should not contain flow start node when undefined"
+    );
+  });
 });
