@@ -93,6 +93,13 @@ export function generateMockFlow(): ParsedFlow {
         from: NODE_NAMES.apexPluginCall,
         to: NODE_NAMES.assignment,
         fault: false,
+        label: "Normal Transition",
+      },
+      {
+        from: NODE_NAMES.assignment,
+        to: NODE_NAMES.decision,
+        fault: true,
+        label: "Error Path",
       },
       {
         from: NODE_NAMES.assignment,

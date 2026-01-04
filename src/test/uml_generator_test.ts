@@ -140,6 +140,10 @@ Deno.test("UmlGenerator", async (t) => {
       ),
       UML_REPRESENTATIONS.transition(
         NODE_NAMES.assignment,
+        NODE_NAMES.decision
+      ),
+      UML_REPRESENTATIONS.transition(
+        NODE_NAMES.assignment,
         NODE_NAMES.collectionProcessor
       ),
     ].join(EOL);
