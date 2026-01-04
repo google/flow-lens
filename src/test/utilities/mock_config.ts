@@ -18,7 +18,7 @@ import {
   DiagramTool,
   Mode,
   RuntimeConfig,
-} from "../main/argument_processor.ts";
+} from "../../main/argument_processor.ts";
 
 /**
  * The test configuration object that is used by the tests.
