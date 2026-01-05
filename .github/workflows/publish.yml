@@ -1,0 +1,46 @@
+name: Publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - deno.json
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # The OIDC ID token is used for authentication with JSR.
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 2 # Need previous commit to compare versions
+
+      - name: Check if version changed
+        id: check_version
+        run: |
+          # Get current version
+          CURRENT_VERSION=$(jq -r '.version' deno.json)
+
+          # Get previous version
+          PREVIOUS_VERSION=$(git show HEAD~1:deno.json 2>/dev/null | jq -r '.version // empty' || echo "")
+
+          echo "Current version: $CURRENT_VERSION"
+          echo "Previous version: $PREVIOUS_VERSION"
+
+          if [ -z "$PREVIOUS_VERSION" ]; then
+            echo "No previous version found, publishing..."
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          elif [ "$CURRENT_VERSION" != "$PREVIOUS_VERSION" ]; then
+            echo "Version changed from $PREVIOUS_VERSION to $CURRENT_VERSION, publishing..."
+            echo "should_publish=true" >> $GITHUB_OUTPUT
+          else
+            echo "Version unchanged ($CURRENT_VERSION), skipping publish"
+            echo "should_publish=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Publish to JSR
+        if: steps.check_version.outputs.should_publish == 'true'
+        run: npx jsr publish
