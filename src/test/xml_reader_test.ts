@@ -61,7 +61,7 @@ Deno.test("XmlReader", async (t) => {
 
     await t.step(
       "should throw an error when the file path does not exist",
-      async () => {
+      () => {
         const xmlReader = new XmlReader(INVALID_FILE_PATH);
         assertThrows(
           () => xmlReader.getXmlFileBody(),

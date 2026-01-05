@@ -24,7 +24,7 @@ const parsedFlow: ParsedFlow = { label: "test" };
 
 Deno.test("UmlGeneratorContext", async (t) => {
   await t.step("should generate diagram using PlantUML", () => {
-    let generatorContext = new UmlGeneratorContext(DiagramTool.PLANTUML);
+    const generatorContext = new UmlGeneratorContext(DiagramTool.PLANTUML);
     const diagram = generatorContext.generateDiagram(parsedFlow);
     assertStringIncludes(diagram, PLANT_UML_SIGNATURE);
   });
@@ -32,7 +32,7 @@ Deno.test("UmlGeneratorContext", async (t) => {
   await t.step(
     "should default to using PlantUML when an unknown tool is specified",
     () => {
-      let generatorContext = new UmlGeneratorContext("fooBar" as DiagramTool);
+      const generatorContext = new UmlGeneratorContext("fooBar" as DiagramTool);
       const diagram = generatorContext.generateDiagram(parsedFlow);
       assertStringIncludes(diagram, PLANT_UML_SIGNATURE);
     },

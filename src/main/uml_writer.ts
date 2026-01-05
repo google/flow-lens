@@ -57,7 +57,7 @@ export class UmlWriter {
     if (config.mode === Mode.JSON) {
       this.writeJsonFile(config);
     } else if (config.mode === Mode.GITHUB_ACTION) {
-      await this.writeGithubComment(config);
+      await this.writeGithubComment();
     } else if (config.mode === Mode.MARKDOWN) {
       this.writeMarkdownFiles(config);
     }
@@ -77,7 +77,7 @@ export class UmlWriter {
     );
   }
 
-  private async writeGithubComment(config: RuntimeConfig) {
+  private async writeGithubComment() {
     try {
       const existingComments = await this.githubClient
         .getAllCommentsForPullRequest();
