@@ -19,7 +19,11 @@
  * the generated UML diagrams to a file.
  */
 import { join } from "@std/path";
-import { Configuration, Mode, type RuntimeConfig } from "./argument_processor.ts";
+import {
+  Configuration,
+  Mode,
+  type RuntimeConfig,
+} from "./argument_processor.ts";
 import type { FlowDifference } from "./flow_to_uml_transformer.ts";
 import { GithubClient } from "./github_client.ts";
 import { EOL } from "./constants.ts";

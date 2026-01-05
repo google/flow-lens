@@ -15,7 +15,11 @@
  */
 
 import { join } from "@std/path";
-import { ERROR_MESSAGES, FlowParser, type ParsedFlow } from "../main/flow_parser.ts";
+import {
+  ERROR_MESSAGES,
+  FlowParser,
+  type ParsedFlow,
+} from "../main/flow_parser.ts";
 import type * as flowTypes from "../main/flow_types.ts";
 import { assert, assertEquals, assertRejects } from "@std/assert";
 
