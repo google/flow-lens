@@ -15,8 +15,8 @@
  */
 
 import { join } from "@std/path";
-import { ERROR_MESSAGES, FlowParser, ParsedFlow } from "../main/flow_parser.ts";
-import * as flowTypes from "../main/flow_types.ts";
+import { ERROR_MESSAGES, FlowParser, type ParsedFlow } from "../main/flow_parser.ts";
+import type * as flowTypes from "../main/flow_types.ts";
 import { assert, assertEquals, assertRejects } from "@std/assert";
 
 const GOLDENS_PATH = "./src/test/goldens";

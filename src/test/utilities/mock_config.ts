@@ -17,7 +17,7 @@
 import {
   DiagramTool,
   Mode,
-  RuntimeConfig,
+  type RuntimeConfig,
 } from "../../main/argument_processor.ts";
 
 /**

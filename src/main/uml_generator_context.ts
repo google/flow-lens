@@ -22,11 +22,11 @@
  */
 
 import { DiagramTool } from "./argument_processor.ts";
-import { ParsedFlow } from "./flow_parser.ts";
+import type { ParsedFlow } from "./flow_parser.ts";
 import { GraphVizGenerator } from "./graphviz_generator.ts";
 import { MermaidGenerator } from "./mermaid_generator.ts";
 import { PlantUmlGenerator } from "./plantuml_generator.ts";
-import { UmlGenerator } from "./uml_generator.ts";
+import type { UmlGenerator } from "./uml_generator.ts";
 
 /**
  * This class is responsible for generating a UML diagram representation of a

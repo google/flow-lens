@@ -15,11 +15,11 @@
  */
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { ParsedFlow, Transition } from "../main/flow_parser.ts";
+import type { ParsedFlow, Transition } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import { MermaidGenerator } from "../main/mermaid_generator.ts";
 import {
-  DiagramNode,
+  type DiagramNode,
   Icon as UmlIcon,
   SkinColor as UmlSkinColor,
 } from "../main/uml_generator.ts";

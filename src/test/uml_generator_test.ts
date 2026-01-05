@@ -15,9 +15,9 @@
  */
 
 import { assertEquals } from "@std/assert";
-import { ParsedFlow, Transition } from "../main/flow_parser.ts";
+import type { ParsedFlow, Transition } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
-import { DiagramNode, UmlGenerator } from "../main/uml_generator.ts";
+import { type DiagramNode, UmlGenerator } from "../main/uml_generator.ts";
 import { generateMockFlow, NODE_NAMES } from "./utilities/mock_flow.ts";
 import { EOL } from "../main/constants.ts";
 

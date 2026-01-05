@@ -19,7 +19,7 @@ import {
   DiagramTool,
   ERROR_MESSAGES,
   Mode,
-  RuntimeConfig,
+  type RuntimeConfig,
 } from "../main/argument_processor.ts";
 import { assertEquals, assertThrows } from "@std/assert";
 import { getTestConfig } from "./utilities/mock_config.ts";

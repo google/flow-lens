@@ -20,7 +20,7 @@ import {
   Configuration,
   DiagramTool,
   Mode,
-  RuntimeConfig,
+  type RuntimeConfig,
 } from "../main/argument_processor.ts";
 import { Runner } from "../main/main.ts";
 

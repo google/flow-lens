@@ -18,7 +18,7 @@
  * @fileoverview Utility functions to compare two flows.
  */
 
-import { ParsedFlow } from "./flow_parser.ts";
+import type { ParsedFlow } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 
 const OBJECT = "object";

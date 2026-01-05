@@ -19,7 +19,7 @@
  * generate a UML string representation of a Salesforce flow.
  */
 
-import { ParsedFlow, Transition } from "./flow_parser.ts";
+import type { ParsedFlow, Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
 import { EOL } from "./constants.ts";
 

@@ -17,7 +17,7 @@
 import { assertEquals } from "@std/assert";
 
 import { compareFlows } from "../main/flow_comparator.ts";
-import { ParsedFlow } from "../main/flow_parser.ts";
+import type { ParsedFlow } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 
 const NODE = {

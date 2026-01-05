@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { GithubClient, GithubComment } from "../main/github_client.ts";
+import { GithubClient, type GithubComment } from "../main/github_client.ts";
 import { assertEquals, assertRejects } from "@std/assert";
 import { ERROR_MESSAGES } from "../main/github_client.ts";
 

@@ -15,7 +15,7 @@
  */
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { ParsedFlow } from "../main/flow_parser.ts";
+import type { ParsedFlow } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import {
   FontColor,
@@ -24,7 +24,7 @@ import {
   SkinColor,
 } from "../main/graphviz_generator.ts";
 import {
-  DiagramNode,
+  type DiagramNode,
   Icon as UmlIcon,
   SkinColor as UmlSkinColor,
 } from "../main/uml_generator.ts";

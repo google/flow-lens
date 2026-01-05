@@ -15,7 +15,7 @@
  */
 
 import * as flowTypes from "../../main/flow_types.ts";
-import { ParsedFlow } from "../../main/flow_parser.ts";
+import type { ParsedFlow } from "../../main/flow_parser.ts";
 
 export const NODE_NAMES = {
   label: "test",

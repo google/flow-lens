@@ -22,11 +22,11 @@ import {
   Configuration,
   DiagramTool,
   Mode,
-  RuntimeConfig,
+  type RuntimeConfig,
 } from "../main/argument_processor.ts";
-import { FlowDifference } from "../main/flow_to_uml_transformer.ts";
+import type { FlowDifference } from "../main/flow_to_uml_transformer.ts";
 import { UmlWriter } from "../main/uml_writer.ts";
-import { GithubClient, GithubComment } from "../main/github_client.ts";
+import type { GithubClient, GithubComment } from "../main/github_client.ts";
 import { EOL } from "../main/constants.ts";
 
 const TEST_UNDECLARED_OUTPUTS_DIR = "./";
