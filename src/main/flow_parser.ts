@@ -109,7 +109,7 @@ export class FlowParser {
     return this.generateParsedFlow(flowFromXml.Flow);
   }
 
-  private async parseXmlFile(): Promise<flowTypes.FlowDefinition> {
+  private parseXmlFile(): Promise<flowTypes.FlowDefinition> {
     return new Promise<flowTypes.FlowDefinition>((resolve, reject) => {
       new Parser({ explicitArray: false }).parseString(
         this.flowXml,
@@ -621,9 +621,7 @@ function setFlowStart(start: flowTypes.FlowStart | undefined) {
     return;
   }
   if (start.filters) {
-    start.filters = ensureArray(
-      start.filters,
-    ) as flowTypes.FlowRecordFilter[];
+    start.filters = ensureArray(start.filters) as flowTypes.FlowRecordFilter[];
   }
   if (start.scheduledPaths) {
     start.scheduledPaths = ensureArray(
@@ -734,9 +732,9 @@ function isCustomError(
   return (node as flowTypes.FlowCustomError).customErrorMessages !== undefined;
 }
 
-function isFlowStart(
-  node: flowTypes.FlowNode,
-): node is flowTypes.FlowStart {
-  return (node as flowTypes.FlowStart).name === START &&
-    (node as flowTypes.FlowStart).label === undefined;
+function isFlowStart(node: flowTypes.FlowNode): node is flowTypes.FlowStart {
+  return (
+    (node as flowTypes.FlowStart).name === START &&
+    (node as flowTypes.FlowStart).label === undefined
+  );
 }

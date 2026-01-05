@@ -130,7 +130,7 @@ class Reader implements Filter<FlowDifference> {
       let old: string | undefined = undefined;
       try {
         old = this.changeDetector.getFileContent(input, "old");
-      } catch (error: unknown) {
+      } catch (_error: unknown) {
         console.log(ERROR_MESSAGES.previousFlowNotFound(input));
       }
       return {

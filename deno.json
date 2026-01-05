@@ -1,6 +1,6 @@
 {
   "name": "@goog/flow-lens",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "license": "Apache",
   "exports": "./src/main/main.ts",
   "imports": {
@@ -15,6 +15,9 @@
     "xml2js": "npm:xml2js@^0.6.2"
   },
   "tasks": {
-    "test": "deno test --allow-read --allow-env --allow-write --allow-run"
+    "test": "deno test --allow-read --allow-env --allow-write --allow-run",
+    "format": "deno fmt",
+    "format:check": "deno fmt --check",
+    "lint": "deno lint"
   }
 }

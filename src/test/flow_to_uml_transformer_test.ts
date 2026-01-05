@@ -31,26 +31,41 @@ import {
 import { UmlGeneratorContext } from "../main/uml_generator_context.ts";
 import { ERROR_MESSAGES as XML_READER_ERROR_MESSAGES } from "../main/xml_reader.ts";
 
+type TestableFlowFileChangeDetector =
+  & Omit<
+    FlowFileChangeDetector,
+    "executeGitCommand"
+  >
+  & {
+    executeGitCommand: (args: string[]) => Uint8Array;
+  };
+
+function asTestable(
+  detector: FlowFileChangeDetector,
+): TestableFlowFileChangeDetector {
+  return detector as unknown as TestableFlowFileChangeDetector;
+}
+
 const SAMPLE_FLOW_FILE_PATH = `./src/test/goldens/sample.flow-meta.xml`;
 const PLANT_UML_SIGNATURE = "skinparam State";
 const GENERATOR_CONTEXT = new UmlGeneratorContext(DiagramTool.PLANTUML);
-const CHANGE_DETECTOR = new FlowFileChangeDetector();
+
+function createMockedDetector(): FlowFileChangeDetector {
+  const detector = new FlowFileChangeDetector();
+  const testableDetector = asTestable(detector);
+  testableDetector.executeGitCommand = () => {
+    return new TextEncoder().encode(
+      Deno.readTextFileSync(SAMPLE_FLOW_FILE_PATH),
+    );
+  };
+  return detector;
+}
+
+let transformer: FlowToUmlTransformer | undefined;
+let result: Map<string, FlowDifference> | undefined;
+const changeDetector = createMockedDetector();
 
 Deno.test("FlowToUmlTransformer", async (t) => {
-  let transformer: FlowToUmlTransformer;
-  let result: Map<string, FlowDifference>;
-
-  await t.step("setup", () => {
-    // Mock the private method which executes git commands using spyOn
-    const executeGitCommand = () => {
-      return new TextEncoder().encode(
-        Deno.readTextFileSync(SAMPLE_FLOW_FILE_PATH),
-      );
-    };
-    // Replace the private method with our mock implementation, using type assertion to access it.
-    (CHANGE_DETECTOR as any).executeGitCommand = executeGitCommand;
-  });
-
   await t.step("should transform a flow file to a UML diagram", async () => {
     const mockConfig = getTestConfig();
     const originalGetInstance = Configuration.getInstance;
@@ -58,7 +73,7 @@ Deno.test("FlowToUmlTransformer", async (t) => {
     transformer = new FlowToUmlTransformer(
       [SAMPLE_FLOW_FILE_PATH],
       GENERATOR_CONTEXT,
-      CHANGE_DETECTOR,
+      changeDetector,
     );
 
     result = await transformer.transformToUmlDiagrams();
@@ -100,7 +115,7 @@ Deno.test("FlowToUmlTransformer", async (t) => {
       transformer = new FlowToUmlTransformer(
         [fakeFilePath],
         GENERATOR_CONTEXT,
-        CHANGE_DETECTOR,
+        changeDetector,
       );
 
       result = await transformer.transformToUmlDiagrams();

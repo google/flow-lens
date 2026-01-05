@@ -15,7 +15,6 @@
  */
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { ParsedFlow } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import {
   FontColor,

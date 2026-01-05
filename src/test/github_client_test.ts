@@ -18,9 +18,17 @@ import { GithubClient, type GithubComment } from "../main/github_client.ts";
 import { assertEquals, assertRejects } from "@std/assert";
 import { ERROR_MESSAGES } from "../main/github_client.ts";
 
+type TestableGithubClient = Omit<GithubClient, "octokit"> & {
+  octokit: MockOctokit;
+};
+
+function asTestable(client: GithubClient): TestableGithubClient {
+  return client as unknown as TestableGithubClient;
+}
+
 // Mock Octokit
 class MockOctokit {
-  async request(endpoint: string, data?: unknown) {
+  request(endpoint: string, data?: unknown) {
     // Mock response for review comments endpoint
     if (endpoint.includes("/pulls/") && endpoint.includes("/comments")) {
       return {
@@ -144,7 +152,9 @@ Deno.test("GithubClient", async (t) => {
   await t.step("writeComment", async (t) => {
     await t.step("should call Octokit with correct parameters", async () => {
       const mockOctokit = new MockOctokit();
-      const githubClient = new GithubClient("fake-token", mockContext) as any;
+      const githubClient = asTestable(
+        new GithubClient("fake-token", mockContext),
+      );
       githubClient.octokit = mockOctokit;
 
       const comment: GithubComment = {
@@ -167,10 +177,9 @@ Deno.test("GithubClient", async (t) => {
 
     await t.step("should throw an error if not in a PR context", async () => {
       const mockOctokit = new MockOctokit();
-      const githubClient = new GithubClient(
-        "fake-token",
-        invalidContext,
-      ) as any;
+      const githubClient = asTestable(
+        new GithubClient("fake-token", invalidContext),
+      );
       githubClient.octokit = mockOctokit;
 
       const comment: GithubComment = {
@@ -212,7 +221,9 @@ Deno.test("GithubClient", async (t) => {
       "should return review comments when in PR context",
       async () => {
         const mockOctokit = new MockOctokit();
-        const githubClient = new GithubClient("fake-token", mockContext) as any;
+        const githubClient = asTestable(
+          new GithubClient("fake-token", mockContext),
+        );
         githubClient.octokit = mockOctokit;
 
         const comments = await githubClient.getAllCommentsForPullRequest();
@@ -227,10 +238,9 @@ Deno.test("GithubClient", async (t) => {
 
     await t.step("should throw error when not in PR context", async () => {
       const mockOctokit = new MockOctokit();
-      const githubClient = new GithubClient(
-        "fake-token",
-        invalidContext,
-      ) as any;
+      const githubClient = asTestable(
+        new GithubClient("fake-token", invalidContext),
+      );
       githubClient.octokit = mockOctokit;
 
       await assertRejects(
@@ -242,9 +252,11 @@ Deno.test("GithubClient", async (t) => {
 
     await t.step("should handle API errors", async () => {
       const mockOctokit = new MockOctokit();
-      const githubClient = new GithubClient("fake-token", mockContext) as any;
+      const githubClient = asTestable(
+        new GithubClient("fake-token", mockContext),
+      );
 
-      mockOctokit.request = async () => {
+      mockOctokit.request = () => {
         throw new Error("API error");
       };
 
@@ -262,7 +274,9 @@ Deno.test("GithubClient", async (t) => {
   await t.step("deleteReviewComment", async (t) => {
     await t.step("should successfully delete a review comment", async () => {
       const mockOctokit = new MockOctokit();
-      const githubClient = new GithubClient("fake-token", mockContext) as any;
+      const githubClient = asTestable(
+        new GithubClient("fake-token", mockContext),
+      );
       githubClient.octokit = mockOctokit;
 
       let errorCaught = false;
@@ -278,10 +292,9 @@ Deno.test("GithubClient", async (t) => {
 
     await t.step("should throw error when not in PR context", async () => {
       const mockOctokit = new MockOctokit();
-      const githubClient = new GithubClient(
-        "fake-token",
-        invalidContext,
-      ) as any;
+      const githubClient = asTestable(
+        new GithubClient("fake-token", invalidContext),
+      );
       githubClient.octokit = mockOctokit;
 
       await assertRejects(
@@ -293,9 +306,11 @@ Deno.test("GithubClient", async (t) => {
 
     await t.step("should handle API errors", async () => {
       const mockOctokit = new MockOctokit();
-      const githubClient = new GithubClient("fake-token", mockContext) as any;
+      const githubClient = asTestable(
+        new GithubClient("fake-token", mockContext),
+      );
 
-      mockOctokit.request = async () => {
+      mockOctokit.request = () => {
         throw new Error("API error");
       };
 

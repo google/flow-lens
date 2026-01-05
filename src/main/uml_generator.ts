@@ -473,13 +473,14 @@ export abstract class UmlGenerator {
       innerNodeContent.push(limit);
     }
 
-    let innerNode = {
-      id: `${node.name}__LookupDetails`,
-      type: `sObject: ${node.object}`,
-      label: "",
-      content: innerNodeContent,
-    };
-    return [innerNode];
+    return [
+      {
+        id: `${node.name}__LookupDetails`,
+        type: `sObject: ${node.object}`,
+        label: "",
+        content: innerNodeContent,
+      },
+    ];
   }
 
   private getFieldsQueried(node: flowTypes.FlowRecordLookup): string[] {

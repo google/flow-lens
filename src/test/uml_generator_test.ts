@@ -101,14 +101,10 @@ class ConcreteUmlGenerator extends UmlGenerator {
   }
 }
 
+const mockParsedFlow = generateMockFlow();
+const systemUnderTest = new ConcreteUmlGenerator(mockParsedFlow);
+
 Deno.test("UmlGenerator", async (t) => {
-  let systemUnderTest: UmlGenerator;
-  let mockParsedFlow: ParsedFlow;
-
-  // Setup: initialize test data and system under test
-  mockParsedFlow = generateMockFlow();
-  systemUnderTest = new ConcreteUmlGenerator(mockParsedFlow);
-
   await t.step("should generate UML with all flow elements", () => {
     const uml = systemUnderTest.generateUml();
 

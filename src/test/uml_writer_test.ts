@@ -45,7 +45,6 @@ const FLOW_DIFFERENCE_2: FlowDifference = {
   old: UML_1,
   new: UML_2,
 };
-const ENCODING = "utf8";
 const OUTPUT_FILE_NAME = "output_file_name";
 
 const FILE_PATH_TO_FLOW_DIFFERENCE = new Map<string, FlowDifference>([
@@ -104,7 +103,7 @@ Deno.test("UmlWriter", async (t) => {
 
     // Create a mock GithubClient with spy methods
     const mockGithubClient = {
-      writeComment: spy(async (_comment: GithubComment) => Promise.resolve()),
+      writeComment: spy((_comment: GithubComment) => Promise.resolve()),
       translateToComment: spy(
         (_body: string, filePath: string): GithubComment => ({
           commit_id: "mock_sha",
@@ -114,7 +113,7 @@ Deno.test("UmlWriter", async (t) => {
         }),
       ),
       // Add the new methods
-      getAllCommentsForPullRequest: spy(async () => {
+      getAllCommentsForPullRequest: spy(() => {
         return [
           {
             id: 1,
@@ -126,7 +125,7 @@ Deno.test("UmlWriter", async (t) => {
           },
         ];
       }),
-      deleteReviewComment: spy(async (_commentId: number) => Promise.resolve()),
+      deleteReviewComment: spy((_commentId: number) => Promise.resolve()),
     };
 
     // Set up environment variable for GITHUB_TOKEN

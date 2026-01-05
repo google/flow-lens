@@ -33,7 +33,7 @@ const INVALID_MODE = "unsupported";
 function setupTest(
   configModifications: (config: RuntimeConfig) => void = () => {},
 ) {
-  let testConfiguration = getTestConfig();
+  const testConfiguration = getTestConfig();
   configModifications(testConfiguration);
   return {
     argumentProcessor: new ArgumentProcessor(testConfiguration),
@@ -369,7 +369,9 @@ Deno.test("ArgumentProcessor", async (t) => {
       });
       try {
         invalidDiagramTool.argumentProcessor.getConfig();
-      } catch {}
+      } catch {
+        // Error is expected; we check errors via getErrors() instead
+      }
       assertEquals(invalidDiagramTool.argumentProcessor.getErrors(), [
         ERROR_MESSAGES.githubActionRequiresMermaid,
       ]);
@@ -387,7 +389,9 @@ Deno.test("ArgumentProcessor", async (t) => {
       });
       try {
         invalidToHash.argumentProcessor.getConfig();
-      } catch {}
+      } catch {
+        // Error is expected; we check errors via getErrors() instead
+      }
       assertEquals(invalidToHash.argumentProcessor.getErrors(), [
         ERROR_MESSAGES.githubActionRequiresHeadHash,
       ]);
@@ -405,7 +409,9 @@ Deno.test("ArgumentProcessor", async (t) => {
       });
       try {
         invalidFromHash.argumentProcessor.getConfig();
-      } catch {}
+      } catch {
+        // Error is expected; we check errors via getErrors() instead
+      }
       assertEquals(invalidFromHash.argumentProcessor.getErrors(), [
         ERROR_MESSAGES.githubActionRequiresHeadMinusOne,
       ]);
@@ -423,7 +429,9 @@ Deno.test("ArgumentProcessor", async (t) => {
       });
       try {
         multipleInvalid.argumentProcessor.getConfig();
-      } catch {}
+      } catch {
+        // Error is expected; we check errors via getErrors() instead
+      }
       assertEquals(multipleInvalid.argumentProcessor.getErrors(), [
         ERROR_MESSAGES.githubActionRequiresMermaid,
         ERROR_MESSAGES.githubActionRequiresHeadHash,

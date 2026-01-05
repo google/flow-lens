@@ -15,7 +15,7 @@
  */
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import type { ParsedFlow, Transition } from "../main/flow_parser.ts";
+import type { Transition } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import { MermaidGenerator } from "../main/mermaid_generator.ts";
 import {
@@ -25,7 +25,6 @@ import {
 } from "../main/uml_generator.ts";
 import { generateMockFlow } from "./utilities/mock_flow.ts";
 
-// @ts-ignore: Deno types
 Deno.test("MermaidGenerator", async (t) => {
   const mockedFlow = generateMockFlow();
   const systemUnderTest = new MermaidGenerator(mockedFlow);
