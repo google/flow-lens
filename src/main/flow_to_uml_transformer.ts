@@ -22,9 +22,9 @@
 import { join } from "@std/path";
 import { Configuration } from "./argument_processor.ts";
 import { compareFlows } from "./flow_comparator.ts";
-import { FlowFileChangeDetector } from "./flow_file_change_detector.ts";
-import { FlowParser, ParsedFlow } from "./flow_parser.ts";
-import { UmlGeneratorContext } from "./uml_generator_context.ts";
+import type { FlowFileChangeDetector } from "./flow_file_change_detector.ts";
+import { FlowParser, type ParsedFlow } from "./flow_parser.ts";
+import type { UmlGeneratorContext } from "./uml_generator_context.ts";
 import { XmlReader } from "./xml_reader.ts";
 
 /**

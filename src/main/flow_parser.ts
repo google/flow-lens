@@ -20,7 +20,7 @@
  */
 
 import { Parser } from "xml2js";
-import * as flowTypes from "./flow_types.ts";
+import type * as flowTypes from "./flow_types.ts";
 
 const FAULT = "Fault";
 const END = "End";

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-import { GithubClient, GithubComment } from "../main/github_client.ts";
+import { GithubClient, type GithubComment } from "../main/github_client.ts";
 import { assertEquals, assertRejects } from "@std/assert";
 import { ERROR_MESSAGES } from "../main/github_client.ts";
 
@@ -101,6 +101,7 @@ const mockContext = {
   job: "mock-job",
   runNumber: 1,
   runId: 1,
+  runAttempt: 1,
   action: "mock-action",
   apiUrl: "https://api.github.com",
   serverUrl: "https://github.com",
@@ -126,6 +127,7 @@ const invalidContext = {
   job: "mock-job",
   runNumber: 1,
   runId: 1,
+  runAttempt: 1,
   action: "mock-action",
   apiUrl: "https://api.github.com",
   serverUrl: "https://github.com",

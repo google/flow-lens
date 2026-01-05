@@ -21,7 +21,7 @@
 import { Configuration } from "./argument_processor.ts";
 import { FlowFileChangeDetector } from "./flow_file_change_detector.ts";
 import {
-  FlowDifference,
+  type FlowDifference,
   FlowToUmlTransformer,
 } from "./flow_to_uml_transformer.ts";
 import { UmlGeneratorContext } from "./uml_generator_context.ts";

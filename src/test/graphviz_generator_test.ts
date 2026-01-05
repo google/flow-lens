@@ -15,7 +15,7 @@
  */
 
 import { assertEquals, assertStringIncludes } from "@std/assert";
-import { ParsedFlow } from "../main/flow_parser.ts";
+import type { ParsedFlow } from "../main/flow_parser.ts";
 import * as flowTypes from "../main/flow_types.ts";
 import {
   FontColor,
@@ -24,154 +24,12 @@ import {
   SkinColor,
 } from "../main/graphviz_generator.ts";
 import {
-  DiagramNode,
+  type DiagramNode,
   Icon as UmlIcon,
   SkinColor as UmlSkinColor,
 } from "../main/uml_generator.ts";
-
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
-const NODE_NAMES = {
-  start: "FLOW_START",
-  apexPluginCall: "myApexPluginCall",
-  assignment: "myAssignment",
-  collectionProcessor: "myCollectionProcessor",
-  decision: "myDecision",
-  loop: "myLoop",
-  orchestratedStage: "myOrchestratedStage",
-  recordCreate: "myRecordCreate",
-  recordDelete: "myRecordDelete",
-  recordLookup: "myRecordLookup",
-  recordRollback: "myRecordRollback",
-  recordUpdate: "myRecordUpdate",
-  screen: "myScreen",
-  stageSteps: ["step1", "step2", "step3"],
-  step: "myStep",
-  subflow: "mySubflow",
-  transform: "myTransform",
-  wait: "myWait",
-  actionCall: "myActionCall",
-};
-
-function generateMockFlow(): ParsedFlow {
-  return {
-    start: {
-      name: NODE_NAMES.start,
-    } as flowTypes.FlowStart,
-    apexPluginCalls: getFlowNodes(
-      NODE_NAMES.apexPluginCall,
-    ) as flowTypes.FlowApexPluginCall[],
-    assignments: getFlowNodes(
-      NODE_NAMES.assignment,
-    ) as flowTypes.FlowAssignment[],
-    collectionProcessors: getFlowNodes(
-      NODE_NAMES.collectionProcessor,
-    ) as flowTypes.FlowCollectionProcessor[],
-    decisions: [
-      generateDecision(NODE_NAMES.decision),
-    ] as flowTypes.FlowDecision[],
-    loops: getFlowNodes(NODE_NAMES.loop) as flowTypes.FlowLoop[],
-    orchestratedStages: [
-      generateStage(NODE_NAMES.orchestratedStage, NODE_NAMES.stageSteps),
-    ],
-    recordCreates: getFlowNodes(
-      NODE_NAMES.recordCreate,
-    ) as flowTypes.FlowRecordCreate[],
-    recordDeletes: getFlowNodes(
-      NODE_NAMES.recordDelete,
-    ) as flowTypes.FlowRecordDelete[],
-    recordLookups: getFlowNodes(
-      NODE_NAMES.recordLookup,
-    ) as flowTypes.FlowRecordLookup[],
-    recordRollbacks: getFlowNodes(
-      NODE_NAMES.recordRollback,
-    ) as flowTypes.FlowRecordRollback[],
-    recordUpdates: getFlowNodes(
-      NODE_NAMES.recordUpdate,
-    ) as flowTypes.FlowRecordUpdate[],
-    screens: getFlowNodes(NODE_NAMES.screen) as flowTypes.FlowScreen[],
-    steps: getFlowNodes(NODE_NAMES.step) as flowTypes.FlowStep[],
-    subflows: getFlowNodes(NODE_NAMES.subflow) as flowTypes.FlowSubflow[],
-    transforms: getFlowNodes(NODE_NAMES.transform) as flowTypes.FlowTransform[],
-    waits: getFlowNodes(NODE_NAMES.wait) as flowTypes.FlowWait[],
-    actionCalls: getFlowNodes(
-      NODE_NAMES.actionCall,
-    ) as flowTypes.FlowActionCall[],
-    transitions: [
-      {
-        from: NODE_NAMES.start,
-        to: NODE_NAMES.apexPluginCall,
-        fault: false,
-      },
-      {
-        from: NODE_NAMES.apexPluginCall,
-        to: NODE_NAMES.assignment,
-        fault: false,
-      },
-      {
-        from: NODE_NAMES.assignment,
-        to: NODE_NAMES.collectionProcessor,
-        fault: false,
-      },
-    ],
-  };
-}
-
-function getFlowNodes(name: string): flowTypes.FlowNode[] {
-  return [{ name: `${name}`, label: `${name}` }] as flowTypes.FlowNode[];
-}
-
-function generateStage(
-  name: string,
-  stepNames: string[],
-): flowTypes.FlowOrchestratedStage {
-  return {
-    name: `${name}`,
-    label: `${name}`,
-    elementSubtype: "OrchestratedStage",
-    locationX: 0,
-    locationY: 0,
-    description: `${name}`,
-    stageSteps: stepNames.map((stepName) => ({
-      name: `${stepName}`,
-      label: `${stepName}`,
-      elementSubtype: "Step",
-      locationX: 0,
-      locationY: 0,
-      description: `${stepName}`,
-      actionName: `${stepName}Action`,
-      actionType: flowTypes.FlowStageStepActionType.STEP_BACKGROUND,
-    })),
-  } as flowTypes.FlowOrchestratedStage;
-}
-
-function generateDecision(name: string): flowTypes.FlowDecision {
-  return {
-    name: `${name}`,
-    label: `${name}`,
-    elementSubtype: "Decision",
-    locationX: 0,
-    locationY: 0,
-    description: `${name}`,
-    rules: [
-      {
-        name: `${name}Rule`,
-        label: `${name}Rule`,
-        description: `${name}Rule`,
-        conditionLogic: "and",
-        conditions: [
-          {
-            leftValueReference: "foo",
-            operator: flowTypes.FlowComparisonOperator.EQUAL_TO,
-            rightValue: {
-              booleanValue: "true",
-            },
-            processMetadataValues: [],
-          },
-        ],
-      },
-    ],
-  } as flowTypes.FlowDecision;
-}
+import { generateMockFlow } from "./utilities/mock_flow.ts";
+import { EOL } from "../main/constants.ts";
 
 function generateTable(
   nodeName: string,
@@ -221,14 +79,9 @@ function generateInnerNodeCells(cells: string[]) {
 }
 
 Deno.test("GraphVizGenerator", async (t) => {
-  let systemUnderTest: GraphVizGenerator;
-  let mockedFlow: ParsedFlow;
+  const mockedFlow = generateMockFlow();
+  const systemUnderTest = new GraphVizGenerator(mockedFlow);
   let result: string;
-
-  await t.step("Setup", () => {
-    mockedFlow = generateMockFlow();
-    systemUnderTest = new GraphVizGenerator(mockedFlow);
-  });
 
   await t.step("should generate header", () => {
     const label = "foo";

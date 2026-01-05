@@ -19,11 +19,14 @@
  * the generated UML diagrams to a file.
  */
 import { join } from "@std/path";
-import { Configuration, Mode, RuntimeConfig } from "./argument_processor.ts";
-import { FlowDifference } from "./flow_to_uml_transformer.ts";
+import {
+  Configuration,
+  Mode,
+  type RuntimeConfig,
+} from "./argument_processor.ts";
+import type { FlowDifference } from "./flow_to_uml_transformer.ts";
 import { GithubClient } from "./github_client.ts";
-
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+import { EOL } from "./constants.ts";
 
 const FILE_EXTENSION = ".json";
 const HIDDEN_COMMENT_PREFIX = "<!--flow-lens-hidden-comment-->";
@@ -104,10 +107,7 @@ export class UmlWriter {
     for (const [filePath, flowDifference] of this.filePathToFlowDifference) {
       const flowApiName = this.extractFlowApiName(filePath);
 
-      const outputPath = join(
-        config.outputDirectory!,
-        `${flowApiName}.md`,
-      );
+      const outputPath = join(config.outputDirectory!, `${flowApiName}.md`);
 
       let markdownContent = "";
       const tripleBackticks = "```";

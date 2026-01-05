@@ -22,11 +22,12 @@ import {
   Configuration,
   DiagramTool,
   Mode,
-  RuntimeConfig,
+  type RuntimeConfig,
 } from "../main/argument_processor.ts";
-import { FlowDifference } from "../main/flow_to_uml_transformer.ts";
+import type { FlowDifference } from "../main/flow_to_uml_transformer.ts";
 import { UmlWriter } from "../main/uml_writer.ts";
-import { GithubClient, GithubComment } from "../main/github_client.ts";
+import type { GithubClient, GithubComment } from "../main/github_client.ts";
+import { EOL } from "../main/constants.ts";
 
 const TEST_UNDECLARED_OUTPUTS_DIR = "./";
 
@@ -195,21 +196,15 @@ Deno.test("UmlWriter", async (t) => {
       assertExists(existsSync(expectedFile1Path));
       assertExists(existsSync(expectedFile2Path));
 
-      // Use OS-appropriate newlines for test expectations
-      const eol = Deno.build.os === "windows" ? "\r\n" : "\n";
-
       // Check the content of the first file (no old version)
       fileContent = Deno.readTextFileSync(expectedFile1Path);
-      assertEquals(
-        fileContent,
-        `\`\`\`mermaid${eol}uml1${eol}\`\`\`${eol}`,
-      );
+      assertEquals(fileContent, `\`\`\`mermaid${EOL}uml1${EOL}\`\`\`${EOL}`);
 
       // Check the content of the second file (with old version)
       fileContent = Deno.readTextFileSync(expectedFile2Path);
       assertEquals(
         fileContent,
-        `## Old Version${eol}${eol}\`\`\`mermaid${eol}uml1${eol}\`\`\`${eol}${eol}## New Version${eol}${eol}\`\`\`mermaid${eol}uml2${eol}\`\`\`${eol}`,
+        `## Old Version${EOL}${EOL}\`\`\`mermaid${EOL}uml1${EOL}\`\`\`${EOL}${EOL}## New Version${EOL}${EOL}\`\`\`mermaid${EOL}uml2${EOL}\`\`\`${EOL}`,
       );
 
       // Clean up

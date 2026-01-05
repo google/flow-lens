@@ -16,7 +16,7 @@
 
 import { assertStringIncludes } from "@std/assert";
 import { DiagramTool } from "../main/argument_processor.ts";
-import { ParsedFlow } from "../main/flow_parser.ts";
+import type { ParsedFlow } from "../main/flow_parser.ts";
 import { UmlGeneratorContext } from "../main/uml_generator_context.ts";
 
 const PLANT_UML_SIGNATURE = "skinparam State";

@@ -19,10 +19,10 @@ import {
   DiagramTool,
   ERROR_MESSAGES,
   Mode,
-  RuntimeConfig,
+  type RuntimeConfig,
 } from "../main/argument_processor.ts";
 import { assertEquals, assertThrows } from "@std/assert";
-import { getTestConfig } from "./test_utils.ts";
+import { getTestConfig } from "./utilities/mock_config.ts";
 
 const INVALID_DIAGRAM_TOOL = "unsupported";
 const INVALID_FILE_PATH = "invalid/file/path/which/does/not/exist";
@@ -130,23 +130,20 @@ Deno.test("ArgumentProcessor", async (t) => {
     },
   );
 
-  await t.step(
-    "should reject markdown mode without outputDirectory",
-    () => {
-      assertThrows(
-        () => {
-          const { argumentProcessor } = setupTest((config) => {
-            config.mode = Mode.MARKDOWN;
-            config.diagramTool = DiagramTool.MERMAID;
-            config.outputDirectory = undefined;
-          });
-          argumentProcessor.getConfig();
-        },
-        Error,
-        ERROR_MESSAGES.outputDirectoryRequired,
-      );
-    },
-  );
+  await t.step("should reject markdown mode without outputDirectory", () => {
+    assertThrows(
+      () => {
+        const { argumentProcessor } = setupTest((config) => {
+          config.mode = Mode.MARKDOWN;
+          config.diagramTool = DiagramTool.MERMAID;
+          config.outputDirectory = undefined;
+        });
+        argumentProcessor.getConfig();
+      },
+      Error,
+      ERROR_MESSAGES.outputDirectoryRequired,
+    );
+  });
 
   await t.step(
     "should reject markdown mode with non-existent outputDirectory",

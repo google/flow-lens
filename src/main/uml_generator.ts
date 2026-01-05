@@ -19,10 +19,9 @@
  * generate a UML string representation of a Salesforce flow.
  */
 
-import { ParsedFlow, Transition } from "./flow_parser.ts";
+import type { ParsedFlow, Transition } from "./flow_parser.ts";
 import * as flowTypes from "./flow_types.ts";
-
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
+import { EOL } from "./constants.ts";
 
 /**
  * The skin color of the node.
@@ -215,7 +214,9 @@ export abstract class UmlGenerator {
       start.filters.forEach((filter, index) => {
         entryCriteria.push(
           `${index + 1}. ${filter.field} ${filter.operator} ${
-            toString(filter.value)
+            toString(
+              filter.value,
+            )
           }`,
         );
       });

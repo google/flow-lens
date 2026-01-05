@@ -21,11 +21,11 @@ import {
   assertStringIncludes,
 } from "@std/assert";
 import { Configuration, DiagramTool } from "../main/argument_processor.ts";
-import { getTestConfig } from "./test_utils.ts";
+import { getTestConfig } from "./utilities/mock_config.ts";
 import { FlowFileChangeDetector } from "../main/flow_file_change_detector.ts";
 import {
   ERROR_MESSAGES,
-  FlowDifference,
+  type FlowDifference,
   FlowToUmlTransformer,
 } from "../main/flow_to_uml_transformer.ts";
 import { UmlGeneratorContext } from "../main/uml_generator_context.ts";

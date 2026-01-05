@@ -16,42 +16,59 @@
 
 import { assertEquals, assertThrows } from "@std/assert";
 import { Configuration } from "../main/argument_processor.ts";
-import { getTestConfig } from "./test_utils.ts";
+import { getTestConfig } from "./utilities/mock_config.ts";
 import {
   ERROR_MESSAGES,
   FLOW_FILE_EXTENSION,
   FlowFileChangeDetector,
 } from "../main/flow_file_change_detector.ts";
+import { EOL } from "../main/constants.ts";
 
-const EOL = Deno.build.os === "windows" ? "\r\n" : "\n";
 const FLOW_FILE_PATH = "file2" + FLOW_FILE_EXTENSION;
 
-Deno.test("FlowFileChangeDetector", async (t) => {
-  let detector: FlowFileChangeDetector;
-
-  // Function to set up the mock implementations
-  const setupMocks = () => {
-    // tslint:disable:no-any
-    (detector as any).executeVersionCommand = () => undefined;
-    (detector as any).executeRevParseCommand = () => undefined;
-    (detector as any).executeDiffCommand = () =>
-      new TextEncoder().encode(
-        ["file1.txt", FLOW_FILE_PATH, "file3.js"].join(EOL),
-      );
-    (detector as any).executeGetFileContentCommand = () =>
-      new TextEncoder().encode("file content");
-    // tslint:enable:no-any
+/**
+ * Test helper type that exposes private methods for mocking purposes.
+ * Uses Omit to remove private methods and re-adds them as public.
+ */
+type TestableFlowFileChangeDetector =
+  & Omit<
+    FlowFileChangeDetector,
+    | "executeVersionCommand"
+    | "executeRevParseCommand"
+    | "executeDiffCommand"
+    | "executeGetFileContentCommand"
+  >
+  & {
+    executeVersionCommand: () => void;
+    executeRevParseCommand: () => void;
+    executeDiffCommand: () => Uint8Array;
+    executeGetFileContentCommand: (
+      filePath: string,
+      commitHash: string,
+    ) => Uint8Array;
   };
 
-  await t.step("beforeEach setup", async () => {
-    Configuration.getInstance = () => getTestConfig();
-    detector = new FlowFileChangeDetector();
-    setupMocks(); // Initial setup
-  });
+function createDetector(): TestableFlowFileChangeDetector {
+  const detector =
+    new FlowFileChangeDetector() as unknown as TestableFlowFileChangeDetector;
+  detector.executeVersionCommand = () => undefined;
+  detector.executeRevParseCommand = () => undefined;
+  detector.executeDiffCommand = () =>
+    new TextEncoder().encode(
+      ["file1.txt", FLOW_FILE_PATH, "file3.js"].join(EOL),
+    );
+  detector.executeGetFileContentCommand = () =>
+    new TextEncoder().encode("file content");
+  return detector;
+}
 
+Configuration.getInstance = () => getTestConfig();
+
+Deno.test("FlowFileChangeDetector", async (t) => {
   await t.step(
     "should get flow files when git is installed and in a repo",
     () => {
+      const detector = createDetector();
       const flowFiles = detector.getFlowFiles();
 
       assertEquals(flowFiles, [FLOW_FILE_PATH]);
@@ -59,9 +76,8 @@ Deno.test("FlowFileChangeDetector", async (t) => {
   );
 
   await t.step("should throw error if git is not installed", () => {
-    setupMocks(); // Reset mocks before this test
-    // tslint:disable-next-line:no-any
-    (detector as any).executeVersionCommand = () => {
+    const detector = createDetector();
+    detector.executeVersionCommand = () => {
       throw new Error(ERROR_MESSAGES.gitIsNotInstalledError);
     };
 
@@ -73,9 +89,8 @@ Deno.test("FlowFileChangeDetector", async (t) => {
   });
 
   await t.step("should throw error if not in a git repo", () => {
-    setupMocks(); // Reset mocks before this test
-    // tslint:disable-next-line:no-any
-    (detector as any).executeRevParseCommand = () => {
+    const detector = createDetector();
+    detector.executeRevParseCommand = () => {
       throw new Error(ERROR_MESSAGES.notInGitRepoError);
     };
 
@@ -87,9 +102,8 @@ Deno.test("FlowFileChangeDetector", async (t) => {
   });
 
   await t.step("should throw error if git diff fails", () => {
-    setupMocks(); // Reset mocks before this test
-    // tslint:disable-next-line:no-any
-    (detector as any).executeDiffCommand = () => {
+    const detector = createDetector();
+    detector.executeDiffCommand = () => {
       throw new Error("Diff error");
     };
 
@@ -101,23 +115,22 @@ Deno.test("FlowFileChangeDetector", async (t) => {
   });
 
   await t.step("should get file content from old version", () => {
-    setupMocks(); // Reset mocks before this test
+    const detector = createDetector();
     const fileContent = detector.getFileContent(FLOW_FILE_PATH, "old");
 
     assertEquals(fileContent, "file content");
   });
 
   await t.step("should get file content from new version", () => {
-    setupMocks(); // Reset mocks before this test
+    const detector = createDetector();
     const fileContent = detector.getFileContent(FLOW_FILE_PATH, "new");
 
     assertEquals(fileContent, "file content");
   });
 
   await t.step("should throw error if unable to get file content", () => {
-    setupMocks(); // Reset mocks before this test
-    // tslint:disable-next-line:no-any
-    (detector as any).executeGetFileContentCommand = () => {
+    const detector = createDetector();
+    detector.executeGetFileContentCommand = () => {
       throw new Error("Get file content error");
     };
 
