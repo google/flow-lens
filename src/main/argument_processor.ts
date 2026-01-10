@@ -59,6 +59,7 @@ export enum DiagramTool {
   PLANTUML = "plantuml",
   GRAPH_VIZ = "graphviz",
   MERMAID = "mermaid",
+  D2 = "d2",
 }
 
 /**

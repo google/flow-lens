@@ -22,6 +22,7 @@
  */
 
 import { DiagramTool } from "./argument_processor.ts";
+import { D2Generator } from "./d2_generator.ts";
 import type { ParsedFlow } from "./flow_parser.ts";
 import { GraphVizGenerator } from "./graphviz_generator.ts";
 import { MermaidGenerator } from "./mermaid_generator.ts";
@@ -62,6 +63,8 @@ export class UmlGeneratorContext {
         return new GraphVizGenerator(parsedFlow);
       case DiagramTool.MERMAID:
         return new MermaidGenerator(parsedFlow);
+      case DiagramTool.D2:
+        return new D2Generator(parsedFlow);
       case DiagramTool.PLANTUML:
       default:
         return new PlantUmlGenerator(parsedFlow);
