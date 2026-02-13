@@ -1,7 +1,7 @@
 {
   "name": "@goog/flow-lens",
   "version": "0.1.16",
-  "license": "Apache",
+  "license": "Apache-2.0",
   "exports": "./src/main/main.ts",
   "imports": {
     "@actions/github": "npm:@actions/github@^6.0.1",
