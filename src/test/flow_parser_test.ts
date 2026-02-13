@@ -56,6 +56,14 @@ const TEST_FILES = {
     GOLDENS_PATH,
     "non_async_scheduled_path.flow-meta.xml",
   ),
+  recordCreateWithoutInputReference: join(
+    GOLDENS_PATH,
+    "record_create_without_input_reference.flow-meta.xml",
+  ),
+  recordCreateVsRecordUpdate: join(
+    GOLDENS_PATH,
+    "record_create_vs_record_update.flow-meta.xml",
+  ),
 };
 
 const NODE_NAMES = {
@@ -534,73 +542,67 @@ Deno.test("FlowParser", async (t) => {
     },
   );
 
-  await t.step(
-    "should handle single async path correctly",
-    async () => {
-      systemUnderTest = new FlowParser(
-        Deno.readTextFileSync(TEST_FILES.asyncPathTest),
-      );
+  await t.step("should handle single async path correctly", async () => {
+    systemUnderTest = new FlowParser(
+      Deno.readTextFileSync(TEST_FILES.asyncPathTest),
+    );
 
-      parsedFlow = await systemUnderTest.generateFlowDefinition();
+    parsedFlow = await systemUnderTest.generateFlowDefinition();
 
-      assert(parsedFlow.transitions);
-      assertEquals(parsedFlow.transitions.length, 2);
+    assert(parsedFlow.transitions);
+    assertEquals(parsedFlow.transitions.length, 2);
 
-      // Main flow transition (no label)
-      assertEquals(parsedFlow.transitions[0], {
-        from: START_NODE_NAME,
-        to: "main_update",
-        fault: false,
-        label: undefined,
-      });
+    // Main flow transition (no label)
+    assertEquals(parsedFlow.transitions[0], {
+      from: START_NODE_NAME,
+      to: "main_update",
+      fault: false,
+      label: undefined,
+    });
 
-      // Async path transition (with path type as label)
-      assertEquals(parsedFlow.transitions[1], {
-        from: START_NODE_NAME,
-        to: "async_update",
-        fault: false,
-        label: "AsyncAfterCommit",
-      });
-    },
-  );
+    // Async path transition (with path type as label)
+    assertEquals(parsedFlow.transitions[1], {
+      from: START_NODE_NAME,
+      to: "async_update",
+      fault: false,
+      label: "AsyncAfterCommit",
+    });
+  });
 
-  await t.step(
-    "should handle multiple async paths correctly",
-    async () => {
-      systemUnderTest = new FlowParser(
-        Deno.readTextFileSync(TEST_FILES.multipleAsyncPaths),
-      );
+  await t.step("should handle multiple async paths correctly", async () => {
+    systemUnderTest = new FlowParser(
+      Deno.readTextFileSync(TEST_FILES.multipleAsyncPaths),
+    );
 
-      parsedFlow = await systemUnderTest.generateFlowDefinition();
+    parsedFlow = await systemUnderTest.generateFlowDefinition();
 
-      assert(parsedFlow.transitions);
-      assertEquals(parsedFlow.transitions.length, 3);
+    assert(parsedFlow.transitions);
+    assertEquals(parsedFlow.transitions.length, 3);
 
-      // Main flow transition (no label)
-      assertEquals(parsedFlow.transitions[0], {
-        from: START_NODE_NAME,
-        to: "main_update",
-        fault: false,
-        label: undefined,
-      });
+    // Main flow transition (no label)
+    assertEquals(parsedFlow.transitions[0], {
+      from: START_NODE_NAME,
+      to: "main_update",
+      fault: false,
+      label: undefined,
+    });
 
-      // First async path transition
-      assertEquals(parsedFlow.transitions[1], {
-        from: START_NODE_NAME,
-        to: "async_update_1",
-        fault: false,
-        label: "AsyncAfterCommit",
-      });
+    // First async path transition
+    assertEquals(parsedFlow.transitions[1], {
+      from: START_NODE_NAME,
+      to: "async_update_1",
+      fault: false,
+      label: "AsyncAfterCommit",
+    });
 
-      // Second async path transition
-      assertEquals(parsedFlow.transitions[2], {
-        from: START_NODE_NAME,
-        to: "async_update_2",
-        fault: false,
-        label: "AsyncAfterCommit",
-      });
-    },
-  );
+    // Second async path transition
+    assertEquals(parsedFlow.transitions[2], {
+      from: START_NODE_NAME,
+      to: "async_update_2",
+      fault: false,
+      label: "AsyncAfterCommit",
+    });
+  });
 
   await t.step(
     "should not label non-async scheduled paths as asynchronous",
@@ -629,6 +631,132 @@ Deno.test("FlowParser", async (t) => {
         fault: false,
         label: "RecordField",
       });
+    },
+  );
+
+  await t.step(
+    "should include fault connectors for recordCreates nodes without inputReference",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.recordCreateWithoutInputReference),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow);
+      assert(parsedFlow.recordCreates);
+      assertEquals(parsedFlow.recordCreates.length, 1);
+
+      const recordCreate = parsedFlow.recordCreates[0];
+      assertEquals(recordCreate.name, "create_property");
+      assertEquals(recordCreate.object, "Property__c");
+      // Verify that inputAssignments is present (required for identification)
+      assert(recordCreate.inputAssignments);
+      assertEquals(recordCreate.inputAssignments.length, 2);
+      // Verify that inputReference is optional and can be undefined
+      assertEquals(recordCreate.inputReference, undefined);
+      // Verify that fault connector is present and parsed correctly
+      assert(recordCreate.faultConnector);
+      assertEquals(
+        recordCreate.faultConnector.targetReference,
+        "error_creating_records",
+      );
+      // Verify that normal connector is also present
+      assert(recordCreate.connector);
+      assertEquals(recordCreate.connector.targetReference, "success_screen");
+
+      // Verify that transitions include both normal and fault paths
+      assert(parsedFlow.transitions);
+      assertEquals(parsedFlow.transitions.length, 3);
+
+      // Start node to create_property
+      assertEquals(parsedFlow.transitions[0], {
+        from: START_NODE_NAME,
+        to: "create_property",
+        fault: false,
+        label: undefined,
+      });
+
+      // Normal path: create_property to success_screen
+      assertEquals(parsedFlow.transitions[1], {
+        from: "create_property",
+        to: "success_screen",
+        fault: false,
+        label: undefined,
+      });
+
+      // Fault path: create_property to error_creating_records
+      assertEquals(parsedFlow.transitions[2], {
+        from: "create_property",
+        to: "error_creating_records",
+        fault: true,
+        label: "Fault",
+      });
+    },
+  );
+
+  await t.step(
+    "should still work correctly for recordCreates nodes with inputReference (backward compatibility)",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.sample),
+      );
+
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow);
+      assert(parsedFlow.recordCreates);
+      assertEquals(parsedFlow.recordCreates.length, 1);
+
+      const recordCreate = parsedFlow.recordCreates[0];
+      assertEquals(recordCreate.name, "Insert_Tag");
+      // Verify that inputReference is present (traditional approach)
+      assertEquals(recordCreate.inputReference, "tagToInsert");
+      // Verify that fault connector is still correctly parsed and included
+      assert(recordCreate.faultConnector);
+      assertEquals(
+        recordCreate.faultConnector.targetReference,
+        "Add_Issue_Inserting_Tag_Record_Error",
+      );
+
+      // Verify that the fault transition is included in the transitions array
+      const faultTransition = parsedFlow.transitions?.find(
+        (t) => t.from === "Insert_Tag" && t.fault === true,
+      );
+      assert(faultTransition);
+      assertEquals(faultTransition.to, "Add_Issue_Inserting_Tag_Record_Error");
+      assertEquals(faultTransition.label, "Fault");
+    },
+  );
+
+  await t.step(
+    "should correctly distinguish recordCreates from recordUpdates",
+    async () => {
+      systemUnderTest = new FlowParser(
+        Deno.readTextFileSync(TEST_FILES.recordCreateVsRecordUpdate),
+      );
+      parsedFlow = await systemUnderTest.generateFlowDefinition();
+
+      assert(parsedFlow);
+
+      // Verify recordCreates is identified correctly (has inputAssignments but no filters)
+      assert(parsedFlow.recordCreates);
+      assertEquals(parsedFlow.recordCreates.length, 1);
+      assertEquals(parsedFlow.recordCreates[0].name, "create_record");
+      assert(parsedFlow.recordCreates[0].inputAssignments);
+      // recordCreates should not have filters
+      assertEquals(
+        (parsedFlow.recordCreates[0] as flowTypes.FlowRecordUpdate).filters,
+        undefined,
+      );
+
+      // Verify recordUpdates is identified correctly (has both inputAssignments and filters)
+      assert(parsedFlow.recordUpdates);
+      assertEquals(parsedFlow.recordUpdates.length, 1);
+      assertEquals(parsedFlow.recordUpdates[0].name, "update_record");
+      assert(parsedFlow.recordUpdates[0].inputAssignments);
+      assert(parsedFlow.recordUpdates[0].filters);
+      assertEquals(parsedFlow.recordUpdates[0].filters.length, 1);
     },
   );
 });

@@ -43,6 +43,8 @@
   </orchestratedStages>
   <recordCreates>
     <name>myRecordCreate</name>
+    <object>Account</object>
+    <inputAssignments></inputAssignments>
   </recordCreates>
   <recordDeletes>
     <name>myRecordDelete</name>
