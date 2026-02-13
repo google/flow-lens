@@ -687,7 +687,16 @@ function isLoop(node: flowTypes.FlowNode): node is flowTypes.FlowLoop {
 function isRecordCreate(
   node: flowTypes.FlowNode,
 ): node is flowTypes.FlowRecordCreate {
-  return (node as flowTypes.FlowRecordCreate).inputReference !== undefined;
+  const recordCreate = node as flowTypes.FlowRecordCreate;
+  // Check for required FlowRecordCreate properties
+  const hasInputAssignments = recordCreate.inputAssignments !== undefined &&
+    Array.isArray(recordCreate.inputAssignments);
+  const hasObject = recordCreate.object !== undefined;
+  // FlowRecordUpdate has filters, FlowRecordCreate does not
+  const recordUpdate = node as flowTypes.FlowRecordUpdate;
+  const hasNoFilters = recordUpdate.filters === undefined;
+
+  return hasInputAssignments && hasObject && hasNoFilters;
 }
 
 function isRecordDelete(
@@ -705,7 +714,12 @@ function isRecordLookup(
 function isRecordUpdate(
   node: flowTypes.FlowNode,
 ): node is flowTypes.FlowRecordUpdate {
-  return (node as flowTypes.FlowRecordUpdate).inputReference !== undefined;
+  const recordUpdate = node as flowTypes.FlowRecordUpdate;
+  return (
+    recordUpdate.inputAssignments !== undefined &&
+    recordUpdate.filters !== undefined &&
+    recordUpdate.object !== undefined
+  );
 }
 
 function isRecordRollback(

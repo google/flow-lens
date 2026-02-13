@@ -554,7 +554,7 @@ export interface FlowRecordCreate extends FlowNode {
   connector?: FlowConnector;
   faultConnector?: FlowConnector;
   inputAssignments: FlowInputFieldAssignment[];
-  inputReference: string;
+  inputReference?: string;
   object: string;
   storeOutputAutomatically?: boolean; // default: false, Available in API version 48.0 and later
 }
@@ -598,7 +598,7 @@ export interface FlowRecordUpdate extends FlowNode {
   faultConnector?: FlowConnector;
   filters: FlowRecordFilter[];
   inputAssignments: FlowInputFieldAssignment[]; // Assuming FlowInputFieldAssignment is a pre-existing interface
-  inputReference: string;
+  inputReference?: string;
   object: string;
 }
 
